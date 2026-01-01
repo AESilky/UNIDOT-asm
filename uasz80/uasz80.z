@@ -1,0 +1,342 @@
+; @(#)$Header: uasz80.z,v 1.2 87/12/01 13:30:23 rmm Rel $
+
+#table O S
+OCNULL			; no operand 
+OCNEX			; nn (non-parenthesized expression)
+OCPEX			; (nn) (parenthesized expression)
+OCEXP			; {nn,(nn)} expression, parenthesized or not
+OCR8			; {b,c,d,e,h,l,a}
+OCA			; a
+OCC			; c
+OCSCC			; {nz,z,nc}
+OCLCC			; {po,pe,p,m}
+OCSSDD			; {bc,de,hl,sp}
+OCQQ			; {bc,de,hl,af}
+OCIC			; (c)
+OCZR8			; {i,r}
+OCAF			; af
+OCAFP			; af'
+OCHL			; hl
+OCIHL			; (hl)
+OCIBCDE			; {(bc),(de)}
+OCSP			; sp
+OCDE			; de
+OCISP			; (sp)
+OCR8M			; {b,c,d,e,h,l,(hl),a}
+
+#table A S
+#0,32
+OANULL			; operand not used
+OAL3			; left 3-bit field
+OAR3			; right 3-bit field
+OA8			; 8-bit field
+OA16			; 16-bit field
+OA8R			; 8-bit field, pc relative
+OARST			; rst instruction address
+OAINT			; interrupt mode
+
+#table F S
+#1,-1
+FMCB			; insert 0xcb byte before opcode
+FMED			; insert 0xed byte before opcode
+FMNIXIY			; ix/iy not allowed
+FMNDISP			; (ix+d)/(iy+d) not allowed
+FMLAST			; final entry for this instruction
+
+
+#table Z E E E E S S
+OCA		OAR3|OCR8M	0x88	-	    ; a,{b,c,d,e,h,l,(hl),a}
+OCA		OA8|OCNEX	0xce	-	    ; a,n
+OCHL		OAL3|OCSSDD	0x4a	FMNIXIY|FMED	adc ; hl,{bc,de,hl,sp}
+OCA		OAR3|OCR8M	0x80	-	    ; a,{b,c,d,e,h,l,(hl),a}
+OCA		OA8|OCNEX	0xc6	-	    ; a,n
+OCHL		OAL3|OCSSDD	0x09	-	add ; hl,{bc,de,hl,sp}
+OAR3|OCR8M	-		0xa0	-	    ; {b,c,d,e,h,l,(hl),a}
+OA8|OCNEX	-		0xe6	-	and ; n
+OAL3|OCNEX	OAR3|OCR8M	0x40	FMCB	bit ; n,{b,c,d,e,h,l,(hl),a}
+OA16|OCNEX	-		0xcd	-	    ; nn
+OAL3|OCLCC	OA16|OCNEX	0xc4	-	    ; {nz,z,nc,po,pe,p,m},nn
+OCC		OA16|OCNEX	0xdc	-	call ; c,nn
+-		-		0x3f	-	ccf ;
+OAR3|OCR8M	-		0xb8	-	    ; {b,c,d,e,h,l,(hl),a}
+OA8|OCNEX	-		0xfe	-	cp ; n
+-		-		0xa9	FMED	cpd ;
+-		-		0xb9	FMED	cpdr ;
+-		-		0xa1	FMED	cpi ;
+-		-		0xb1	FMED	cpir ;
+-		-		0x2f	-	cpl ;
+-		-		0x27	-	daa ;
+OAL3|OCR8M	-		0x05	-	    ; {b,c,d,e,h,l,(hl),a}
+OAL3|OCSSDD	-		0x0b	-	dec ; {bc,de,hl,sp}
+-		-		0xf3	-	di ;
+OA8R|OCNEX	-		0x10	-	djnz ; nn
+-		-		0xfb	-	ei ;
+OCDE		OCHL		0xeb	-	    ; de,hl
+OCISP		OCHL		0xe3	-	    ; (sp),hl
+OCAF		OCAFP		0x08	-	    ; af,af'
+OCHL		OCDE		0xeb	-	    ; hl,de
+OCHL		OCISP		0xe3	-	    ; hl,(sp)
+OCAFP		OCAF		0x08	-	ex ; af',af
+-		-		0xd9	-	exx ;
+-		-		0x76	-	halt ;
+OAINT|OCNEX	-		0x46	FMED	im ; n
+OCA		OA8|OCPEX	0xdb	-	    ; a,(n)
+OAL3|OCR8	OCIC		0x40	FMED	in ; {b,c,d,e,h,l,a},(c)
+OAL3|OCR8M	-		0x04	-	    ; {b,c,d,e,h,l,(hl),a}
+OAL3|OCSSDD	-		0x03	-	inc ; {bc,de,hl,sp}
+-		-		0xaa	FMED	ind ;
+-		-		0xba	FMED	indr ;
+-		-		0xa2	FMED	ini ;
+-		-		0xb2	FMED	inir ;
+OA16|OCNEX	-		0xc3	-	    ; nn
+OAL3|OCLCC	OA16|OCNEX	0xc2	-	    ; {nz,z,nc,po,pe,p,m},nn
+OCC		OA16|OCNEX	0xda	-	    ; c,nn
+OCIHL		-		0xe9	FMNDISP	jp ; (hl)
+OA8R|OCNEX	-		0x18	-	    ; nn
+OAL3|OCSCC	OA8R|OCNEX	0x20	-	    ; {nz,z,nc},nn
+OCC		OA8R|OCNEX	0x38	-	jr ; c,nn
+OAL3|OCR8	OAR3|OCR8M	0x40	-	    ; {b,c,d,e,h,l,a},{b,c,d,e,h,l,(hl),a}
+OCIHL		OAR3|OCR8	0x70	-	    ; (hl),{b,c,d,e,h,l,a}
+OAL3|OCR8M	OA8|OCNEX	0x06	-	    ; {b,c,d,e,h,l,(hl),a},n
+OCA		OA16|OCPEX	0x3a	-	    ; a,(nn)
+OA16|OCPEX	OCA		0x32	-	    ; (nn),a
+OCHL		OA16|OCPEX	0x2a	-	    ; hl,(nn)
+OA16|OCPEX	OCHL		0x22	-	    ; (nn),hl
+OAL3|OCSSDD	OA16|OCNEX	0x01	-	    ; {bc,de,hl,sp},nn
+OAL3|OCSSDD	OA16|OCPEX	0x4b	FMED	    ; {bc,de,hl,sp},(nn)
+OA16|OCPEX	OAL3|OCSSDD	0x43	FMED	    ; (nn),{bc,de,hl,sp}
+OCA		OAL3|OCIBCDE	0x0a	-	    ; a,{(bc),(de)}
+OAL3|OCIBCDE	OCA		0x02	-	    ; {(bc),(de)},a
+OCSP		OCHL		0xf9	-	    ; sp,hl
+OCA		OAL3|OCZR8	0x57	FMED	    ; a,{i,r}
+OAL3|OCZR8	OCA		0x47	FMED	ld ; {i,r},a
+-		-		0xa8	FMED	ldd ;
+-		-		0xb8	FMED	lddr ;
+-		-		0xa0	FMED	ldi ;
+-		-		0xb0	FMED	ldir ;
+-		-		0x44	FMED	neg ;
+-		-		0x00	-	nop ;
+OAR3|OCR8M	-		0xb0	-	    ; {b,c,d,e,h,l,(hl),a}
+OA8|OCNEX	-		0xf6	-	or ; n
+-		-		0xbb	FMED	otdr ;
+-		-		0xb3	FMED	otir ;
+OA8|OCPEX	OCA		0xd3	-	    ; (n),a
+OCIC		OAL3|OCR8	0x41	FMED	out ; (c),{b,c,d,e,h,l,a}
+-		-		0xab	FMED	outd ;
+-		-		0xa3	FMED	outi ;
+OAL3|OCQQ	-		0xc1	-	pop ; {bc,de,hl,af}
+OAL3|OCQQ	-		0xc5	-	push ; {bc,de,hl,af}
+OAL3|OCNEX	OAR3|OCR8M	0x80	FMCB	res ; n,{b,c,d,e,h,l,(hl),a}
+-		-		0xc9	-	    ;
+OAL3|OCLCC	-		0xc0	-	    ; {nz,z,nc,po,pe,p,m}
+OCC		-		0xd8	-	ret ; c
+-		-		0x4d	FMED	reti ;
+-		-		0x45	FMED	retn ;
+OAR3|OCR8M	-		0x10	FMCB	rl ; {b,c,d,e,h,l,(hl),a}
+-		-		0x17	-	rla ;
+OAR3|OCR8M	-		0x00	FMCB	rlc ; {b,c,d,e,h,l,(hl),a}
+-		-		0x07	-	rlca ;
+-		-		0x6f	FMED	rld ;
+OAR3|OCR8M	-		0x18	FMCB	rr ; {b,c,d,e,h,l,(hl),a}
+-		-		0x1f	-	rra ;
+OAR3|OCR8M	-		0x08	FMCB	rrc ; {b,c,d,e,h,l,(hl),a}
+-		-		0x0f	-	rrca ;
+-		-		0x67	FMED	rrd ;
+OARST|OCNEX	-		0xc7	-	rst ; n
+OCA		OAR3|OCR8M	0x98	-	    ; a,{b,c,d,e,h,l,(hl),a}
+OCA		OA8|OCNEX	0xde	-	    ; a,n
+OCHL		OAL3|OCSSDD	0x42	FMNIXIY|FMED	sbc ; hl,{bc,de,hl,sp}
+-		-		0x37	-	scf ;
+OAL3|OCNEX	OAR3|OCR8M	0xc0	FMCB	set ; n,{b,c,d,e,h,l,(hl),a}
+OAR3|OCR8M	-		0x20	FMCB	sla ; {b,c,d,e,h,l,(hl),a}
+OAR3|OCR8M	-		0x28	FMCB	sra ; {b,c,d,e,h,l,(hl),a}
+OAR3|OCR8M	-		0x38	FMCB	srl ; {b,c,d,e,h,l,(hl),a}
+OAR3|OCR8M	-		0x90	-	    ; {b,c,d,e,h,l,(hl),a}
+OA8|OCNEX	-		0xd6	-	sub ; n
+OAR3|OCR8M	-		0xa8	-	    ; {b,c,d,e,h,l,(hl),a}
+OA8|OCNEX	-		0xee	-	xor ; n
+
+#free uasz80.h
+/************************************************************************
+\*									*
+\*	Copyright (C) 1982,1985,1987 by Unidot, Inc.			*
+\*									*
+\*			Unidot, Inc.					*
+\*			602 Park Point Dr.				*
+\*			Golden, CO 80401				*
+\*									*
+\*			All Rights Reserved				*
+\*									*
+\* This software is furnished under license and may be used and copied	*
+\* only in accordance with the terms of such license and with the	*
+\* inclusion of the above copyright notice.  This software or any other	*
+\* copies thereof may not be provided or otherwise made available to any	*
+\* other person.								*
+\*									*
+\* No title to or ownership of the software is hereby transferred.	*
+\*									*
+\* The information in this software is subject to change without notice	*
+\* and should not be construed as a commitment by Unidot, Inc.		*
+\*									*
+\* Unidot assumes no responsibility for the use or reliability of its	*
+\* software on equipment configurations that are not directly supported	*
+\* by Unidot, Inc.							*
+\*									*
+\*************************************************************************/
+
+/************************************************************************
+\*									*
+\*			     UAS Assembler				*
+\*									*
+\*			uasz80.h - z80 specific header			*
+\*									*
+\************************************************************************/
+/*
+ * @(#)$Header: uasz80.z,v 1.2 87/12/01 13:30:23 rmm Rel $
+ *
+ * Declarations specific to uasz80
+ */
+
+/*
+ * Parameters.
+ */
+\#define OPMAX	2		/* maximum number of instruction operands */
+
+
+/*
+ * Token types. (coordinated with grammar)
+ */
+
+\#define	TKR8	14		/* {b,d,e,h,l} */
+\#define	TKZR8	15		/* {i,r} */
+\#define	TKSCC	16		/* {nz,z,nc} */
+\#define	TKA	17		/* a */
+\#define	TKC	18		/* c */
+\#define	TKHL	19		/* hl */
+\#define	TKSP	20		/* sp */
+\#define	TKBC	21		/* bc */
+\#define	TKDE	22		/* de */
+\#define	TKAF	23		/* af */
+\#define	TKAFP	24		/* af' */
+\#define	TKLCC	25		/* {po,pe,p,m} */
+\#define	TKZR16	26		/* {ix,iy} */
+
+/*
+ * Structure declarations.
+ */
+
+struct	format {		/* instruction format table entry */
+	char	fm_op[OPMAX];		/* operand descriptions */
+	char	fm_skel;		/* opcode skeleton word */
+	char	fm_flg;			/* flags */
+};
+/*
+ * Global variable declarations.
+ */
+extern char		hlflg;		/* flag indicating reg hl was used */
+extern char		ixiy;		/* prefix for ix/iy instruction, or 0 */
+extern char		ixiyi;		/* flag indicating (ix+d) or (iy+d) */
+extern uns		ixiyr;		/* (ix+d) or (iy+d) offset relocation */
+extern long		ixiyv;		/* (ix+d) or (iy+d) offset value */
+
+#output
+
+/*
+ * Operand classes.
+ */
+
+\#ifdef %s(OCNULL.0)
+\#undef %s(OCNULL.0)
+\#endif
+\#ifdef %s(OCNEX.0)
+\#undef %s(OCNEX.0)
+\#endif
+\#ifdef %s(OCPEX.0)
+\#undef %s(OCPEX.0)
+\#endif
+\#ifdef %s(OCEXP.0)
+\#undef %s(OCEXP.0)
+\#endif
+
+*O#define %s($0)	%d($0)
+\#define OCMSK	0x1f		/* mask for operand class field in fm_op */
+
+/*
+ * Operand actions (in fm_op[]).
+ */
+
+*A#define %s($0)	%x($0)
+\#define OAMSK	0xe0		/* mask for operand action field in fm_op */
+
+/*
+ * Instruction format table flags (in fm_flg).
+ */
+
+*F#define %s($0)	%x($0)
+
+/*
+ * Global variable declarations.
+ */
+
+#output uz80s.pd
+*Z%h($0) %h($1) %h($2) %h(P($4)*FMLAST|$3) %s($4) %s($5)
+#free
+
+1	.end
+2	.equ
+3	.input
+4	.byte
+5	.word
+6	.set
+7	.block
+8	.org
+9	.clist
+10	.sect
+11	.space
+12	.stitle
+13	.title
+14	.list
+15	.else
+16	.endif
+17	.if
+18	.global
+19	.abs
+20	.align
+21	.within
+22	.macro
+23	.endm
+24	.long
+25	.eject
+26	.common
+28	.endr
+29	.repeat
+30	.error
+31	.exit
+33	.warn
+
+0100h	$
+0e00h	b	B
+0e02h	d	D
+0e03h	e	E
+0e04h	h	H
+0e05h	l	L
+0f00h	i	I
+0f01h	r	R
+1000h	nz	NZ
+1001h	z	Z
+1002h	nc	NC
+1100h	a	A
+1200h	c	C
+1300h	hl	HL
+1400h	sp	SP
+1500h	bc	BC
+1600h	de	DE
+1700h	af	AF
+1904h	po	PO
+1905h	pe	PE
+1906h	p	P
+1907h	m	M
+1addh	ix	IX
+1afdh	iy	IY
+
+obj lst z80
