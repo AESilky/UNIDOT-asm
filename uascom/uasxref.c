@@ -43,20 +43,29 @@ static char rcsid[] =
 #else
 #include "../incl/uobj.h"
 #endif
+#include "funcdefs.h"		/* Forward defines for GCC */
+
+#include <string.h>
+
+/* Declarations (local) */
+
+void putblks(int n);
+void sysort();
+
 
 /* putxref - Prints out the cross reference listing.  */
 
-putxref(){
+void putxref(){
 
-	reg SYTAB	*syp;
-	reg XREF	*xrp;
-	reg VMADR	sym,
-			xr,
-			xrtail;
-	reg uns		llcol;
-	char		undef;
-	int		sylen;
-	char		*keystr;
+	SYTAB	*syp;
+	XREF	*xrp;
+	VMADR	sym;
+	VMADR	xr;
+	VMADR	xrtail;
+	uns	llcol;
+	char	undef;
+	int	sylen;
+	char	*keystr;
 
 	strcpy( titl2, "Cross Reference Listing" );
 	linect = 0;
@@ -69,7 +78,7 @@ putxref(){
 		    undef && xrtail == 0 ) continue;
 
 		pgcheck();
-		if( (sylen = strlen(syp->sy_str)) > 32 ) syp->sy_str[32] = 0;
+		if( (sylen = strlen(syp->sy_str)) > 32 ) syp->sy_str[32] = NULLCA;
 		fprintf( LIST, "%s", syp->sy_str );
 		while( ++sylen <= 32 ) fputc( ' ', LIST );
 		fputc( ' ', LIST );
@@ -123,7 +132,7 @@ putxref(){
 	}
 }
 
-putblks(n){
+void putblks(int n){
 	while( --n >= 0 ) fputc( ' ', LIST );
 }
 /*
@@ -132,7 +141,7 @@ putblks(n){
  */
 
 VMADR
-symerge( a, b ) reg VMADR a, b;{
+symerge(VMADR a, VMADR b) {
 
 
 	reg SYTAB	*ap;
@@ -248,7 +257,7 @@ lstsort( l ) reg VMADR l; {
  * head is syhtab[0].
  */
 
-sysort(){
+void sysort(){
 
 	reg uns		halfi,
 			i,
@@ -267,7 +276,7 @@ sysort(){
  * specified symbol.
  */
 
-xref( sym, type ) VMADR sym; int type;{
+void xref( sym, type ) VMADR sym; int type;{
 
 
 	reg SYTAB	*syp;

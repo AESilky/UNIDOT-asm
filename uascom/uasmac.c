@@ -43,11 +43,14 @@ static char rcsid[]=
 #else
 #include "../incl/uobj.h"
 #endif
+#include "funcdefs.h"		/* Forward defines for GCC */
+
+#include <string.h>
 
 /*	def1 - Copies one statement into a macro definition.  */
 
 
-def1(){
+void def1(){
 
 	reg char	*p;
 	reg char	*q;
@@ -92,7 +95,7 @@ fixlev:	if( argno == ADMAC ) deflev++; else
 	if( pass2 ) goto endy;		/* no more work in pass 2	*/
 	if( deflev <= 0 ){		/* end of definition		*/
 		v = VAL1;
-		*wfetch(v) = '\0';
+		*((char*)(wfetch(v))) = '\0';
 		((MCH *)wfetch(mctail))->mc_arg = curdef->oc_arg;
 endy:		do scanc(); while( ch != '\n' );
 		goto endx;
@@ -123,7 +126,7 @@ endy:		do scanc(); while( ch != '\n' );
 			scanc();		/* get next character	*/
 			if( ch == argchr ){	/* \?			*/
 				v = VAL1;
-				*wfetch(v) = ch;
+				*((char*)(wfetch(v))) = ch;
 				scanc();
 			}
 		}
@@ -131,7 +134,7 @@ endy:		do scanc(); while( ch != '\n' );
 		/* normal character - stash away */
 
 		v = VAL1;
-		*wfetch(v) = ch;
+		*((char*)(wfetch(v))) = ch;
 	} while( ch != '\n' );
 endx:	toktyp = TKEOL;
 	scanpt = sline;
@@ -142,7 +145,7 @@ endx:	toktyp = TKEOL;
 
 
 
-macro( vp ) VMADR vp;{
+void macro( vp ) VMADR vp;{
 
 
 	reg INPUT	*newfp;
@@ -256,7 +259,7 @@ macro( vp ) VMADR vp;{
  * rpt1 - Copies one statement into a repeat definition.
  */
 
-rpt1(){
+void rpt1(){
 
 	reg INPUT	*newfp;
 	reg VMADR	vp;
@@ -268,9 +271,9 @@ rpt1(){
 	if(*opcstr ){ /* check opcode field for special cases */
 		opcode = oclook( opcstr );
 		if( opcode->oc_typ == OTDIR ){		/* directive */
-			if( opcode->oc_val == ADREPT )	/* nested repeat */
+			if( opcode->oc_val == OCVAL(ADREPT) )	/* nested repeat */
 				rptlev++;
-			else if( opcode->oc_val == ADENDR )	/* end rpt */
+			else if( opcode->oc_val == OCVAL(ADENDR) )	/* end rpt */
 				rptlev--;
 		}
 	}
@@ -281,20 +284,20 @@ rpt1(){
 		do {			/* copy the line */
 			scanc();
 			vp = VAL1;
-			*wfetch(vp) = ch;
+			*((char*)(wfetch(vp))) = ch;
 		} while( ch != '\n' );
 		unscanc();
 		token();
 	} else { /* finish off the repeat definition and start the repeat */
 		vp = VAL1;
-		*wfetch(vp) = '\0';
+		*((char*)(wfetch(vp))) = '\0';
 		newfp = pushin();
 		newfp->in_typ = INRPT;
 		newfp->in_rpt = rptct;
 		newfp->in_fd = rptline;		/* starting line	*/
 		newfp->in_seq = rptline;	/* set for both		*/
 		vp = rptstr;
-		while( rch = *rfetch(vp) ){	/* copy definition to stack */
+		while( rch = *((char*)rfetch(vp)) ){	/* copy definition to stack */
 			pushc( rch );
 			vp++;
 		}
@@ -308,8 +311,7 @@ rpt1(){
 /*
  * skip1 - Skips one statement due to an unsatisfied conditional assembly.
  */
-
-skip1(){
+void skip1(){
 
 	reg int	i;
 
@@ -353,7 +355,7 @@ skip1(){
  * skipeol - Skips to the next end of line or end of file.
  */
 
-skipeol(){
+void skipeol(){
 
 	while( toktyp!= TKEOL && toktyp!= TKEOF ) token();
 }

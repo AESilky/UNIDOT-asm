@@ -2,24 +2,28 @@
 
 #@(#)$Header: Makefile,v 4.2 88/10/09 15:56:19 rmm Rel $ makefile for ulink
 
-#pdp-11 defines
-CFLAGS= -DDEBUG
-# 3b2 defines 
+# LAX_CC - Define to ease warnings and errors back to K&R C
+#LAX_CC=-Wno-implicit-int
+# GCC on 64-bit Linux defines (ES)
+CFLAGS=$(LAX_CC) -DNOPD -DALIGN=4
+# pdp-11 defines
+#CFLAGS= -DDEBUG
+# 3b2 defines
 #CFLAGS=-DNOBSS -DALIGN=4 -DVMADR='unsigned long'
 
 #pdp - 23 fix version
 #LDFLAGS=-Z
-#3b2 or split id machines
+# 3b2 and split id machines
 #LDFLAGS=-i
 # 32 bit machines
 #LDFLAGS=
 
-#pdp-11 defines
+# pdp-11 defines
 LDFLAGS=-i
-#3b2- split id machines
+# 3b2 and split id machines
 #LDFLAGS=
-#32bit machines
-LDFLAGS=
+# 32bit machines
+#LDFLAGS=
 
 CC = cc
 
@@ -46,6 +50,9 @@ $(OBJ):		ulink.h ../incl/uobj.h
 
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c
+
+clean:
+	rm -f $(OBJ)
 
 print:
 	pr -n ../incl/uobj.h $(SRC)|lpr

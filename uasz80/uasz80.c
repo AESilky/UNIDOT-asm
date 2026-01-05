@@ -36,18 +36,31 @@
 static char rcsid[]=
 "@(#)$Header: uasz80.c,v 3.6 87/12/01 13:30:05 rmm Rel $ z80 specific code";
 
+#ifndef NOPD
+#define NOPD	/* ES: Define this here to aid code highlighting (is in makefile) */
+#endif
+
 #ifdef vms
 #include "[-.uascom]uas.h"
 #include "[-.incl]uobj.h"
 #else
 #include "../uascom/uas.h"
 #include "../incl/uobj.h"
+#include "../uascom/funcdefs.h"
 #endif
 #include "uasz80.h"
+
+#include <string.h>
 
 #ifdef NOPD
 #include "uz80pd.h"
 #endif
+
+/* Definitions (local) */
+
+int opmatch(struct format* fmp);
+
+
 /*
  * Global variable definitions and initializations specific to z80.
  */
@@ -88,13 +101,13 @@ char		ixiyi = 0;
 uns		ixiyr = 0;
 long		ixiyv = 0;
 
-struct	operand	optab[OPMAX] = 0;
+struct	operand	optab[OPMAX] = {NULLCA};
 /*
  * direc - Processes assembler directives which are special to this
  * assembler.  Calls dircom to process other directives.
  */
 
-direc( dirnum ) int dirnum;{
+void direc( dirnum ) int dirnum;{
 
 
 	if( dirnum != ADMAC )			/* look up the label */
@@ -109,7 +122,7 @@ direc( dirnum ) int dirnum;{
  * keywords.
  */
 
-equ( symtype ) int symtype;{
+void equ( symtype ) int symtype;{
 
 
 	if( !label ) nolabel();
@@ -130,9 +143,9 @@ skip:		skipeol();
  * further processing as required by the isp parser.
  */
 
-iilex(){
+int iilex(){
 
-	reg SYTAB	*syp;
+	SYTAB	*syp;
 
 	iilexeme.ps_sym = token();
 	iilexeme.ps_val0 = tokval;
@@ -140,8 +153,8 @@ iilex(){
 		iilexeme.ps_val0 = (long) sylook( tokstr );
 		syp = (SYTAB *) rfetch(( VMADR ) iilexeme.ps_val0 );
 		if( syp->sy_typ == STKEY ){ /* keyword */
-			iilexeme.ps_val0 = syp->sy_val&0xff;
-			iilexeme.ps_sym = syp->sy_val >> 8&0xff;
+			iilexeme.ps_val0 = (uns)syp->sy_val & 0xff;
+			iilexeme.ps_sym = (uns)syp->sy_val >> 8&0xff;
 			if( iilexeme.ps_sym == TKAF ){ /* check for af' */
 				scanc();
 				if( ch == '\'' ) iilexeme.ps_sym = TKAFP;
@@ -161,9 +174,8 @@ iilex(){
  * descriptions in optab.
  */
 
-inops(){
-
-	regstr operand	*opp;
+void inops(){
+	struct operand	*opp;
 
 	if( toktyp == TKSPC ) iilex();
 	for( opp = optab; opp < optab+OPMAX; opp++ )
@@ -183,19 +195,20 @@ inops(){
  * instr - Generates the specified machine instruction.
  */
 
-instr( fmp ) regstr format *fmp;{
+void instr( fmpa ) VMADR fmpa;{
 
 
-	reg uns		v;
-	reg uns		r;
-	reg int		i;
+	uns		v;
+	uns		r;
+	int		i;
 	char		skel;
+	struct format*	fmp = (struct format*)fmpa;
 
 	label = *labstr ? sylook( labstr ): 0;
 	lcassign();
 	hlflg = ixiy = ixiyi = 0;
 	inops();			/* read the instruction operands */
-	while(!opmatch( fmp )){		/* scan for matching format entry */
+	while(!opmatch( fmp )){	/* scan for matching format entry */
 		if( fmp->fm_flg&FMLAST ){
 			error("105 Invalid operands");
 			return;
@@ -297,10 +310,8 @@ instr( fmp ) regstr format *fmp;{
  * in optab, 0 otherwise.
  */
 
-opmatch( fmp ) regstr format *fmp;{
-
-
-	reg	i;
+int opmatch(struct format* fmp) {
+	int	i;
 
 	for( i = 0; i < OPMAX; i++ )
 		if( !( 1L <<( fmp->fm_op[i]&OCMSK )&optab[i].op_cls ))
@@ -311,13 +322,13 @@ opmatch( fmp ) regstr format *fmp;{
  * predef - Reads the predefined symbols into the symbol table.
  */
 
-predef(){
+void predef(){
 
-	regstr	format	*fmp;
-	regstr	octab	*ocp;
-	regstr	sytab	*syp;
-	reg int		i;
-	reg VMADR	val;
+	struct	format	*fmp;
+	struct	octab	*ocp;
+	struct	sytab	*syp;
+	int		i;
+	VMADR	val;
 	extern char	objsuf[], lstsuf[];
 	extern char	*lstfmt;
 
@@ -399,7 +410,7 @@ predef(){
 	/* first the opcodes */
 	for( i=0; opctab[i].oc_str[0]; i++ ){
 		if( opctab[i].oc_typ == OTINS )
-			opctab[i].oc_val = (VMADR)&fmt[opctab[i].oc_val];
+			opctab[i].oc_val = (VMADR)&fmt[(uns)(opctab[i].oc_val)];
 		opcinsert( &opctab[i] );
 	}
 	/* now the reserved words */
@@ -407,7 +418,7 @@ predef(){
 		val = sylook(rsw[i].rw_str);
 		syp = (SYTAB *)wfetch(val);
 		syp->sy_typ = STKEY;
-		syp->sy_val = rsw[i].rw_val;
+		syp->sy_val = SYVAL((unsigned long)rsw[i].rw_val);
 		syp->sy_atr = SADP2;
 	}
 	/* now the suffixes */
@@ -420,12 +431,12 @@ predef(){
  * sem51 - Parser semantic routines specific to asz80.
  */
 
-sem51( sem ) int sem;{
+void sem51(int sem) {
 
 
-	regstr psframe	*p,
+	struct psframe	*p,
 			*pl;
-	regstr sytab	*syp;
+	struct sytab	*syp;
 
 	p = iipsp;
 	pl = iipspl;

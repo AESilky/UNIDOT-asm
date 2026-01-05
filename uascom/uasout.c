@@ -43,14 +43,14 @@ static char rcsid[]=
 #else
 #include "../incl/uobj.h"
 #endif
+#include "funcdefs.h"		/* Forward defines for GCC */
+
 
 /*		emitb - Emits a byte of object code.		*/
 
+void emitb(uns value, uns reloc) {
 
-
-emitb( value, reloc ) uns value, reloc;{
-
-	reg int	i;
+	int	i;
 
 	/* we start by saving the values in the pending table just for
 	   being systematic */
@@ -61,13 +61,13 @@ emitb( value, reloc ) uns value, reloc;{
 		curloc += bytbit;
 }
 
-nopend(){			/* clear the pending stuff		*/
+void nopend(){			/* clear the pending stuff		*/
 
 	/* routine must be called only during pass2 */
 
-	reg int		j;
-	reg int		ca;
-	reg int		objf;
+	int		j;
+	int		ca;
+	int		objf;
 
 	if( pendbits == 0 ) return;
 	if( !pass2 ){
@@ -109,7 +109,7 @@ nopend(){			/* clear the pending stuff		*/
 
 /* the following routine actually puts out the code or data	*/
 
-emitau( value, reloc, bits ) long value; uns reloc; int bits;{
+void emitau( value, reloc, bits ) long value; uns reloc; int bits;{
 
 	/* routine is now called only during pass2	*/
 
@@ -125,8 +125,8 @@ emitau( value, reloc, bits ) long value; uns reloc; int bits;{
 	   so that we don't have to pack bits.
 	*/
 
-	reg int		i;
-	reg long	l;
+	int		i;
+	long	l;
 
 	/* Output to the object file without breaking up a relocatable item.  */
 
@@ -194,9 +194,9 @@ emitau( value, reloc, bits ) long value; uns reloc; int bits;{
  */
 
 
-emitstr( s, n ) reg char *s; {
+void emitstr( s, n ) char *s; int n; {
 
-	reg int	i;
+	int	i;
 	int	m;
 	int	msk;
 
@@ -208,9 +208,9 @@ emitstr( s, n ) reg char *s; {
 	while( --n >= 0 ) emitv( (long)(*s++ & msk), 0, bytbit );
 }
 
-emitv( value, reloc, bits ) long value; uns reloc; int bits; {
+void emitv( value, reloc, bits ) long value; uns reloc; int bits; {
 
-	reg int	i;
+	int	i;
 	long	mask;
 	long	v;
 	int	ca;
@@ -286,7 +286,7 @@ BDEB(1,("emitv(0x%lx,0x%x,%d)pv:%lx,pb:%d\n",value,reloc,bits,pendv,pendbits));
 	}
 }
 
-listau( objf, v, bits ) long v;{
+void listau(int objf, long v, int bits) {
 
 	/* this routine puts some text into the listing - If it does
 	   not fit, then we flush the line and start a new one
@@ -308,7 +308,7 @@ listau( objf, v, bits ) long v;{
 			v >>= 4;
 		}
 	} else {
-		llobt[objf] = 0;
+		llobt[objf] = NULLCA;
 		while( --objf >= 0 ){
 			llobt[objf] = hextab[ v & 0xf ];
 			v >>= 4;
@@ -320,10 +320,10 @@ listau( objf, v, bits ) long v;{
  * emitl - Emits a long to the object file.
  */
 
-emitl( value, reloc ) long value; uns reloc;{
+void emitl(long value, uns reloc) {
 
-	reg	i;
-	reg	j;
+	int	i;
+	int	j;
 
 	if( pass2 ) emitv( value, reloc, lngbit );
 		else curloc += lngbit;
@@ -333,7 +333,7 @@ emitl( value, reloc ) long value; uns reloc;{
  * emitw - Emits a word to the object file.
  */
 
-emitw( value, reloc ) uns value, reloc;{
+void emitw(uns value, uns reloc) {
 
 	if( pass2 ) emitv( (long)value, reloc, wrdbit );
 		else curloc += wrdbit;
@@ -343,9 +343,9 @@ emitw( value, reloc ) uns value, reloc;{
  * oflush - Outputs an object block to the object file.
  */
 
-oflush(){
+void oflush(){
 
-	reg char	*op;
+	char	*op;
 
 	if( objtyp && OBJECT ){
 		fputc( objtyp, OBJECT );
@@ -369,7 +369,7 @@ oflush(){
  * oneed - guarantees n bytes available in buffer
  */
 
-oneed( n ){
+void oneed( int n ){
 
 	if( relbot-objtop < n ) oflush();
 }
@@ -377,9 +377,7 @@ oneed( n ){
 /*
  * oputb - Puts a byte into the object buffer.
  */
-
-
-oputb( c ) char c;{
+void oputb(char c) {
 
 
 	if( objtop >= relbot ) fatal( "70 Object buffer overflow" );
@@ -390,7 +388,7 @@ oputb( c ) char c;{
  * oputr - Puts a byte into the relocation area.
  */
 
-oputrb( c ) char c; {
+void oputrb(char c) {
 
 	if( objtop >= relbot ) fatal( "70 Object buffer overflow" );
 	*--relbot = c;
@@ -400,9 +398,9 @@ oputrb( c ) char c; {
  * oputl - Puts a long word into the object buffer.
  */
 
-oputl( l ) long l;{
+void oputl(long l) {
 
-	reg uns	i;
+	uns	i;
 
 	i = l;		oputb( i );
 	i >>= 8;	oputb( i );
@@ -413,11 +411,10 @@ oputl( l ) long l;{
 /*
  * oputs - Puts a symbol into the object buffer.
  */
+void oputs( s ) char *s;{
 
-oputs( s ) reg char *s;{
 
-
-	reg int	i;
+	int	i;
 
 	i = SYMSIZ;
 	do {
@@ -432,7 +429,7 @@ oputs( s ) reg char *s;{
  * oputw - Puts a word into the object buffer.
  */
 
-oputw( w ) uns w;{
+void oputw( w ) uns w;{
 
 	oputb( w );
 	oputb( w >> 8 );

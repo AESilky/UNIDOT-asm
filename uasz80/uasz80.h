@@ -37,6 +37,8 @@
  *
  * Declarations specific to uasz80
  */
+#ifndef UASZ80_H_
+#define UASZ80_H_
 
 /*
  * Parameters.
@@ -71,6 +73,8 @@ struct	format {		/* instruction format table entry */
 	char	fm_skel;		/* opcode skeleton word */
 	char	fm_flg;			/* flags */
 };
+typedef struct format format_t;
+
 /*
  * Global variable declarations.
  */
@@ -149,4 +153,6 @@ extern long		ixiyv;		/* (ix+d) or (iy+d) offset value */
 /*
  * Global variable declarations.
  */
+
+#endif // UASZ80_H_
 

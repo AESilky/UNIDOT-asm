@@ -39,8 +39,11 @@ static char rcsid[] =
 
 
 #include "uas.h"
+#include "funcdefs.h"		/* Forward defines for GCC */
 
-extern char *palloc();
+#ifdef USEVM
+#include <fcntl.h> /* For 'open' */
+#include <unistd.h> /* For 'close' */
 
 #ifndef BIGMEM
 #define VMNUMX	64			/* better be bigger than VMNUM	*/
@@ -185,7 +188,7 @@ readin:
 #endif
 		}
 	} else {
-		for( i=0; i<BUFSIZ; i++ ) bufptr[i] = 0;
+		for( i=0; i<BUFSIZ; i++ ) bufptr[i] = NULLCA;
 	}
 	return vmp;
 }
@@ -222,8 +225,7 @@ vmwfetch( adr ) VMADR adr;{
 }
 
 #ifdef VMDEBUG
-char *
-rfetch(n)VMADR n;{
+char* rfetch(n)VMADR n;{
 	char *vmr;
 /*DEB*/if(n==0)debug=9;
 	if(debug)printf("rfetch( %x ) ",(unsigned int)n);
@@ -237,8 +239,7 @@ rfetch(n)VMADR n;{
 	if(debug)printf("	returns %x\n",vmr);
 	return vmr;
 }
-char *
-wfetch(n)VMADR n;{
+char* wfetch(n)VMADR n;{
 	char *vmr;
 /*DEB*/if(n==0)debug=9;
 	if(debug)printf("wfetch( %x ) ",(unsigned int)n);
@@ -259,7 +260,7 @@ wfetch(n)VMADR n;{
  * vminit - Opens the virtual memory file.
  */
 
-vminit(){
+void vminit(){
 
 	mktemp( vmfn );
 	vmfd = creat( vmfn, 0600 );
@@ -271,7 +272,7 @@ vminit(){
 
 /* remove the vmfile if it has been opened	*/
 
-vclose(){
+void vclose(){
 
 #ifdef msdos
 	REG86	r;
@@ -289,8 +290,8 @@ vclose(){
 #endif
 }
 
-vmballoc(){		/* allocate a block - on ramdisk if possible
-			   of disk if not	*/
+int vmballoc(){		/* allocate a block - on ramdisk if possible
+			   on disk if not	*/
 	static	int	vmdblk;
 	reg		i;
 
@@ -335,11 +336,7 @@ vmballoc(){		/* allocate a block - on ramdisk if possible
  * and returns the vm address of it.  The region is guaranteed to reside
  * entirely within a single block.
  */
-
-VMADR
-valloc( size ) reg uns size;{
-
-
+VMADR valloc( size ) uns size;{
 	reg VMADR	base;
 
 #ifdef BIGMEM
@@ -367,12 +364,19 @@ valloc( size ) reg uns size;{
 	return base;
 }
 
-valign(){		/* align the virtual pointe	*/
-
-	virtop = (virtop + (ALIGN-1)) & -ALIGN;
+void valign(){		/* align the virtual pointer */
+	virtop = virtop;
 }
 
-setvirtop(v) VMADR v; {		/* reset the virtop and blklim pointers */
+void setvirtop(v) VMADR v; {		/* reset the virtop and blklim pointers */
 	virtop = v;
-	blklim = (virtop | (BUFSIZ-1))+1;
+	blklim = (virtop + (BUFSIZ-1))+1;
 }
+#else
+void valign() {
+	return;
+}
+void setvirtop(VMADR v) {
+	return;
+}
+#endif // USEVM

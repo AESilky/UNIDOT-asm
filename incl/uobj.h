@@ -33,6 +33,8 @@
 *									*
 ************************************************************************/
 
+#ifndef UOBJ_H_
+#define UOBJ_H_
 
 /* @(#)$Header: uobj.h,v 1.8 87/12/01 05:49:06 rmm Exp $ Unidot Object Format */
 
@@ -156,3 +158,5 @@
 #define	USMADU	0x01		/* addru byte present			*/
 #define USMWTH	0x02		/* within byt present			*/
 #define USMLEN	0x04		/* section length long word present	*/
+
+#endif // UOBJ_H_

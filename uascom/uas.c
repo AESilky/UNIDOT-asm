@@ -40,6 +40,8 @@ static char rcsid[]=
 #define VARS			/* variables declared in this module */
 /* if there is to be no bss section, insert #define NOBSS here */
 #include <signal.h>
+#include <string.h>
+
 #include "uas.h"
 #ifdef vms
 #include "[-.incl]uobj.h"
@@ -48,14 +50,24 @@ static char rcsid[]=
 #include "../incl/uobj.h"
 #include "../incl/urel.h"
 #endif
+#include "funcdefs.h"		/* Forward defines for GCC */
 
-intr(){
+/* Forward definitions (local) */
+void assem1();
+void listsec();
+void lotoken();
+void secprint(reg int rel, int n);
+void setlabel();
+
+
+void intr(){
 	fprintf(ERRFIL,"INTERRUPT!\n");
 	quit(BADEXIT);
 }
-		/* the assembler starts here		*/
 
-main( argc, argv, env ) int argc; char *argv[]; char *env[];{
+/* the assembler starts here		*/
+
+void main( argc, argv, env ) int argc; char *argv[]; char *env[];{
 
 	reg int		i;
 	reg OCTAB	*oc;
@@ -81,7 +93,7 @@ main( argc, argv, env ) int argc; char *argv[]; char *env[];{
 	extern short *countbas;
 	countbas = buffer+3;
 	monitor( 2, etext, buffer, PROFILE, 150 );
-#endif PROFILE
+#endif // PROFILE
 
 	ERRFIL = stderr;
 #ifdef vms
@@ -170,7 +182,7 @@ main( argc, argv, env ) int argc; char *argv[]; char *env[];{
 	quit( GOODEXIT );
 }
 
-listsec(){
+void listsec() {
 
 	reg SYTAB	*syp;
 	reg int		rel;
@@ -197,7 +209,7 @@ listsec(){
 	}
 }
 
-secprint( rel, n ) reg int rel;{
+void secprint( rel, n ) reg int rel; int n;{
 
 	reg SYTAB	*syp;
 	reg long	l;
@@ -211,7 +223,7 @@ secprint( rel, n ) reg int rel;{
 
 
 
-dopass(){
+void dopass(){
 
 	curlst = 255;		/* must be before include() */
 	if( include( srcfile ) != 0 ) fatal( "86 Cannot open %s", srcfile );
@@ -272,7 +284,7 @@ dopass(){
 
 
 
-assem1(){
+void assem1(){
 
 	laboc();
 	BDEB(1,("lc=%lx,ad=%d,pb=%d	%s\n",curloc,curadu,pendbits,sline));
@@ -289,7 +301,7 @@ assem1(){
 		case OTINS:	/* machine instruction */
 			nopend();
 			lcalign( codaln );
-			instr( opcode->oc_val );
+			instr(opcode->oc_val);
 			break;
 
 		case OTDIR:	/* assembler directive */
@@ -318,10 +330,7 @@ BDEB(0,("%d expanding: %s, (%d)  stack depth is %d\n",
  * It also records a cross reference entry.
  */
 
-
-
-
-assign( typ, val, rel ) uns typ; long val; uns rel;{
+void assign( typ, val, rel ) uns typ; long val; uns rel;{
 
 
 	reg SYTAB	*syp;
@@ -373,7 +382,7 @@ assign( typ, val, rel ) uns typ; long val; uns rel;{
 			error("36 The label is in use as a section name");
 		if( pass2 && !(syp->sy_atr & SADP2) ){
 			syp->sy_atr |= SADP2;
-			syp->sy_val = val;
+			syp->sy_val = SYVAL(val);
 			syp->sy_rel = rel;
 		}
 		return;
@@ -394,10 +403,10 @@ assign( typ, val, rel ) uns typ; long val; uns rel;{
 	}
 	if( syp->sy_rel == URBUND || syp->sy_typ == STVAR ){
 		/* assign a value */
-		syp->sy_val = val;
+		syp->sy_val = SYVAL(val);
 		syp->sy_rel = rel;
 	} else
-	if( syp->sy_val != val ){
+	if( syp->sy_val != SYVAL(val) ){
 printf("pass1 value = %lx, pass2 value = %lx\n",syp->sy_val,val);
 		error( "03 Phase error in assembler: %lx",syp->sy_val);
 		return;
@@ -413,7 +422,7 @@ printf("pass1 reloc = %d, pass2 reloc = %d\n",syp->sy_rel,rel);
 	return;
 }
 
-setlabel(){		/* establish the label virtual address */
+void setlabel(){		/* establish the label virtual address */
 	label = 0;
 	if( *labstr ){
 		label = labtyp == STNLAB ?
@@ -425,10 +434,7 @@ setlabel(){		/* establish the label virtual address */
 /*
  * interlude - Performs processing between pass 1 and pass 2.
  */
-
-
-
-interlude(){
+void interlude(){
 
 	reg SYTAB	*syp;
 	reg VMADR	p;
@@ -546,7 +552,7 @@ interlude(){
  * is left on the token after the opcode (if it is present).
  */
 
-laboc(){
+void laboc(){
 
 	reg int		col1;
 	reg int		colfound;
@@ -564,7 +570,7 @@ laboc(){
 	   or	<space> <opcode> ...
 	*/
 
-	labstr[0] = opcstr[0] = 0;
+	labstr[0] = opcstr[0] = NULLCA;
 	scansv = scanpt;
 	colfound = 0;
 	labtyp = 0;
@@ -580,7 +586,7 @@ laboc(){
 			continue;
 		}
 		if( toktyp == TKSYM ){		/* found symbol		*/
-			tokstr[SYMSIZ] = 0;	/* trim to size		*/
+			tokstr[SYMSIZ] = NULLCA;	/* trim to size		*/
 			if( !colfound ){	/* no colon yet		*/
 				if( labstr[0] == 0 ){	/* no label yet	*/
 					scansv = scanpt;
@@ -632,14 +638,14 @@ laboc(){
 		/* the label WAS the opcode */
 movelab:	opcptr = labptr;
 		strcpy( opcstr, labstr );
-		labstr[0] = 0;
+		labstr[0] = NULLCA;
 		labtyp = 0;
 	}
 	scanpt = scansv;
 	token();
 }
 
-lotoken(){
+void lotoken() {
 
 	/* routine guaranteed not to read a token that is not a label,
 	   opcode or a colon */
@@ -660,7 +666,7 @@ lotoken(){
  */
 
 
-newsec(f){	/* f is 0 for normal sections, 1 for dummy sections */
+void newsec(int f) {	/* f is 0 for normal sections, 1 for dummy sections */
 
 	reg int	se;
 
@@ -692,7 +698,7 @@ newsec(f){	/* f is 0 for normal sections, 1 for dummy sections */
  * putstats - Outputs various statistics for performance evaluation.
  */
 
-putstats(){
+void putstats() {
 
 	fprintf( stdout, "%5u dynamic physical bytes used\n", phytop-&end );
 	fprintf( stdout, "%5u total physical bytes used\n",( uns ) phytop );
@@ -709,8 +715,7 @@ putstats(){
 /*
  * setorg - Sets up the next address for text output.
  */
-
-setorg(){
+void setorg() {
 
 	if( curatr & SEATDUMY ) return;
 	if( objtyp != UOBTXT || nxtloc != curloc || nxtsec != cursec ){
@@ -729,7 +734,7 @@ setorg(){
  * setsec - Changes to the specified section for code generation.
  */
 
-setsec( sec ) uns sec;{
+void setsec( sec ) uns sec;{
 
 	reg SECTION	*sep;
 

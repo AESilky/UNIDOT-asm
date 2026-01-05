@@ -43,12 +43,14 @@ static char rcsid[] =
 #else
 #include "../incl/uobj.h"
 #endif
-/*
+#include "funcdefs.h"
+
+/*
  * dopass - Performs a single pass over all of the object and library
  * files.
  */
 
-dopass( filex, files ) int filex; char **files;{
+void dopass( filex, files ) int filex; char **files;{
 
 
 	reg char	*sp;
@@ -104,7 +106,7 @@ prstats("start of dofile");
 		library();
 	else
 		object();
-	curmod[0] = 0;
+	curmod[0] = NULLCA;
 	fclose( OBJIN );
 }
 
