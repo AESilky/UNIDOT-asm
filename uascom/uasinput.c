@@ -38,12 +38,16 @@ static char rcsid[] =
 "@(#)$Header: uasinput.c,v 6.4 88/11/20 13:28:05 rmm Rel $ uas input routines";
 
 #include "uas.h"
+#include "funcdefs.h"		/* Forward defines for GCC */
+
+#include <fcntl.h> /* For 'open' */
+#include <unistd.h> /* For 'close' */
+#include <string.h>
 
 /*
  * fillin - Processes the end of an input stack frame.
  */
-
-fillin(){
+void fillin(){
 
 	reg INPUT	*rinfp;
 
@@ -74,10 +78,7 @@ case INRPT:	if( rinfp->in_rpt-- == 0 ) break;
  * include - Pushes the specified file into the input stream.  Returns -1
  * if the file cannot be opened, 0 otherwise.
  */
-
-include( file ) reg char *file;{
-
-
+int include( file ) reg char *file;{
 	reg int		fd;
 	reg int		i;
 	reg int		per;
@@ -141,8 +142,7 @@ include( file ) reg char *file;{
  * iovck - Checks to make sure the input stack pointer is not beyond the
  * end of the input stack area.
  */
-
-iovck(){
+void iovck(){
 
 	if( insp > ((char *)instk)+INSIZ )
 		fatal( "67 Input/Macro stack overflow" );
@@ -150,8 +150,7 @@ iovck(){
 /*
  * popin - Pops the top frame off the input stack.
  */
-
-popin(){
+void popin(){
 
 	curlst = infp->in_lst & 0xff;		/* restore list control	*/
 	insp = (char *)infp;			/* pop stack pointer	*/
@@ -162,7 +161,7 @@ popin(){
  * pushc - Pushes the specified character onto the input stack.
  */
 
-pushc( c ) char c;{
+void pushc( c ) char c;{
 
 	if( insp > ((char *)instk)+INSIZ-1 ) iovck();
 	*insp++ = c;
@@ -173,10 +172,7 @@ pushc( c ) char c;{
  * the new frame pointer.  Note that the global frame pointer infp is
  * not automatically adjusted.
  */
-
-INPUT *
-pushin(){
-
+INPUT * pushin(){
 	reg INPUT	*newfp;
 	reg int		i;
 

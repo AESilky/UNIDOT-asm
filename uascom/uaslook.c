@@ -38,6 +38,12 @@ static char rcsid[] =
 "@(#)$Header: uaslook.c,v 6.6 88/03/10 09:31:38 rmm Rel $ uas table lookup routine";
 
 #include "uas.h"
+#include "funcdefs.h"		/* Forward defines for GCC */
+#include <string.h>
+
+#ifndef NOPD
+#define NOPD	/* ES: Define this here to aid code highlighting (is in makefile) */
+#endif
 
 #ifndef BIGMEM
 #define ASIDE struct aside
@@ -84,7 +90,7 @@ oclook( s ) char *s;{
 	reg char	*a;
 	reg int		i;
 	reg uns		h;
-	static char	opstr[16] = 0;
+	static char	opstr[16] = {NULLCA};
 
 	h = hash(s) & ((1 << OHSHLOG)-1);
 	b = s;
@@ -123,9 +129,7 @@ oclook( s ) char *s;{
    uses, it must be called with the string already converted to lower
    case.
 */
-
-
-opval( s ) reg char *s;{
+int opval( s ) reg char *s;{
 
 
 	reg OCTAB	*q;
@@ -141,7 +145,7 @@ opval( s ) reg char *s;{
 #ifdef NOPD
 	/* quick routine for inserting pre-built opcodes into chain */
 
-opcinsert( o ) reg OCTAB *o; {
+void opcinsert(OCTAB* o) {
 
 	reg uns		h;
 
@@ -182,9 +186,9 @@ sylook( s ) char *s;{
 #endif
 	reg SYTAB	*qp,
 			*rp;
-	VMADR		p,
-			q,
-			r;
+	VMADR		p;
+	VMADR		q;
+	VMADR		r;
 	uns		h;
 	int		cmp;
 
@@ -261,7 +265,8 @@ sylook( s ) char *s;{
 	rp = (SYTAB *) wfetch(r);
 	symcpy( rp->sy_str, s );
 	rp->sy_typ = rp->sy_atr = rp->sy_rel = 0;
-	rp->sy_xlk = rp->sy_val = 0;
+	rp->sy_val = 0;
+	rp->sy_xlk = (void*)0;
 	rp->sy_lnk = q;
 	if( p ) (qp=((SYTAB *)wfetch( p )))->sy_lnk = r;
 	else syhtab[h] = r;

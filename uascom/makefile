@@ -10,12 +10,19 @@ OBJ = uas.o uasdirec.o uasinit.o uasinput.o \
 	uaslook.o uasmac.o uasmisc.o uasout.o uasparse.o \
 	uastoken.o uasvm.o uasszy.o uasxref.o
 
+# LAX_CC - Define to ease warnings on GCC
+LAX_CC=-Wno-pointer-to-int-cast
+# GCC on 64-bit Linux defines (ES)
+CFLAGS=$(LAX_CC) -DNOPD -DALIGN=4
 #CFLAGS= -DNOPD -DBIGDEBUG -DDEBUG -DONECASE
-CFLAGS= -DBIGMEM -DNOPD -DBIGDEBUG -DDEBUG -DONECASE
+#CFLAGS= -DBIGMEM -DNOPD -DBIGDEBUG -DDEBUG -DONECASE
 
 CC = cc
 
 all:	$(OBJ)
+
+clean:
+	rm -f $(OBJ)
 
 $(OBJ):	uas.h ../incl/uobj.h
 

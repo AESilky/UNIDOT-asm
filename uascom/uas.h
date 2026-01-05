@@ -35,6 +35,22 @@
 
 
 /* @(#)$Header: uas.h,v 6.19 88/10/09 13:34:37 rmm Rel $ uas common header */
+#ifndef UAS_H_
+#define UAS_H_
+
+#include <stdlib.h>
+typedef unsigned uns;
+typedef unsigned short ushort;
+typedef void* VMADR;
+
+#ifndef USEVM
+#ifndef BIGMEM
+#define BIGMEM		/* Indicate BIGMEM if not using Virtual Memory */
+#endif // !BIGMEM
+#define VMALIGN 256 	/* Alignment for `aligned_alloc` */
+#endif // !USEVM
+
+extern int xscanc();
 
 #ifdef vms
 #define NOTUNIX
@@ -45,7 +61,7 @@
 #ifndef __HOST__
 #define __HOST__ "vax.vms"
 #endif
-#endif
+#endif // vms
 
 #ifdef msdos
 #define NOTUNIX
@@ -56,7 +72,7 @@
 #ifndef __HOST__
 #define __HOST__ "msdos"
 #endif
-#endif
+#endif // msdos
 
 #ifndef NOTUNIX
 #define FATEXIT 1
@@ -65,24 +81,12 @@
 #define GOODEXIT 0
 #ifndef __HOST__
 #define __HOST__ "xxx.unix"
-#endif
-#endif
+#endif // __HOST__
+#endif // NOTUNIX
 #include <stdio.h>
 #ifndef reg
-#define	reg	register	/* abbreviation for good tabbing	*/
-#endif reg
-
-#ifndef uns
-#define	uns	unsigned	/* abbreviation for good tabbing	*/
-#endif uns
-
-#ifndef ushort
-#define ushort	unsigned short
-#endif
-
-#ifndef regstr
-#define regstr	register struct
-#endif
+#define	reg	/* abbreviation for good tabbing	*/
+#endif // reg
 
 /* Declarations common to all of the cross assemblers */
 
@@ -99,32 +103,28 @@
 #define IZ ={0}
 #else
 #define IZ
-#endif
+#endif // NOBSS
 #define IX(X) ={X}
 #else
 #define GLOBL extern
 #define IZ
 #define IX(X)
-#endif
+#endif // VARS
 
 #ifdef BIGDEBUG
 #define BDEB(x,y) if(debug>x)printf y
 #else
 #define BDEB(x,y)
-#endif
+#endif // BIGDEBUG
 
 	/* The following items are MACHINE SPECIFIC!!!		*/
 
 #ifndef ALIGN
 /** #define ALIGN 4	 this must be 4 on the 3b2 */
 #define ALIGN 2		/* this should be 2 on most 16 bit machines */
-#endif
+#endif // ALIGN
 
-#ifndef VMADR
-/** #define VMADR long	 this must be long enough to hold a *char */
-#define VMADR unsigned	/* this must be long enough to hold a *char */
-#endif
-
+#ifdef USEVM
 #ifdef BIGMEM		/* define this to avoid virtual memory overhead */
 #define VALN(n)		(virtop+(n)>blklim?valloc(n):(virtop+=(n))-(n))
 #define rfetch(n)	(phyp[(n)>>blklog]+(n&(BUFSIZ-1)))
@@ -156,11 +156,23 @@ extern char		*vmwfetch();
 #else
 extern char	*rfetch();
 extern char	*wfetch();
-#endif
+#endif // VMDEBUG
 #define rlimit(n)	(vmtab[(n)>>blklog].vm_buf + BUFSIZ)
 	/* note rlimit must be called only AFTER calling rfetch or wfetch */
-#endif
+#endif // BIGMEM
 #define VAL1		(virtop>=blklim?valloc(1):virtop++)
+#ifdef BIGMEM
+GLOBL char* phyp[PHNUM] IZ;	/* in core pointers		*/
+#else
+GLOBL VMTAB	vmtab[VMCNT] IZ;	/* in core headers		*/
+#endif // BIGMEM
+#else
+#define VAL1		aligned_alloc(4, 1)
+#define VALN(n)		aligned_alloc(4, n)
+#define rfetch(n)	(n)
+#define wfetch(n)	(n)
+#define rlimit(n)	(n+1)
+#endif // USEVM
 
 
 
@@ -174,7 +186,7 @@ extern char	*wfetch();
 #define	LLOBJ	   8		/* length of object field in listing	*/
 #else
 #define	LLOBJ	   11		/* length of object field in listing	*/
-#endif
+#endif // OLDSTYLE
 #define	LLPP	  58		/* listing lines/page (must be < 99)	*/
 #define	LLSEQ	   5		/* length of sequence field in listing	*/
 #define NMCCNT	   8		/* chain count for numeric labels	*/
@@ -467,6 +479,7 @@ OCTAB {			/* opcode table entry				*/
 	char	oc_arg;			/* highest formal # for macro	*/
 	char	oc_str[SYMSIZ];		/* opcode mnemonic string	*/
 };
+#define OCVAL(n)	(VMADR)(n)	/* ES: Make an oc_val from 'n' */
 
 OPERAND {		/* operand descriptor				*/
 	long	op_cls;			/* set of classes (bit vector)	*/
@@ -509,16 +522,17 @@ SECTION {		/* section table entry				*/
 SYTAB {				/* symbol table entry			*/
 	VMADR	sy_lnk;			/* link to next hash entry	*/
 	VMADR	sy_xlk;			/* link to rear of xref chain	*/
-	long	sy_val;			/* value of symbol		*/
+	VMADR	sy_val;			/* value of symbol		*/
 	uns	sy_rel;			/* relocation of symbol		*/
 	char	sy_typ;			/* type of symbol		*/
 	char	sy_atr;			/* attributes of symbol		*/
 	char	sy_str[SYMSIZ];		/* symbol mnemonic string	*/
 };
+#define SYVAL(n)	(VMADR)(n)	/* ES: To make sy_val from long,int,etc. */
 
 NUMLAB {			/* numeric label entry			*/
 	VMADR	nm_lnk;			/* link to next entry		*/
-	VMADR	nm_lab;			/* this numeric entry		*/
+	uns	nm_lab;			/* this numeric entry		*/
 	long	nm_val;			/* value of symbol		*/
 	uns	nm_rel;			/* relocation of symbol		*/
 	char	nm_typ;			/* type of symbol		*/
@@ -557,11 +571,6 @@ GLOBL OCTAB	*ochtab[1<<OHSHLOG] IZ;	/* opcode hash table		*/
 GLOBL char	opcstr[SYMSIZ+1] IZ;	/* opcode string		*/
 GLOBL uns	pendrel IZ;		/* pending reloc		*/
 GLOBL long	pendv IZ;		/* pending value		*/
-#ifdef BIGMEM
-GLOBL char	*phyp[PHNUM] IZ;	/* in core pointers		*/
-#else
-GLOBL VMTAB	vmtab[VMCNT] IZ;	/* in core headers		*/
-#endif
 GLOBL char	proctype[64] IZ;	/* processor type		*/
 GLOBL char	savstr[STRSIZ+1] IZ;	/* string save area		*/
 GLOBL SECTION	sectab[SECSIZ] IZ;	/* section table		*/
@@ -708,13 +717,13 @@ GLOBL uns	uralong IZ;		/* long relocation action	*/
 GLOBL uns	uraword	IZ;		/* word relocation action	*/
 GLOBL char	upperonly IZ;		/* convert all to upper case	*/
 GLOBL char	verbose IZ;		/* some want it talky		*/
-GLOBL VMADR	virtop IX(2);		/* first unused vm location	*/
+GLOBL VMADR	virtop IX((VMADR)2);		/* first unused vm location	*/
 #ifndef BIGMEM
 GLOBL int	vmfd IZ;		/* virtual memory file descriptor */
 GLOBL char	*vmr IZ;		/* vm read pointer		*/
 GLOBL VMTAB	*vmw IZ;		/* vm write pointer		*/
 GLOBL ushort	vmlrux IZ;		/* vm lru marker		*/
-#endif
+#endif // BIGMEM
 GLOBL char	vmrq IZ;		/* vm memory request		*/
 GLOBL uns	ulx IZ;			/* number of using entries	*/
 GLOBL uns	warnct IZ;		/* warning count		*/
@@ -732,7 +741,7 @@ GLOBL uns	symct IZ;		/* number of symbols		*/
 GLOBL uns	vmgct IZ;		/* number of vm accesses	*/
 GLOBL uns	vmrct IZ;		/* number of vm disk reads	*/
 GLOBL uns	vmwct IZ;		/* number of vm disk writes	*/
-#endif
+#endif // STATS
 
 	/* Function declarations */
 
@@ -743,7 +752,10 @@ GLOBL INPUT	*pushin();
 GLOBL char	*rindex();
 GLOBL VMADR	sylook();
 GLOBL VMADR	symerge();
-GLOBL char	*sprintf();
-GLOBL long	align();
-GLOBL VMADR	valloc();
-GLOBL VMADR	val1();
+#ifndef __GNUC__
+GLOBL char	*sprintf(); // Conflicts with GCC <stdio.h> definition
+GLOBL VMADR	valloc(uns size);
+#endif // __GNUC__
+#define NULLCA 	'\000'			/* NULL char value */
+
+#endif // UAS_H_

@@ -43,6 +43,16 @@ static char rcsid[] =
 #else
 #include "../incl/uobj.h"
 #endif
+#include "funcdefs.h"		/* Forward defines for GCC */
+
+#include <string.h>
+
+/* Declarations (local) */
+
+void error2(char* s);
+int rel1check(PSFRAME* p);
+int rel2check(PSFRAME* pl, PSFRAME* p);
+void sem01(int sem);
 
 /*
  * iiparse - Attempts to parse the input stream, and returns 0 if successful.
@@ -52,7 +62,7 @@ static char rcsid[] =
  */
 
 
-iiparse(){
+int iiparse(){
 
 	reg char	*scp;			/* scntab pointer */
 	reg PSFRAME	*liipsp;		/* local for speed	*/
@@ -172,7 +182,7 @@ semprint( ff, sem ) int (*ff)(); {
 #endif
 
 
-sem01( sem ) int sem;{
+void sem01(int sem) {
 #ifdef DEBUG
 	if(debug<=2) xsem01( sem ); else semprint( xsem01, sem );
 }
@@ -328,7 +338,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 		break;
 
 	case 12:	/* <primary> ::= symbol */
-		lastsym = (VMADR) p->ps_val1;
+		lastsym = (VMADR)((unsigned long)p->ps_val1);
 		xref( lastsym, 0 );
 		syp = (SYTAB *)rfetch( lastsym );
 		if( syp->sy_typ == STSEC ){
@@ -351,7 +361,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 			pl->ps_val0 = pl->ps_val1 = 0;
 			pl->ps_flg = OFFOR;
 		} else {
-			pl->ps_val0 = syp->sy_val;
+			pl->ps_val0 = (long)syp->sy_val;
 			pl->ps_val1 = syp->sy_rel;
 			pl->ps_flg = pass2 && !(syp->sy_atr&SADP2) ? OFFOR : 0;
 		}
@@ -462,7 +472,7 @@ errex:	eflg = 1;
 	pl->ps_val0 = pl->ps_val1 = 0;
 }
 
-rel1check(p) reg PSFRAME  *p;{
+int rel1check(PSFRAME* p) {
 
 	if( p->ps_val1 < URBUND &&
 	    sectab[p->ps_val1].se_atr & (USEFIX|SEATDUMY) ) p->ps_val1 = 0;
@@ -470,7 +480,7 @@ rel1check(p) reg PSFRAME  *p;{
 	return 0;
 }
 
-rel2check(pl,p) reg PSFRAME *pl, *p;{
+int rel2check(PSFRAME* pl, PSFRAME* p) {
 
 	if( p->ps_val1 < URBUND &&
 	    sectab[p->ps_val1].se_atr & (USEFIX|SEATDUMY) ) p->ps_val1 = 0;
@@ -480,7 +490,7 @@ rel2check(pl,p) reg PSFRAME *pl, *p;{
 	return 0;
 }
 
-error2(s) char *s; {
+void error2(char* s) {
 	reg char	*toksv;
 	toksv = tokpt;
 	tokpt = tokpt2;

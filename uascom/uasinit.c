@@ -48,12 +48,23 @@ static char rcsid[] =
 #include <fcntl.h>
 int	_fmode = O_BINARY;
 #else
+#include <fcntl.h> /* For 'open' */
+#include <unistd.h> /* For 'close' and `sbrk` */
 int	_iomode = 1;
 #endif
+#include "funcdefs.h"		/* Forward defines for GCC */
+
+#include <stdarg.h>
+#include <string.h>
+#include <time.h>
+
+int argnum(reg char* s);
+void defsym(reg char* s);
+void usage(char* s, ...);
 
 char		objsuf[8] = "obj";	/* predef may change this */
 char		lstsuf[8] = "lst";	/* predef may change this */
-char		srcsuf[8] = 0;		/* predef may change this */
+char		srcsuf[8] = {NULLCA};	/* predef may change this */
 char		*pdpath[] = { "./u", "/lib/u", "/usr/lib/u", 0 };
 char		*lstname = 0;		/* listing name		  */
 
@@ -77,7 +88,7 @@ badpre(){
  * getdat - Gets the date and time and puts them into datstr.
  */
 
-getdat(){
+void getdat(){
 
 	long	curtime;
 
@@ -103,9 +114,7 @@ lastcomp(s) reg char *s;{	/* find last component of file name */
 /*
  * init - Performs assembler initialization.
  */
-
-
-init( argc, argv ) int argc; char *argv[];{
+void init( argc, argv ) int argc; char *argv[];{
 
 
 	reg char	**av;
@@ -127,7 +136,7 @@ init( argc, argv ) int argc; char *argv[];{
 	char		pdname[64];
 #endif
 	char		*asmsuf;
-	extern char	*sbrk();
+	//extern char	*sbrk();
 	static char	nil[2];
 
 	objname = 0;
@@ -135,7 +144,7 @@ init( argc, argv ) int argc; char *argv[];{
 	errfile = 0;
 	defx = 0;
 	prname = lastcomp( argv[0] );
-	if( strlen( prname ) > 10 ) prname[10] = 0;
+	if( strlen( prname ) > 10 ) prname[10] = NULLCA;
 	if( argc < 2 ) usage((char *)0);
 	phytop = phylim = sbrk( 0 );
 	blklog = 1;
@@ -351,7 +360,7 @@ top:	while( argn < argc ){	/* read command line arguments */
 	}
 	if( !srcfile[0] ) usage("no sourcefile");
 	sp = lastcomp( srcfile );
-	if( (j = strlen(sp)) > 14 ) sp[j = 14] = 0;
+	if( (j = strlen(sp)) > 14 ) sp[j = 14] = NULLCA;
 	strcpy( titl1, srcfile );
 	for( i = -1, ep = sp; *ep; ep++ )
 		if( *ep == '.' ){
@@ -368,7 +377,7 @@ top:	while( argn < argc ){	/* read command line arguments */
 		strcpy( sp+8, ep );		/* move it down		*/
 		ep = sp+8;
 	}
-	if( strlen(ep) > 4 ) ep[4] = 0;		/* trim extension	*/
+	if( strlen(ep) > 4 ) ep[4] = NULLCA;		/* trim extension	*/
 #endif
 #ifndef NOPD
 	for( j=0; pdpath[j]; i++ ){
@@ -389,12 +398,12 @@ top:	while( argn < argc ){	/* read command line arguments */
 	if( nerrlim ) errlim = nerrlim;
 	if( srcsuf[0] == 0 && *ep ) strcpy( srcsuf, ep+1 );
 	sufsiz = strlen(srcsuf);
-	if( sufsiz > 3 ) srcsuf[sufsiz=3] = 0;
+	if( sufsiz > 3 ) srcsuf[sufsiz=3] = NULLCA;
 	i = strlen(lstsuf);
-	if( i > 3 ) lstsuf[i=3] = 0;
+	if( i > 3 ) lstsuf[i=3] = NULLCA;
 	if( i > sufsiz ) sufsiz = i;
 	i = strlen( objsuf );
-	if( i > 3 ) objsuf[i=3] = 0;
+	if( i > 3 ) objsuf[i=3] = NULLCA;
 	if( i > sufsiz ) sufsiz = i;
 	if( strcmp(srcsuf,lstsuf) == 0 || strcmp(srcsuf,objsuf) == 0 )
 		fatal( "84 Illegal suffix for source: .%s\n",srcsuf);
@@ -470,7 +479,7 @@ top:	while( argn < argc ){	/* read command line arguments */
 	}
 }
 
-argnum(s) reg char *s; {
+int argnum(s) reg char *s; {
 
 	reg int	i;
 
@@ -482,7 +491,7 @@ argnum(s) reg char *s; {
 	return i;
 }
 
-defsym(s) reg char *s; {
+void defsym(s) reg char *s; {
 
 	reg char	*p;
 	reg SYTAB	*syp;
@@ -505,7 +514,7 @@ defsym(s) reg char *s; {
 	syp = (SYTAB *)wfetch(val);
 	if( syp->sy_typ != STUND ) usage("symbol %s previous defined",defbuf);
 	syp->sy_typ = STVAR;
-	syp->sy_val = tokval;
+	syp->sy_val = SYVAL(tokval);
 	syp->sy_atr = SADP2;
 	if( xflag ){
 		pass2++;
@@ -530,13 +539,15 @@ preget( typ ) int typ;{
  * usage - Issues a fatal error for an illegal command line.
  */
 
-usage(s,a,b)char *s;{
-
+void usage(char* s, ...) {
 	if( verbose ) predef();
 	if( s ){
+		va_list argptr;
+		va_start(argptr, s);
 		fprintf(ERRFIL,"Fatal:	");
-		fprintf(ERRFIL,s,a,b);
+		vfprintf(ERRFIL,s,argptr);
 		fprintf(ERRFIL,"\n");
+		va_end(argptr);
 	}
 	fprintf(ERRFIL, "Usage:  %s [options]... file\n", prname);
 	if( !strcmp(prname,"nrgpasm") || !strcmp(prname,"NRGPASM") )

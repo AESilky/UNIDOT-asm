@@ -36,6 +36,7 @@
 static char rcsid[]=
 "@(#)$Header: ulkmisc.c,v 4.7 92/04/26 16:13:21 rmm Rel $ ulink misc routines";
 
+#include <unistd.h> /* For 'close' and `sbrk` */
 
 #include "ulink.h"
 /*
@@ -98,7 +99,7 @@ palloc( size ) uns size;{
 	reg char	*oldtop;
 	reg char	*tmp;
 	reg int		i;
-	extern char	*sbrk();
+//	extern char	*sbrk();
 
 	size = (size + (ALIGN-1)) & -ALIGN;
 #ifdef STATS

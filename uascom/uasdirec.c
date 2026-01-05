@@ -43,13 +43,29 @@ static char rcsid[] =
 #else
 #include "../incl/uobj.h"
 #endif
+#include "funcdefs.h"		/* Forward defines for GCC */
+
+#include <string.h>
+
+int expression(char* s, int strok, int norel);
+void labnotok();
+void newloclabs();
+int noextlab();
+int nonrelex(char* s);
+void noopnd();
+void notexpr(char* s);
+void notrel(char* s);
+int scanstr(char* s);
+void title(char* msg, char* s);
+int usingreg(char* s);
+
 
 static short	loclabskips;		/* useless .loclabs to skip	*/
 /*
  * dircom - Performs the assembler directives common to all versions.
  */
 
-dircom( dirnum ) int dirnum;{
+void dircom( dirnum ) int dirnum;{
 
 
 	reg SYTAB	*syp;
@@ -150,7 +166,7 @@ dircom( dirnum ) int dirnum;{
 		if( syp->sy_typ != STUND || syp->sy_val != 0 )
 			syp->sy_atr |= SAMUD;
 		syp->sy_atr |= SAGLO;
-		syp->sy_val = l;
+		syp->sy_val = SYVAL(l);
 		xref( sym, 0 );
 		break;
 
@@ -537,7 +553,7 @@ tryrwx:		if( toktyp == TKEOL ) break;
 		i = 1;
 		if( toktyp == TKSPC && nonrelex( ".space" ) )
 			i = curop.op_val;
-		if( !llerx ) llsrc[0] = 0;
+		if( !llerx ) llsrc[0] = NULLCA;
 		if( i >= linect ){
 			linect = 0; /* eject page */
 			break;
@@ -641,18 +657,18 @@ skip:	skipeol();
 noop:	noopnd();
 }
 
-mexprint(){	/* routine is called for directives that should not
+void mexprint(){	/* routine is called for directives that should not
 		   necessarily be printed	*/
 
 	if( mexlev && mlist == 0 ) llfull = 0;
 }
 
-noopnd(){
+void noopnd(){
 	error("10 An operand is required");
 	skipeol();
 }
 
-nonrelex(s) char *s;{
+int nonrelex(s) char *s;{
 
 	/* set up and get an operand that is not relocatable	*/
 
@@ -661,7 +677,7 @@ nonrelex(s) char *s;{
 	return expression(s,NOSTR,NOREL);
 }
 
-scanstr(s)char *s;{
+int scanstr(s)char *s;{
 
 	/* set up and get an operand that is supposed to be a string */
 
@@ -674,12 +690,12 @@ scanstr(s)char *s;{
 	return 0;
 }
 
-notexpr(s)char *s;{
+void notexpr(s)char *s;{
 	error("09 Operand not a valid %s expression",s);
 	skipeol();
 }
 
-nolabel(){
+void nolabel(){
 
 	reg char	*toksv;
 
@@ -690,7 +706,7 @@ nolabel(){
 }
 
 
-notrel(s)char *s;{
+void notrel(s)char *s;{
 	error("12 Relocation not legal for %s expression",s);
 	skipeol();
 }
@@ -703,7 +719,7 @@ notrel(s)char *s;{
  */
 
 
-expression(s,strok,norel) char *s;{
+int expression(s,strok,norel) char *s; int strok; int norel; {
 
 	/* if strok != 0, a string is allowed			*/
 	/* if norel != 0, relocatables are not allowed		*/
@@ -739,7 +755,7 @@ expression(s,strok,norel) char *s;{
  */
 
 
-title( msg, s ) char *msg,*s;{
+void title( msg, s ) char *msg,*s;{
 
 
 	if( !pass2 ) return;
@@ -751,7 +767,7 @@ title( msg, s ) char *msg,*s;{
 	if( llfull ) llfull = linect = 0;
 }
 
-stdequend(symtype)int symtype;{		/* finish of standard .equ processing */
+void stdequend(symtype)int symtype;{		/* finish of standard .equ processing */
 
 	reg int	i;
 	long	l;
@@ -782,7 +798,7 @@ stdequend(symtype)int symtype;{		/* finish of standard .equ processing */
 
 
 
-delim(){
+void delim(){
 
 	if( toktyp == TKSPC || toktyp == TKCOM ){
 		iilex();
@@ -790,13 +806,13 @@ delim(){
 	}
 }
 
-lcassign(){
+void lcassign(){
 	lcalign( curadu );
 	assign( labtyp, curloc/curadu, cursec );
 	if( labtyp != STNLAB && labtyp != STUND ) newloclabs();
 }
 
-newloclabs(){
+void newloclabs(){
 
 	/* routines sets up new scope for local labels */
 
@@ -809,11 +825,11 @@ newloclabs(){
 	nctl = nctl->nc_lnk;
 }
 
-labnotok(){
+void labnotok(){
 	if( label ) error("88 a label is not allowed");
 }
 
-noextlab(){
+int noextlab(){
 	if( !label ){
 		nolabel();
 		return 1;
@@ -825,7 +841,7 @@ noextlab(){
 	return 0;
 }
 
-usingreg(s)char *s; {
+int usingreg(s)char *s; {
 
 	VMADR		sym;
 	reg SYTAB	*syp;
@@ -835,7 +851,7 @@ usingreg(s)char *s; {
 	syp = (SYTAB *) rfetch( sym );
 	if( syp->sy_typ == STKEQ ){
 		xref( sym, 0 );
-		syp = (SYTAB *)rfetch((VMADR)syp->sy_val);
+		syp = (SYTAB *)rfetch(syp->sy_val);
 	}
 	if( (k = regcheck(syp)) == -1 )
 		error("48 Symbol is not a suitable register");

@@ -19,17 +19,29 @@
 #
 #  Lastly, be SURE that the SAME choices are made in the uascom directory!
 
+#
+#  (ES) `valloc` is considered obsolete, suggested replacement is `aligned_alloc`
+#    from <stdlib.h>. Created new compile flag USEVM to control whether the
+#    two original virtual memory approaches are used or if it is left up to the
+#    system by using `aligned_alloc`. If `USEVM` is not defined `BIGMEM` will
+#    be defined for use in most of the code.
+#
+
+# LAX_CC - Define to ease warnings on GCC
+LAX_CC=-Wno-pointer-to-int-cast
+# GCC on 64-bit Linux defines (ES)
+CFLAGS=$(LAX_CC) -DNOPD -DALIGN=4
 #pdp-11 defines
-CFLAGS=-DBIGMEM -DNOPD
+#CFLAGS=-DBIGMEM -DNOPD
 # 3b2 defines 
 #CFLAGS=-DNOBSS -DALIGN=4 -DVMADR='unsigned long'
 
 #pdp - 23 fix version
 #LDFLAGS=-Z
 #3b2 or split id machines
-LDFLAGS=-i
+#LDFLAGS=-i
 # 32 bit machines
-#LDFLAGS=
+LDFLAGS=
 
 CC = cc
 LD = cc
@@ -54,7 +66,7 @@ UASCOM=  ../uascom/uas.o \
 
 TGT = uasz80
 
-OBJ = uasz80.o uaz80gr.o
+OBJ = uasz80.o uaz80gr.o easrgchk.o
 
 .SUFFIXES:	.pd .pdc
 
@@ -80,6 +92,9 @@ Installlib:	uz80s.pd
 	cd $(LIB); chown bin $?; chgrp bin $?; chmod 664 $?
 	rm -f Installlib
 
+clean:
+	rm -f $(OBJ)
+	cd ../uascom;make clean
 
 # the following should be run by hand if needed to make a new grammar
 

@@ -38,6 +38,17 @@ static char rcsid[] =
 "@(#)$Header: uasmisc.c,v 6.23 89/03/17 08:15:02 rmm Rel $ uas misc routines";
 
 #include "uas.h"
+#include "funcdefs.h"		/* Forward defines for GCC */
+
+#include <stdarg.h>
+#include <stdlib.h>
+#define _exit exit
+#include <string.h>
+#include <unistd.h> /* For 'close' and `sbrk` */
+
+void lineover();
+int oktobreak(reg int n);	/* is it ok to break a line after this character */
+void prline(FILE* f);
 
 char	*immms1, *immms2;
 char	*lstfmt = "%-5s %-11s %-5s ";
@@ -53,7 +64,7 @@ char	*errfmt = "====> line %-4u         ";
  * replaces the normal exit() in libc.a, with its stdio stuff.
  */
 
-quit( status ) int status;{
+void quit( status ) int status;{
 
 
 #ifndef BIGMEM
@@ -66,7 +77,7 @@ quit( status ) int status;{
 
 #ifdef PROFILE
 	monitor( 0 );
-#endif PROFILE
+#endif // PROFILE
 
 	_exit( status );
 }
@@ -81,7 +92,7 @@ quit( status ) int status;{
  */
 
 
-getline(){
+void ugetline(){
 
 	reg INPUT	*rinfp;
 	reg char	*slp;
@@ -122,7 +133,7 @@ expmac:		ap = apx = 0;
 					   character is a colon, skip it */
 
 					if( slp == sline )
-					   while( *rfetch((VMADR)rinfp->in_ptr)
+					   while( *rfetch(rinfp->in_ptr)
 						== ':' ) rinfp->in_ptr++;
 					ap = apx = 0;
 					continue;
@@ -232,14 +243,14 @@ if(debug>5) printf( "%d	%s",curline,sline);
 }
 
 
-oktobreak(n)reg int n;{	/* is it ok to break a line after this character */
+int oktobreak(n)reg int n;{	/* is it ok to break a line after this character */
 
 	if( n == ',' || n == '(' || n == ')' ||
 	    n == '{' || n == '}' || n == ' ' ) return 1;
 	return 0;
 }
 
-lineover(){
+void lineover(){
 	fatal("34 Input line overflow");
 }
 /*
@@ -255,7 +266,7 @@ lineover(){
 
 char *
 xsbrk( size ) uns size; {
-	extern char	*sbrk();
+//	extern char	*sbrk();
 	char autoalloc[1000];		/* move stack down 1000 bytes */
 	autoalloc[0] = size;		/* in case of optimization */
 	return sbrk(size);
@@ -285,7 +296,7 @@ palloc( size ) uns size;{
 			once = 0;
 			for( ; n >= 8192; n -= 512 )
 #else
-			static once = 16384;
+			static int once = 16384;
 			for( n = 16384 ; n >= 512; n -= 512 )
 #endif
 				if( xsbrk( n ) != (char *)-1 ) break;
@@ -310,7 +321,7 @@ palloc( size ) uns size;{
  * of output.
  */
 
-pgcheck(){
+void pgcheck(){
 
 	reg int	i;
 
@@ -335,7 +346,7 @@ pgcheck(){
  * it is pass 2 and there is something to output.
  */
 
-putline(){
+void putline(){
 
 	int	perr;
 	static char	lstnonnull;
@@ -346,7 +357,7 @@ putline(){
 			if( llsrc[0] == 0 ){
 				llsrc[0] = lstnonnull;
 				prline( ERRFIL ); /* put out error list line */
-				llsrc[0] = 0;
+				llsrc[0] = NULLCA;
 			} else
 				prline( ERRFIL ); /* put out error list line */
 		}
@@ -374,12 +385,12 @@ ernget(s) reg char *s;{
 	while( *s == ' ' ) s++;
 	while( *s >= '0' && *s <= '9' ) *p++ = *s++;
 	*p = 0;
-	if( errnum == 0 ) ernbuf[0] = 0;
+	if( errnum == 0 ) ernbuf[0] = NULLCA;
 	while( *s == ' ' ) s++;
 	return s;
 }
 
-prline(f)FILE *f;{
+void prline(f)FILE *f;{
 
 	reg int		i;
 	reg int		j;
@@ -460,11 +471,10 @@ prline(f)FILE *f;{
  *	== 0, if a == b,
  *	< 0, if a < b.
  */
+int symcmp( a, b ) reg char *a, *b;{
 
-symcmp( a, b ) reg char *a, *b;{
 
-
-	reg 	i;
+	int 	i;
 
 	i = SYMSIZ;
 	while( --i >= 0 && *a ==*b++ ) if(*a++ == '\0' ) return 0;
@@ -475,7 +485,7 @@ symcmp( a, b ) reg char *a, *b;{
  * symcpy - Copies one symbol from source to destination.
  */
 
-symcpy( d, s ) reg char *d, *s;{
+void symcpy( d, s ) reg char *d, *s;{
 
 
 	reg char	i;
@@ -489,13 +499,12 @@ symcpy( d, s ) reg char *d, *s;{
 /*
  * memcpy - Like str(n)cpy but does not stop at a null
  */
+//void memcpy( d, s, n ) reg char *d, *s; reg int n; {
+//	while( --n >= 0 ) *d++ = *s++;
+//}
 
-memcpy( d, s, n ) reg char *d, *s; reg int n; {
-	while( --n >= 0 ) *d++ = *s++;
-}
 
-
-lcalign( n ) reg int n; {
+void lcalign( n ) reg int n; {
 
 	reg int	i;
 
@@ -505,12 +514,12 @@ lcalign( n ) reg int n; {
 }
 
 
-range( l, m, n ) long l; int m,n; {
+void range( l, m, n ) long l; int m,n; {
 
 	if( l < m || l > n ) error("13 Value not in range %d-%d",m,n);
 }
 
-hexit( p, n, v ) reg char *p; reg int n; long v; {
+void hexit( p, n, v ) reg char *p; reg int n; long v; {
 
 	/* in the low nibble of n is the field width, in the high nibble is
 	   the number of digits to print */
@@ -520,7 +529,7 @@ hexit( p, n, v ) reg char *p; reg int n; long v; {
 
 	i = n >> 4;
 	n &= 0xf;
-	p[n] = 0;
+	p[n] = NULLCA;
 	while( --i >= 0 ){
 		p[--n] = hextab[ v & 0xf ];
 		v >>= 4;
@@ -533,7 +542,7 @@ hexit( p, n, v ) reg char *p; reg int n; long v; {
  * err or error, but not both
  */
 
-error(s,a,b) char *s; {
+void error(char* s, ...) {
 
 	reg ERF		*ep;
 	reg char	*p;
@@ -542,33 +551,39 @@ error(s,a,b) char *s; {
 	if( !pass2 ) return;
 	if( llerx >= LLERX ) llerx--;
 	errct++;
+	va_list argptr;
+	va_start(argptr, s);
 	ep = &llerf[llerx++];
 	ep->er_msg = s;
-	ep->er_par[0] = a;
-	ep->er_par[1] = b;
+	ep->er_par[0] = va_arg(argptr, int);
+	ep->er_par[1] = va_arg(argptr, int);
 	for( p = sline, col = 0; p < tokpt; p++, col++ )
 		if( *p == '\t' ) col |= 7;
 	ep->er_col = col;
 	ep->er_flg = 0;
+	va_end(argptr);
 }
 
 /*
  * warn - Puts the specified warning flag into the listing.
  */
 
-warn( s, a, b ) char *s; {
+void warn(char* s, ...) {
 
 	if( !pass2 || !verbose ) return;
-	error( s, a, b );
+	error( s );
 	llerf[llerx-1].er_flg = ER_WRN;
 	errct--;
 	warnct++;
 }
 
-fatal( s, a, b, c ) char *s; {
+void fatal(char* s, ...) {
 
 	reg char	*p;
 	reg int		i;
+
+	va_list argptr;
+	va_start(argptr, s);
 
 	s = ernget( s );
 	if( ((INPUT *)instk)->in_seq ){
@@ -587,14 +602,16 @@ fatal( s, a, b, c ) char *s; {
 	}
 	fprintf(ERRFIL,"======>\t\tFATAL   ");
 	if( ernbuf[0] ) fprintf(ERRFIL,"(%s): ",ernbuf );
-	fprintf(ERRFIL,s,a,b,c);
+	vfprintf(ERRFIL, s, argptr);
 	fprintf(ERRFIL,"\n");
 	if( LIST ){
 		fprintf(LIST,"======>\t\tFATAL   ");
 		if( ernbuf[0] ) fprintf(LIST,"(%s): ",ernbuf );
-		fprintf(LIST,s,a,b,c);
+		vfprintf(LIST, s, argptr);
 		fprintf(LIST,"\n");
 	}
+	va_end(argptr);
+
 #ifdef msdos
 	quit(FATEXIT);
 #else
@@ -602,13 +619,13 @@ fatal( s, a, b, c ) char *s; {
 #endif
 }
 
-immmsg( s1, s2 ) char *s1; char *s2; {	/* immediate message */
+void immmsg( s1, s2 ) char *s1; char *s2; {	/* immediate message */
 
 	if( !pass2 ) return;
 	immms1 = s1;
 	immms2 = s2;
 }
 
-filchk( f, s ) FILE *f; char *s; {
+void filchk( f, s ) FILE *f; char *s; {
 	if( ferror(f) ) fatal("93write error on %s file",s);
 }

@@ -32,6 +32,8 @@
 *			ulink.h - linker header				*
 *									*
 ************************************************************************/
+#ifndef ULINK_H_
+#define ULINK_H_
 
 /*
  * @(#)$Header: ulink.h,v 4.9 92/07/31 07:57:46 rmm Rel $ ulink header file
@@ -131,12 +133,12 @@
  */
 #ifndef reg
 #define	reg	register
-#endif reg
+#endif // reg
 #ifndef uns
 #define	uns	unsigned
-#endif uns
-#ifndef regstr
-#define regstr register struct
+#endif // uns
+#ifndef struct
+#define struct register struct
 #endif
 #ifndef ushort
 #define ushort unsigned short
@@ -163,7 +165,7 @@ XREFENT {			/* cross reference entry	*/
 #ifdef STATS
 #define BUFUSE	0		/* space used for buffers	*/
 #define SECUSE	1		/* space used for sections	*/
-#define SYMUSE	2		/* space used for symbols	*/ 
+#define SYMUSE	2		/* space used for symbols	*/
 #define GRPUSE	3		/* space used for groups	*/
 #define OTHUSE	4		/* space used for other		*/
 #endif
@@ -349,3 +351,5 @@ GLOBL FILE	*LOCFILE IZ;
 GLOBL FILE	*SYMFILE IZ;
 GLOBL FILE	*RELFILE IZ;
 GLOBL FILE	*OVLYFILE IZ;		/* overlay control stream	*/
+
+#endif // ULINK_H_

@@ -10,7 +10,7 @@ OBJ = uas.o uasdirec.o uasinit.o uasinput.o \
 	uaslook.o uasmac.o uasmisc.o uasout.o uasparse.o \
 	uastoken.o uasvm.o uasszy.o uasxref.o
 
-CFLAGS= -DBIGMEM -DNOPD -DBIGDEBUG -DDEBUG -DONECASE -DMEC
+CFLAGS= -DNOPD -DBIGDEBUG -DDEBUG -DONECASE -DMEC
 
 CC = cc
 

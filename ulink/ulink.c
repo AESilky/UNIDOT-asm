@@ -380,7 +380,7 @@ linkspec( lnkfile ) char *lnkfile; {	/* do a link file */
 #endif
 		strcpy( ap, tmp );
 	}
-	aav[ax] = 0;
+	aav[ax] = NULLCA;
 	flushclos( LNKFILE );
 	init( ax, aav );		/* recurse */
 }
@@ -418,7 +418,7 @@ locspec( s ) reg char *s;{
 
 	n = name;
 	while( *s != '\0' && *s != '=' ) *n++ = *s++;	/* copy the name */
-	*n = name[32] = 0;
+	*n = name[32] = NULLCA;
 	sep = selook( name );
 	if( *s == '=' ){				/* read the address */
 		sep->se_val = scanaddr( s+1 );
@@ -440,7 +440,7 @@ defsym( s ) reg char *s;{
 
 	n = name;
 	while( *s != '\0' && *s != '=' ) *n++ = *s++;	/* copy the name */
-	*n = name[32] = 0;
+	*n = name[32] = NULLCA;
 	syp = sylook( name );
 	if( *s != '=' ) error("F06 Illegal definition");
 	syp->sy_val = scanaddr( s+1 );		/* get the value	*/

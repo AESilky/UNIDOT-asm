@@ -39,6 +39,15 @@ static char rcsid[] =
 
 #include "uas.h"
 #include "../incl/uobj.h"
+#include "funcdefs.h"		/* Forward defines for GCC */
+
+/* Declarations (local) */
+
+int szbump(ushort rel, long val);
+int szecheck(SZE* szep);
+void szesyinc();
+void szyient(ushort inc, ushort rel, long val);
+
 
 #define SZEDEF 0x8000
 
@@ -116,13 +125,13 @@ static short	szyix;
 
 */
 
-szyinit( vltp ) VLSIZ **vltp; {
+void szyinit( vltp ) VLSIZ **vltp; {
 	szevlpt = vltp;
 	BDEB(1,("szyinit: %o %o %o %o %o\n",
 		vltp,vltp[0],vltp[1],vltp[2],vltp[3]));
 }
 
-szyentry( sdirel, sdilc, tgt, vltabx, vldefined )
+void szyentry( sdirel, sdilc, tgt, vltabx, vldefined )
 	short	sdirel;
 	long sdilc;
 	VMADR	tgt;
@@ -155,7 +164,7 @@ szyentry( sdirel, sdilc, tgt, vltabx, vldefined )
 	szep->sze_tgt = tgt;
 }
 
-szynext(){
+uns szynext(){
 #ifdef BIGDEBUG
 	reg int	i;
 	if(!debug) return xsznext();
@@ -188,7 +197,7 @@ xsznext(){
 	return (szep->sze_flg >> 12) & 0x7;
 }
 
-szyprocess(){
+void szyprocess(){
 
 	/* this is the main processing routine for computing the
 	   proper length for variable length (span dependent) instructions.
@@ -223,7 +232,7 @@ top:	again = 0;
 			if( j == cx ){
 				if( j >= SZX ) fatal("szproc");
 				cx++;
-				cum[j] = 0;
+				cum[j] = NULLCA;
 			}
 			szep->sze_lc += cum[j];
 
@@ -244,7 +253,7 @@ top:	again = 0;
 	szycur = 0;
 }
 
-szecheck( szep ) reg SZE *szep; {
+int szecheck(SZE* szep) {
 #ifdef BIGDEBUG
 
 	reg int	i;
@@ -271,7 +280,7 @@ xszecheck( szep ) reg SZE *szep; {
 	vlp = szevlpt[((szep->sze_flg >> 8) & 0xf)];
 	syp = (SYTAB *)rfetch( szep->sze_tgt );
 	sect = szep->sze_flg & 0xff;		/* section of sdi */
-	l = syp->sy_val;
+	l = (long)syp->sy_val;
 	if( sect != syp->sy_rel ) l = 0x7fffffffL;
 	for( i=0; vlp->vl_neg || vlp->vl_pos; i++, vlp++ ){
 		if( l >= (szep->sze_lc-vlp->vl_neg) &&
@@ -291,7 +300,7 @@ xszecheck( szep ) reg SZE *szep; {
 	return i;
 }
 
-szyient( inc, rel, val ) long val; {
+void szyient( ushort inc, ushort rel, long val ) {
 
 	reg struct szyincrs *szp;
 
@@ -320,7 +329,7 @@ szyient( inc, rel, val ) long val; {
 }
 
 
-szbump(rel,val) long val; {
+int szbump(ushort rel, long val) {
 #ifdef BIGDEBUG
 	int n;
 	n = xszbump(rel,val);
@@ -344,7 +353,7 @@ xszbump(rel,val) long val; {
 	return (int)(val - val2);
 }
 
-szesyinc(){
+void szesyinc(){
 
 	/* hard work - got through the symbol table, adjusting all
 	   entries with addresses greater than val (which is in adu's) */
@@ -371,7 +380,7 @@ szesyinc(){
 			    syp->sy_rel >= URBUND ||
 			    syp->sy_typ == STSEC )
 				continue;
-			n = szbump( syp->sy_rel, syp->sy_val );
+			n = szbump( syp->sy_rel, (long)syp->sy_val );
 			if( n == 0 ) continue;
 			syp = (SYTAB *) wfetch( p );
 BDEB(1,("symbol %s value increase from %ld to %ld\n",syp->sy_str,
@@ -385,7 +394,7 @@ BDEB(1,("symbol %s value increase from %ld to %ld\n",syp->sy_str,
 			for( p = nmc->nc_nm[h]; p; p = p2 ){
 				syp = (SYTAB *)rfetch(p);
 				p2 = syp->sy_lnk;
-				n = szbump( syp->sy_rel, syp->sy_val );
+				n = szbump( syp->sy_rel, (long)syp->sy_val );
 				if( n == 0 ) continue;
 				syp = (SYTAB *) wfetch( p );
 				syp->sy_val += n;

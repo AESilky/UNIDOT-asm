@@ -38,6 +38,14 @@ static char rcsid[] =
 "@(#)$Header: uastoken.c,v 6.15 90/08/16 10:22:23 rmm Rel $ uas token scanner";
 
 #include "uas.h"
+#include "funcdefs.h"		/* Forward defines for GCC */
+
+/* Declarations (local) */
+
+int hexch();
+int stresc();
+
+
 int notokerr = 0;		/* used in uas.c to avoid spurious error msg*/
 
 /*
@@ -46,9 +54,9 @@ int notokerr = 0;		/* used in uas.c to avoid spurious error msg*/
  * of the escape and returns its value.
  */
 
-stresc(){
+int stresc(){
 
-	reg int	ct,
+	int	ct,
 		val;
 
 	scanc();
@@ -89,7 +97,7 @@ stresc(){
 
 }
 
-hexch(){
+int hexch(){
 
 	scanc();
 	if( ch >= '0' && ch <= '9' ) return ch - '0';
@@ -104,7 +112,7 @@ hexch(){
  * and tokstr.
  */
 
-token(){
+int token(){
 
 	reg CHENT	*chp;
 	reg char	*strp;
@@ -181,7 +189,7 @@ numlabscn:
 badcon:			if( !notokerr ) error("83 illegal constant");
 			goto reterr;
 		}
-		tokstr[SYMSIZ] = 0;
+		tokstr[SYMSIZ] = NULLCA;
 #ifdef MEC
 		if( tokstr[0] == '$' && strp-tokstr > 1 &&
 		    chclass[tokstr[1]] & D ){	/* constant */
@@ -334,11 +342,11 @@ reterr:	tokpt = scanpt;
  */
 
 
-xscanc(){
+int xscanc(){
 
 top:
 	if( ch == '\0' ){
-		getline();
+		ugetline();
 		ch = *scanpt++;
 		goto top;
 	}

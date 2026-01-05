@@ -33,6 +33,9 @@
 *									*
 ************************************************************************/
 
+#ifndef UREL_H_
+#define UREL_H_
+
 /*
  * @(#)$Header: urel.z,v 1.7 88/04/07 13:32:45 rmm Rel $
  *
@@ -93,3 +96,4 @@
 #define X_SHF		5
 #define X_MSK		7
 
+#endif // UREL_H_
