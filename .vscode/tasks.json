@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "make",
+			"targetName": "all",
+			"makeFileRelativePath": "uasz80/makefile",
+			"problemMatcher": [],
+			"label": "make: all",
+			"detail": "./uasz80/makefile"
+		},
+		{
+			"type": "clean",
+			"targetName": "all",
+			"makeFileRelativePath": "uasz80/makefile",
+			"problemMatcher": [],
+			"label": "make: clean",
+			"detail": "./uasz80/makefile"
+		}
+	]
+}

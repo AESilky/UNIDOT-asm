@@ -1,0 +1,48 @@
+$C ucc 
+$A -DBIGMEM -DNOPD -DDEBUG -DBIGDEBUG -c
+
+all:
+	cd ../uascom
+	make
+	cd ../z80
+	make uasz80.h
+	make uasz80.exe
+
+uasz80.exe: uasz80.obj uaz80gr.obj ../uascom/uas.obj \
+	../uascom/uasdirec.obj \
+	../uascom/uasinit.obj \
+	../uascom/uasinput.obj \
+	../uascom/uaslook.obj \
+	../uascom/uasmac.obj \
+	../uascom/uasmisc.obj \
+	../uascom/uasout.obj \
+	../uascom/uasparse.obj \
+	../uascom/uastoken.obj \
+	../uascom/uasvm.obj \
+	../uascom/uasszy.obj \
+	../uascom/uasxref.obj
+	$C uasz80.obj uaz80gr.obj ..\\uascom\\uas.obj \
+	..\\uascom\\uasdirec.obj \
+	..\\uascom\\uasinit.obj \
+	..\\uascom\\uasinput.obj \
+	..\\uascom\\uaslook.obj \
+	..\\uascom\\uasmac.obj \
+	..\\uascom\\uasmisc.obj \
+	..\\uascom\\uasout.obj \
+	..\\uascom\\uasparse.obj \
+	..\\uascom\\uastoken.obj \
+	..\\uascom\\uasvm.obj \
+	..\\uascom\\uasszy.obj \
+	..\\uascom\\uasxref.obj -o uasz80
+
+uasz80.obj: uasz80.c
+	$C $A uasz80.c
+
+uaz80gr.obj: uaz80gr.c
+	$C $A uaz80gr.c
+
+uasz80.h: uasz80.z
+	mktable uasz80.z
+	mkpdtab uz80s.pd >uz80pd.h
+
+

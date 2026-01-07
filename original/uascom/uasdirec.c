@@ -43,29 +43,13 @@ static char rcsid[] =
 #else
 #include "../incl/uobj.h"
 #endif
-#include "funcdefs.h"		/* Forward defines for GCC */
-
-#include <string.h>
-
-int expression(char* s, int strok, int norel);
-void labnotok();
-void newloclabs();
-int noextlab();
-int nonrelex(char* s);
-void noopnd();
-void notexpr(char* s);
-void notrel(char* s);
-int scanstr(char* s);
-void title(char* msg, char* s);
-int usingreg(char* s);
-
 
 static short	loclabskips;		/* useless .loclabs to skip	*/
 /*
  * dircom - Performs the assembler directives common to all versions.
  */
 
-void dircom( dirnum ) int dirnum;{
+dircom( dirnum ) int dirnum;{
 
 
 	reg SYTAB	*syp;
@@ -166,7 +150,7 @@ void dircom( dirnum ) int dirnum;{
 		if( syp->sy_typ != STUND || syp->sy_val != 0 )
 			syp->sy_atr |= SAMUD;
 		syp->sy_atr |= SAGLO;
-		syp->sy_val = SYVAL(l);
+		syp->sy_val = l;
 		xref( sym, 0 );
 		break;
 
@@ -553,7 +537,7 @@ tryrwx:		if( toktyp == TKEOL ) break;
 		i = 1;
 		if( toktyp == TKSPC && nonrelex( ".space" ) )
 			i = curop.op_val;
-		if( !llerx ) llsrc[0] = NULLCA;
+		if( !llerx ) llsrc[0] = 0;
 		if( i >= linect ){
 			linect = 0; /* eject page */
 			break;
@@ -657,18 +641,18 @@ skip:	skipeol();
 noop:	noopnd();
 }
 
-void mexprint(){	/* routine is called for directives that should not
+mexprint(){	/* routine is called for directives that should not
 		   necessarily be printed	*/
 
 	if( mexlev && mlist == 0 ) llfull = 0;
 }
 
-void noopnd(){
+noopnd(){
 	error("10 An operand is required");
 	skipeol();
 }
 
-int nonrelex(s) char *s;{
+nonrelex(s) char *s;{
 
 	/* set up and get an operand that is not relocatable	*/
 
@@ -677,7 +661,7 @@ int nonrelex(s) char *s;{
 	return expression(s,NOSTR,NOREL);
 }
 
-int scanstr(s)char *s;{
+scanstr(s)char *s;{
 
 	/* set up and get an operand that is supposed to be a string */
 
@@ -690,12 +674,12 @@ int scanstr(s)char *s;{
 	return 0;
 }
 
-void notexpr(s)char *s;{
+notexpr(s)char *s;{
 	error("09 Operand not a valid %s expression",s);
 	skipeol();
 }
 
-void nolabel(){
+nolabel(){
 
 	reg char	*toksv;
 
@@ -706,7 +690,7 @@ void nolabel(){
 }
 
 
-void notrel(s)char *s;{
+notrel(s)char *s;{
 	error("12 Relocation not legal for %s expression",s);
 	skipeol();
 }
@@ -719,7 +703,7 @@ void notrel(s)char *s;{
  */
 
 
-int expression(s,strok,norel) char *s; int strok; int norel; {
+expression(s,strok,norel) char *s;{
 
 	/* if strok != 0, a string is allowed			*/
 	/* if norel != 0, relocatables are not allowed		*/
@@ -755,7 +739,7 @@ int expression(s,strok,norel) char *s; int strok; int norel; {
  */
 
 
-void title( msg, s ) char *msg,*s;{
+title( msg, s ) char *msg,*s;{
 
 
 	if( !pass2 ) return;
@@ -767,7 +751,7 @@ void title( msg, s ) char *msg,*s;{
 	if( llfull ) llfull = linect = 0;
 }
 
-void stdequend(symtype)int symtype;{		/* finish of standard .equ processing */
+stdequend(symtype)int symtype;{		/* finish of standard .equ processing */
 
 	reg int	i;
 	long	l;
@@ -798,7 +782,7 @@ void stdequend(symtype)int symtype;{		/* finish of standard .equ processing */
 
 
 
-void delim(){
+delim(){
 
 	if( toktyp == TKSPC || toktyp == TKCOM ){
 		iilex();
@@ -806,13 +790,13 @@ void delim(){
 	}
 }
 
-void lcassign(){
+lcassign(){
 	lcalign( curadu );
 	assign( labtyp, curloc/curadu, cursec );
 	if( labtyp != STNLAB && labtyp != STUND ) newloclabs();
 }
 
-void newloclabs(){
+newloclabs(){
 
 	/* routines sets up new scope for local labels */
 
@@ -825,11 +809,11 @@ void newloclabs(){
 	nctl = nctl->nc_lnk;
 }
 
-void labnotok(){
+labnotok(){
 	if( label ) error("88 a label is not allowed");
 }
 
-int noextlab(){
+noextlab(){
 	if( !label ){
 		nolabel();
 		return 1;
@@ -841,7 +825,7 @@ int noextlab(){
 	return 0;
 }
 
-int usingreg(s)char *s; {
+usingreg(s)char *s; {
 
 	VMADR		sym;
 	reg SYTAB	*syp;
@@ -851,7 +835,7 @@ int usingreg(s)char *s; {
 	syp = (SYTAB *) rfetch( sym );
 	if( syp->sy_typ == STKEQ ){
 		xref( sym, 0 );
-		syp = (SYTAB *)rfetch(syp->sy_val);
+		syp = (SYTAB *)rfetch((VMADR)syp->sy_val);
 	}
 	if( (k = regcheck(syp)) == -1 )
 		error("48 Symbol is not a suitable register");

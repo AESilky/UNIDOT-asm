@@ -1,0 +1,32 @@
+$C ucc
+$D -DDEBUG
+$A 
+
+ulink.exe: ulink.obj ulkgetpt.obj ulklook.obj ulkmisc.obj ulkilude.obj \
+	ulkobj.obj ulkrel.obj ulkpass.obj
+	$C ulink.obj ulkgetpt.obj ulklook.obj ulkmisc.obj ulkilude.obj \
+	ulkobj.obj ulkpass.obj ulkrel.obj argsetup.obj -o ulink
+
+ulink.obj: ulink.c
+	$C -c $D $A ulink.c
+
+ulkgetpt.obj: ulkgetpt.c
+	$C -c $D $A ulkgetpt.c
+
+ulkilude.obj: ulkilude.c
+	$C -c $D $A ulkilude.c
+
+ulklook.obj: ulklook.c
+	$C -c $D $A ulklook.c
+
+ulkobj.obj: ulkobj.c
+	$C -c $D $A ulkobj.c
+
+ulkrel.obj: ulkrel.c
+	$C -c $D $A ulkrel.c
+
+ulkpass.obj: ulkpass.c
+	$C -c $D $A ulkpass.c
+
+ulkmisc.obj: ulkmisc.c
+	$C -c $D $A ulkmisc.c

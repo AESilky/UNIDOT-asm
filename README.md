@@ -13,3 +13,7 @@ root
   uasz80/
   ulink/
 ```
+
+The ZIPs contain files with uppercase names (probably zipped from DOS). To convert to lowercase (needed) use the command:
+`rename 'y/A-Z/a-z/' *`
+

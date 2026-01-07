@@ -39,15 +39,13 @@
 #define UAS_H_
 
 #include <stdlib.h>
-typedef unsigned uns;
-typedef unsigned short ushort;
-typedef void* VMADR;
+#include "../incl/aesbfh.h"
 
 #ifndef USEVM
 #ifndef BIGMEM
 #define BIGMEM		/* Indicate BIGMEM if not using Virtual Memory */
 #endif // !BIGMEM
-#define VMALIGN 256 	/* Alignment for `aligned_alloc` */
+#define VMALIGN 4 	/* Alignment for `aligned_alloc` */
 #endif // !USEVM
 
 extern int xscanc();
@@ -120,8 +118,8 @@ extern int xscanc();
 	/* The following items are MACHINE SPECIFIC!!!		*/
 
 #ifndef ALIGN
-/** #define ALIGN 4	 this must be 4 on the 3b2 */
-#define ALIGN 2		/* this should be 2 on most 16 bit machines */
+#define ALIGN 4	 	/* this must be 4 on the 3b2 */
+//#define ALIGN 2		/* this should be 2 on most 16 bit machines */
 #endif // ALIGN
 
 #ifdef USEVM
@@ -167,8 +165,8 @@ GLOBL char* phyp[PHNUM] IZ;	/* in core pointers		*/
 GLOBL VMTAB	vmtab[VMCNT] IZ;	/* in core headers		*/
 #endif // BIGMEM
 #else
-#define VAL1		aligned_alloc(4, 1)
-#define VALN(n)		aligned_alloc(4, n)
+#define VAL1		aligned_alloc(VMALIGN, 1)
+#define VALN(n)		aligned_alloc(VMALIGN, n)
 #define rfetch(n)	(n)
 #define wfetch(n)	(n)
 #define rlimit(n)	(n+1)
@@ -179,7 +177,7 @@ GLOBL VMTAB	vmtab[VMCNT] IZ;	/* in core headers		*/
 	/* Parameters */
 
 #define	IISIZ	  30		/* size of parse stack in frames	*/
-#define	INSIZ	4096		/* size of input stack in bytes		*/
+#define	INSIZ	(BUFSIZ*2)	/* size of input stack in bytes		*/
 #define	LLERX	   6		/* max number of errors per line	*/
 #define	LLLOC	   4		/* length of location field in listing	*/
 #ifdef OLDSTYLE
@@ -479,7 +477,6 @@ OCTAB {			/* opcode table entry				*/
 	char	oc_arg;			/* highest formal # for macro	*/
 	char	oc_str[SYMSIZ];		/* opcode mnemonic string	*/
 };
-#define OCVAL(n)	(VMADR)(n)	/* ES: Make an oc_val from 'n' */
 
 OPERAND {		/* operand descriptor				*/
 	long	op_cls;			/* set of classes (bit vector)	*/
@@ -493,7 +490,7 @@ PSFRAME {		/* parse stack frame				*/
 	short	*ps_state;		/* parse state			*/
 	int	ps_sym;			/* lookahead symbol		*/
 	long	ps_val0;		/* usually subexpression value	*/
-	uns	ps_val1;		/* usually subexpr relocation	*/
+	VMADR	ps_val1;		/* usually subexpr relocation	*/
 	int	ps_flg;			/* flags			*/
 };
 
@@ -528,7 +525,6 @@ SYTAB {				/* symbol table entry			*/
 	char	sy_atr;			/* attributes of symbol		*/
 	char	sy_str[SYMSIZ];		/* symbol mnemonic string	*/
 };
-#define SYVAL(n)	(VMADR)(n)	/* ES: To make sy_val from long,int,etc. */
 
 NUMLAB {			/* numeric label entry			*/
 	VMADR	nm_lnk;			/* link to next entry		*/
@@ -553,8 +549,8 @@ XREF {			/* cross reference entry			*/
 	/* Global variable declarations.  First arrays then scalars	*/
 
 
-extern char	chclass[];		/* character classification table */
-extern CHENT	chtab[];		/* single-character token table */
+extern char	chclass[];		/* character classification table (in assy src) */
+extern CHENT	chtab[];		/* single-character token table (in assy src) */
 GLOBL char	date[12] IZ;		/* string containing date	*/
 GLOBL char	datstr[26] IZ;		/* string containing date and time */
 GLOBL GRP	grptab[8] IZ;		/* heads of group chains	*/
@@ -629,7 +625,7 @@ GLOBL char	*inclpath[16] IZ;	/* include paths		*/
 GLOBL short	inclev IZ;		/* included levels		*/
 GLOBL short	inclx IZ;		/* number of include paths	*/
 GLOBL INPUT	*infp IZ;		/* input frame pointer		*/
-GLOBL char	*insp IX((char *)instk); /* input stack pointer		*/
+GLOBL char	*insp IX((char*)(&instk[0])); /* input stack pointer		*/
 GLOBL VMADR	label IZ;		/* sytab pointer for statement label */
 GLOBL char	*labptr IZ;		/* pointer to label		*/
 GLOBL int	labtyp IZ;		/* label type STLAB or STNLAB	*/
@@ -717,7 +713,7 @@ GLOBL uns	uralong IZ;		/* long relocation action	*/
 GLOBL uns	uraword	IZ;		/* word relocation action	*/
 GLOBL char	upperonly IZ;		/* convert all to upper case	*/
 GLOBL char	verbose IZ;		/* some want it talky		*/
-GLOBL VMADR	virtop IX((VMADR)2);		/* first unused vm location	*/
+GLOBL VMADR	virtop IX((VMADR)4);		/* first unused vm location	*/
 #ifndef BIGMEM
 GLOBL int	vmfd IZ;		/* virtual memory file descriptor */
 GLOBL char	*vmr IZ;		/* vm read pointer		*/
