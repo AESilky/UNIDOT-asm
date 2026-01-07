@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+	{
+		"name": "uasz80 game.z80",
+		"type": "cppdbg",
+		"request": "launch",
+		"program": "${workspaceFolder}/uasz80/uasz80",
+		"args": ["game.z80"],
+		"miDebuggerPath": "/usr/bin/gdb",
+		"cwd": "${workspaceFolder}/uasz80",
+		"preLaunchTask": "make: all"
+	},
+	{
+		"name": "BAD SOURCE FILE",
+		"type": "cppdbg",
+		"request": "launch",
+		"program": "${workspaceFolder}/uasz80/uasz80",
+		"args": [
+			"NOFILE.z80"
+		],
+		"miDebuggerPath": "/usr/bin/gdb",
+		"cwd": "${workspaceFolder}/uasz80",
+		"preLaunchTask": "make: all"
+	}
+]
+}

@@ -272,6 +272,7 @@ xsbrk( size ) uns size; {
 	return sbrk(size);
 }
 
+#ifdef USEVM
 char *
 palloc( size ) uns size;{
 
@@ -315,6 +316,12 @@ palloc( size ) uns size;{
 #endif
 	return oldtop;
 }
+#else
+char* palloc(uns size) {
+	return ((char*)aligned_alloc(VMALIGN, size));
+}
+#endif // USEVM
+
 /*
  * pgcheck - Checks to see if a new listing page is needed, and starts one
  * if necessary.  Then updates the line counter in anticipation of a line

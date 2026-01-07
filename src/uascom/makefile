@@ -4,16 +4,18 @@
 
 SRC = uas.c uasdirec.c uasinit.c uasinput.c \
 	uaslook.c uasmac.c uasmisc.c uasout.c uasparse.c \
-	uastoken.c uasvm.c uasszy.c uasxref.c
+	uastoken.c uasvars.c uasvm.c uasszy.c uasxref.c
 
 OBJ = uas.o uasdirec.o uasinit.o uasinput.o \
 	uaslook.o uasmac.o uasmisc.o uasout.o uasparse.o \
-	uastoken.o uasvm.o uasszy.o uasxref.o
+	uastoken.o uasvars.o uasvm.o uasszy.o uasxref.o
 
 # LAX_CC - Define to ease warnings on GCC
 LAX_CC=-Wno-pointer-to-int-cast
+# DEBUG_CC - Define to add debug symbols to executable
+DEBUG_CC=-g
 # GCC on 64-bit Linux defines (ES)
-CFLAGS=$(LAX_CC) -DNOPD -DALIGN=4
+CFLAGS=$(LAX_CC) $(DEBUG_CC) -DNOPD -DALIGN=4
 #CFLAGS= -DNOPD -DBIGDEBUG -DDEBUG -DONECASE
 #CFLAGS= -DBIGMEM -DNOPD -DBIGDEBUG -DDEBUG -DONECASE
 

@@ -37,12 +37,11 @@
 static char rcsid[]=
 "@(#)$Header: uas.c,v 6.33 90/08/16 10:21:32 rmm Rel $ uas main routine";
 
-#define VARS			/* variables declared in this module */
-/* if there is to be no bss section, insert #define NOBSS here */
 #include <signal.h>
 #include <string.h>
 
 #include "uas.h"
+
 #ifdef vms
 #include "[-.incl]uobj.h"
 #include "[-.incl]urel.h"
@@ -382,7 +381,7 @@ void assign( typ, val, rel ) uns typ; long val; uns rel;{
 			error("36 The label is in use as a section name");
 		if( pass2 && !(syp->sy_atr & SADP2) ){
 			syp->sy_atr |= SADP2;
-			syp->sy_val = SYVAL(val);
+			syp->sy_val = LONG2VMA(val);
 			syp->sy_rel = rel;
 		}
 		return;
@@ -403,10 +402,10 @@ void assign( typ, val, rel ) uns typ; long val; uns rel;{
 	}
 	if( syp->sy_rel == URBUND || syp->sy_typ == STVAR ){
 		/* assign a value */
-		syp->sy_val = SYVAL(val);
+		syp->sy_val = LONG2VMA(val);
 		syp->sy_rel = rel;
 	} else
-	if( syp->sy_val != SYVAL(val) ){
+	if( syp->sy_val != LONG2VMA(val) ){
 printf("pass1 value = %lx, pass2 value = %lx\n",syp->sy_val,val);
 		error( "03 Phase error in assembler: %lx",syp->sy_val);
 		return;

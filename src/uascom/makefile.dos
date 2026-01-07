@@ -1,0 +1,47 @@
+
+#$A -DNOPD -DBIGDEBUG -DDEBUG -DONECASE -DVMDEB
+$A -DNOPD -DONECASE
+$C ucc -c
+
+all: uas.obj uasdirec.obj uasinit.obj uasinput.obj uaslook.obj \
+	uasmac.obj uasout.obj \
+	uasmisc.obj uasparse.obj uastoken.obj uasvm.obj uasxref.obj uasszy.obj
+
+uas.obj: uas.c uas.h
+	$C $A uas.c
+
+uasdirec.obj: uasdirec.c uas.h
+	$C $A uasdirec.c
+
+uasinit.obj: uasinit.c uas.h
+	$C $A uasinit.c 
+
+uasinput.obj: uasinput.c uas.h
+	$C $A uasinput.c 
+
+uaslook.obj: uaslook.c uas.h
+	$C $A uaslook.c 
+
+uasmac.obj: uasmac.c uas.h
+	$C $A uasmac.c 
+
+uasmisc.obj: uasmisc.c uas.h
+	$C $A uasmisc.c 
+
+uasout.obj: uasout.c uas.h
+	$C $A uasout.c 
+
+uasparse.obj: uasparse.c uas.h
+	$C $A uasparse.c 
+
+uastoken.obj: uastoken.c uas.h
+	$C $A uastoken.c 
+
+uasvm.obj: uasvm.c uas.h
+	$C $A uasvm.c 
+
+uasxref.obj: uasxref.c        uas.h
+	$C $A uasxref.c 
+
+uasszy.obj: uasszy.c        uas.h
+	$C $A uasszy.c 

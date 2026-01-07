@@ -2,10 +2,12 @@
 
 #@(#)$Header: Makefile,v 4.2 88/10/09 15:56:19 rmm Rel $ makefile for ulink
 
-# LAX_CC - Define to ease warnings and errors back to K&R C
-#LAX_CC=-Wno-implicit-int
+# LAX_CC - Define to ease warnings on GCC
+LAX_CC=-Wno-pointer-to-int-cast
+# DEBUG_CC - Define to add debug symbols to executable
+DEBUG_CC=-g
 # GCC on 64-bit Linux defines (ES)
-CFLAGS=$(LAX_CC) -DNOPD -DALIGN=4
+CFLAGS=$(LAX_CC) $(DEBUG_CC) -DNOPD -DALIGN=4
 # pdp-11 defines
 #CFLAGS= -DDEBUG
 # 3b2 defines

@@ -1,0 +1,22 @@
+# makefile for the common part of the uas system
+
+# @(#)$Header: Makemec,v 1.1 88/04/08 11:35:01 rmm Exp $ make for uas common part with .using
+
+SRC = uas.c uasdirec.c uasinit.c uasinput.c \
+	uaslook.c uasmac.c uasmisc.c uasout.c uasparse.c \
+	uastoken.c uasvm.c uasszy.c uasxref.c
+
+OBJ = uas.o uasdirec.o uasinit.o uasinput.o \
+	uaslook.o uasmac.o uasmisc.o uasout.o uasparse.o \
+	uastoken.o uasvm.o uasszy.o uasxref.o
+
+CFLAGS= -DBIGMEM -DNOPD -DBIGDEBUG -DDEBUG -DONECASE -DMEC
+
+CC = cc
+
+all:	$(OBJ)
+
+$(OBJ):	uas.h ../incl/uobj.h
+
+uas.o:	../incl/urel.h
+

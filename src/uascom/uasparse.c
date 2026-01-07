@@ -209,7 +209,7 @@ xsem01( sem ) int sem; {
 		break;
 
 	case 2:		/* <expr1> ::= addop <expr1> */
-		if( pl->ps_val1 == TVADD ){ /* unary plus */
+		if( VMA2INT(pl->ps_val1) == TVADD ){ /* unary plus */
 			pl->ps_val0 = p->ps_val0;
 			pl->ps_val1 = p->ps_val1;
 		} else {				/* unary minus */
@@ -235,7 +235,7 @@ xsem01( sem ) int sem; {
 
 	case 5:		/* <expr2> ::= <expr2> mulop <expr1> */
 		if( rel2check(pl,p) ) goto relerr;
-		switch( p[1].ps_val1 ){
+		switch( VMA2INT(p[1].ps_val1) ){
 		case TVMUL: pl->ps_val0 *= p->ps_val0; break;
 		case TVDIV: if( p->ps_val0 == 0 ){
 				error2("44 Divide by zero");
@@ -271,7 +271,7 @@ xsem01( sem ) int sem; {
 		break;
 
 	case 6:		/* <expr3> ::= <expr3> addop <expr2> */
-		if( p[1].ps_val1 == TVADD ){		/* addition */
+		if( VMA2INT(p[1].ps_val1) == TVADD ){		/* addition */
 			if( pl->ps_val1 && p->ps_val1 && rel1check(p) )
 				rel1check( pl );
 			if( pl->ps_val1 && p->ps_val1 ){
@@ -279,7 +279,7 @@ xsem01( sem ) int sem; {
 				goto errex;
 			}
 			pl->ps_val0 += p->ps_val0;
-			pl->ps_val1 += p->ps_val1;
+			pl->ps_val1 = ULONG2VMA(VMA2ULONG(pl->ps_val1) + VMA2ULONG(p->ps_val1));
 		} else {				/* subtraction */
 			if( p->ps_val1 ) rel1check( p );
 			if( pl->ps_val1 != p->ps_val1 ) rel1check( pl );
@@ -307,7 +307,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 
 	case 9:		/* <expr4> ::= <expr3> relop <expr3> */
 		rel2check(pl,p);	/* kill dummy sections only */
-		switch( p[1].ps_val1 ){
+		switch( VMA2INT(p[1].ps_val1) ){
 		case TVEQ: pl->ps_val0 = pl->ps_val1 == p->ps_val1 &&
 				      pl->ps_val0 == p->ps_val0;
 			   break;
@@ -316,7 +316,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 			   break;
 		default:   if( pl->ps_val1 != p->ps_val1 ) goto cmperr;
 		}
-		switch( p[1].ps_val1 ){
+		switch( VMA2INT(p[1].ps_val1) ){
 		case TVLT: pl->ps_val0 = pl->ps_val0 <  p->ps_val0; break;
 		case TVGT: pl->ps_val0 = pl->ps_val0 >  p->ps_val0; break;
 		case TVLE: pl->ps_val0 = pl->ps_val0 <= p->ps_val0; break;
