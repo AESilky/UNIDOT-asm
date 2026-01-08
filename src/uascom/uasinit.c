@@ -535,6 +535,12 @@ preget( typ ) int typ;{
 }
 #endif
 
+void copymsg(f)FILE* f; {
+	fprintf(f, "UAS Macro Assembler Version 6.18 by Unidot Inc (c) Copyright 1982,1985,1987,1988\n");
+	fprintf(f, " Resurrected 2026, AESilky\n");
+}
+
+
 /*
  * usage - Issues a fatal error for an illegal command line.
  */
@@ -549,6 +555,7 @@ void usage(char* s, ...) {
 		fprintf(ERRFIL,"\n");
 		va_end(argptr);
 	}
+	copymsg(ERRFIL);
 	fprintf(ERRFIL, "Usage:  %s [options]... file\n", prname);
 	if( !strcmp(prname,"nrgpasm") || !strcmp(prname,"NRGPASM") )
 		fprintf(ERRFIL,"\t-a            absolute addressing\n");
