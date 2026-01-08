@@ -1,0 +1,1724 @@
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page   1
+
+ 1                       1 ;                                               GROUP # 4
+ 2                       2 ;                                       Lawrence M. McClure
+ 3                       3 ;                                       Bruce Turner
+ 4                       4 ;                                       David Hicks
+ 5                       5 ;
+ 6                       6 ;   TRS-80 "BASE ATTACK" video game
+ 7                       7 ;   THE START OF THIS PROGRAM IS 43FD MAIN:
+ 8                       8 
+ 9       2e7             9 VIDOUT  .EQU    02E7H
+10       8              10 INPUT   .EQU    0008H
+11       24             11 PORT1A  .EQU    24H
+12       25             12 PORT1B  .EQU    25H
+13       28             13 PORT2A  .EQU    28H
+14       29             14 PORT2B  .EQU    29H
+15                      15 
+16                      16 
+17                      17 
+18                      18 ;/*     HL MUST CONTAIN THE STRING ADDRESS    */
+19                      19 ;  PROCEDURE:  VIDSTRING  
+20                      20 ;  PURPOSE IN LIFE:  OUTPUT NULL TERMINATED STRING TO SCREEN
+21                      21 ;  GIVE IT: ADDRESS OF STRING IN HL
+22                      22 ;  GET BACK: NOTHING
+23                      23 ;  CHANGES DONE: HL, A, F
+24                      24 
+25  4300                25         .ORG 4300H
+26  4300                26 VIDSTRING:
+27  4300 cb3f           27         SRL     A       ; Debug
+28  4302 7e             28         LD      A,(HL)          ; get the first character
+29  4303 23             29         INC     HL
+30  4304 fe00           30         CP      00H             ; check for 0 byte
+31  4306 2805           31         JR      Z,VDONE         ; NO MORE LEFT QUIT
+32  4308 cde702         32         CALL    VIDOUT          ; OUTPUT CHARACTER
+33  430b 18f3           33         JR      VIDSTRING       ; continue
+34  430d c9             34 VDONE:  RET
+35                      35         
+36                      36         
+37                      37         
+38                      38 ;/*---------------------------------------------*/
+39                      39 ;/*     GCHAR(GET A CHARACTER FROM KEYBOARD)    */
+40                      40 ;/*INPUT:NOTHING                                */
+41                      41 ;/*OUTPUT:LOAD INTO A OF INPUT CHAR             */
+42                      42 ;/*CHANGES: A                                   */
+43                      43 
+44                      44 ;  PROCEDURE:  GCHAR  
+45                      45 ;  PURPOSE IN LIFE: GET A CHARACTER FROM KEYBOARD 
+46                      46 ;  GIVE IT: NOTHING
+47                      47 ;  GET BACK: CHARACTER IN REGISTER A
+48                      48 ;  CHANGES DONE: A, F
+49                      49 
+50  430e                50 GCHAR:  
+51  430e cd0800         51         CALL    INPUT           ;POLL UNTIL KEY INPUT
+52                      52 
+53  4311 28fb           53         JR      Z,GCHAR         ;
+54                      54 
+55  4313 c9             55         RET                     ;
+56  4314 00             56         NOP
+57                      57 ; POLL the keyboard for input return after delay if no input
+58  4315                58 POLL:   
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page   2
+
+ 1  4315 c5             59         PUSH    BC
+ 2  4316 3eff           60         LD      A,0FFH
+ 3  4318 fe00           61 PTOP:   CP      00H             ; ARE WE DONE?
+ 4  431a 280a           62         JR      Z,PDONE
+ 5  431c 3d             63         DEC     A
+ 6  431d f5             64         PUSH    AF
+ 7  431e cd0800         65         CALL    INPUT           ;POLL UNTIL KEY INPUT
+ 8  4321 2008           66         JR      NZ,PEXIT        ;
+ 9  4323 f1             67         POP     AF
+10  4324 18f2           68         JR      PTOP
+11                      69 
+12  4326 3eff           70 PDONE:  LD      A,0FFH          ; NO KEY HIT
+13  4328 00             71         NOP
+14  4329 c1             72         POP     BC
+15  432a c9             73         RET
+16  432b                74 PEXIT:
+17  432b c1             75         POP     BC
+18  432c c1             76         POP     BC
+19  432d c9             77         RET                     ;
+20                      78 
+21  432e 00             79         NOP
+22                      80 ;       EXPLODE THE BASE STATION
+23  432f                81 EXPBASE:
+24  432f cddd43         82         CALL    BASESET
+25                      83 
+26  4332 213b52         84         LD      HL,EXPBASE1     ; BLOW UP BASE
+27  4335 22224a         85         LD      (BASEADDR),HL
+28  4338 cd3148         86         CALL    DRAWBASE
+29  433b cde443         87         CALL    BASENOISE
+30  433e 216e52         88         LD      HL,EXPBASE2     ; BLOW UP BASE
+31  4341 22224a         89         LD      (BASEADDR),HL
+32  4344 cd3148         90         CALL    DRAWBASE
+33  4347 cde443         91         CALL    BASENOISE
+34  434a 21a152         92         LD      HL,EXPBASE3     ; BLOW UP BASE
+35  434d 22224a         93         LD      (BASEADDR),HL
+36  4350 cd3148         94         CALL    DRAWBASE
+37  4353 cde443         95         CALL    BASENOISE
+38  4356 21d452         96         LD      HL,EXPBASE4     ; BLOW UP BASE
+39  4359 22224a         97         LD      (BASEADDR),HL
+40  435c cd3148         98         CALL    DRAWBASE
+41  435f c9             99         RET
+42                     100 ;DRAW THE END BASE STATION
+43  4360               101 THEEND:
+44  4360 210753        102         LD      HL,TEND         ; LOAD IN MESSAGE THE END
+45  4363 22224a        103         LD      (BASEADDR),HL
+46  4366 21010c        104         LD      HL,0C01H        ; LOAD IN MESSAGE POSITION 
+47  4369 22204a        105         LD      (BASEPOS),HL
+48  436c cd3148        106         CALL    DRAWBASE
+49  436f c9            107         RET
+50                     108 
+51                     109 ; SET UP THE SOUND GENERATOR CHIP 
+52                     110 
+53  4370               111 SETUP:
+54  4370 3e0f          112         LD      A,0FH           ; set up ports
+55  4372 d326          113         OUT     (26H),A
+56  4374 d327          114         OUT     (27H),A
+57  4376 3e4f          115         LD      A,4FH
+58  4378 d32b          116         OUT     (2BH),A
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page   3
+
+ 1  437a 3e00          117         LD      A,00H
+ 2  437c d324          118         OUT     (24H),A
+ 3  437e               119 CLEAR:
+ 4  437e 3e9f          120         LD      A,9FH   
+ 5  4380 cd9343        121         CALL    ENTER
+ 6  4383 3ebf          122         LD      A,0BFH
+ 7  4385 cd9343        123         CALL    ENTER
+ 8  4388 3edf          124         LD      A,0DFH
+ 9  438a cd9343        125         CALL    ENTER
+10  438d 3eff          126         LD      A,0FFH
+11  438f cd9343        127         CALL    ENTER
+12  4392 c9            128         RET
+13                     129 
+14  4393               130 ENTER:
+15  4393 f5            131         PUSH    AF
+16  4394 c5            132         PUSH    BC
+17  4395 d325          133         OUT     (25H),A
+18  4397 3e01          134         LD      A,01H
+19  4399 d324          135         OUT     (24H),A
+20  439b 0620          136         LD      B,020H
+21  439d               137 EW1:    
+22  439d 05            138         DEC     B
+23  439e db29          139         IN      A,(29H)
+24  43a0 cb47          140         BIT     0,A
+25  43a2 2003          141         JR      NZ,ENDONE
+26  43a4 b0            142         OR      B
+27  43a5 20f6          143         JR      NZ,EW1
+28  43a7               144 ENDONE:
+29  43a7 3e00          145         LD      A,00H
+30  43a9 d324          146         OUT     (24H),A
+31  43ab c1            147         POP     BC
+32  43ac f1            148         POP     AF
+33  43ad c9            149         RET
+34                     150 
+35                     151 ; DO THE EXPLOSION NOISE
+36                     152         
+37  43ae               153 EXPNOISE:
+38  43ae d9            154         EXX                             ; save all registers
+39  43af 57            155         LD      D,A                     ; SAVE START OF LOOP
+40  43b0 3a064a        156         LD      A,(EXPCT)               ;
+41  43b3 fe00          157 ELP1:   CP      00H
+42  43b5 2823          158         JR      Z,EEXT
+43  43b7 3d            159         DEC     A                       ; ONE DOWN
+44  43b8 f5            160         PUSH    AF
+45  43b9 7a            161         LD      A,D                     ; GET LOOP VALUE
+46  43ba fe00          162         CP      00H                     ; ARE WE DONE?
+47  43bc 2003          163         JR      NZ,ELP2
+48  43be f1            164         POP     AF
+49  43bf 1816          165         JR      EDONE
+50  43c1 14            166 ELP2:   INC     D
+51  43c2 cd9343        167         CALL    ENTER
+52                     168 
+53  43c5 f5            169         PUSH    AF
+54  43c6 3eff          170         LD      A,0FFH                  ; DO ABOUT 255 TIMES
+55  43c8 fe00          171 ELP3:   CP      00H                     ; ARE WE DONE YET?
+56  43ca 2807          172         JR      Z,ELP4
+57  43cc 3d            173         DEC     A
+58  43cd 00            174         NOP
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page   4
+
+ 1  43ce 00            175         NOP
+ 2  43cf 00            176         NOP
+ 3  43d0 00            177         NOP
+ 4  43d1 18f5          178         JR      ELP3
+ 5                     179 
+ 6  43d3               180 ELP4:
+ 7  43d3 f1            181         POP     AF
+ 8  43d4 f1            182         POP     AF
+ 9  43d5 18dc          183         JR      ELP1
+10  43d7               184 EDONE:
+11  43d7 cd7e43        185         CALL    CLEAR
+12  43da               186 EEXT:
+13  43da 7a            187         LD      A,D
+14  43db d9            188         EXX
+15  43dc c9            189         RET
+16                     190 ;
+17                     191 ; SET UP EXPLOSION FOR BASE STATION
+18                     192 
+19  43dd               193 BASESET:
+20  43dd c5            194         PUSH    BC
+21  43de d5            195         PUSH    DE
+22  43df e5            196         PUSH    HL
+23  43e0 cdab49        197         CALL    EXPSET
+24  43e3 c9            198         RET
+25                     199 
+26                     200 ; THE BASE EXPLOSION NOISE IS LOUDER AND LONGER SO DO IT
+27  43e4               201 BASENOISE:
+28  43e4 3a074a        202         LD      A,(EXPST)
+29  43e7 cdae43        203         CALL    EXPNOISE                        ; CALL NOISE
+30  43ea 32074a        204         LD      (EXPST),A
+31  43ed cd1543        205         CALL    POLL
+32  43f0 c9            206         RET
+33                     207 
+34                     208 
+35                     209 
+36                     210 ;/*-------------------------------------*/
+37                     211 ;/* GLOBAL PROCEDURES                   */
+38                     212 ;/* MAIN PROGRAM                        */
+39                     213 ;/* INPUT : KEYBOARD DIGITS             */
+40                     214 ;/* OUPUT : USER PROMPTS                */
+41                     215 ;/*                                     */
+42                     216 ;/* CHANGES : A, BC,                    */
+43                     217 ;/*           DE, HL                    */
+44                     218 ;/*           IY,                       */
+45                     219 ;/*                                     */
+46                     220 ;/*      SET UP SCREEN DISPLAY HEADINGS */
+47                     221 ;/*-------------------------------------*/
+48                     222 
+49                     223 ;  PROCEDURE:  MAIN  
+50                     224 ;  PURPOSE IN LIFE: GETS THE BALL ROLLING 
+51                     225 ;  GIVE IT: NOTHING
+52                     226 ;  GET BACK: EVERYTHING
+53                     227 ;  CHANGES DONE: ALL
+54                     228 
+55                     229 
+56  43fd               230         .ORG    43FDH
+57  43fd               231 MAIN:
+58  43fd cd7043        232         CALL SETUP
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page   5
+
+ 1  4400 3e0c          233         LD      A,0CH           ; string to clear screen
+ 2  4402 cde702        234         CALL    VIDOUT          ; output the string using vidout
+ 3                     235 
+ 4  4405 212b24        236         LD      HL,242BH                ; Initialize all variables and
+ 5  4408 22204a        237         LD      (BASEPOS),HL            ; positions of ships and there
+ 6  440b 21244a        238         LD      HL,BASE                 ; initial picture locations
+ 7  440e 22224a        239         LD      (BASEADDR),HL
+ 8                     240 
+ 9  4411 21004d        241         LD      HL,STARTBOMB
+10  4414 22004c        242         LD      (BOMBPOS),HL
+11  4417 21044c        243         LD      HL,BOMB
+12  441a 22024c        244         LD      (BOMBADDR),HL
+13                     245 
+14  441d 21004f        246         LD      HL,STARTSHIP
+15  4420 22004e        247         LD      (SHIPPOS),HL
+16  4423 21044e        248         LD      HL,SHIP
+17  4426 22024e        249         LD      (SHIPADDR),HL
+18                     250         
+19  4429 212f24        251         LD      HL,242FH
+20  442c 22284b        252         LD      (TURRPOS),HL
+21  442f 21744b        253         LD      HL,TURRET
+22  4432 222a4b        254         LD      (TURRADDR),HL
+23  4435 3e04          255         LD      A,04H
+24  4437 32264b        256         LD      (TURRCNT),A
+25                     257 
+26  443a 21104b        258         LD      HL,PHASOR
+27  443d 22244b        259         LD      (PHASORADDR),HL
+28                     260 
+29  4440 3e00          261         LD      A,00H
+30  4442 320051        262         LD      (EXPBOMBT),A                    ; DO NOT BLOW UP SHIP
+31  4445 320151        263         LD      (EXPSHIPT),A                    ; DO NOT BLOW UP BOMB
+32  4448 320251        264         LD      (ENABLBOMB),A                   ; DO NOT DRAW BOMB
+33                     265 
+34  444b cd3148        266         CALL    DRAWBASE
+35                     267 
+36  444e               268 MLOOP:
+37  444e cd1543        269         CALL    POLL            ; get a number from the screen
+38                     270         
+39  4451 fe39          271         CP      39H             ; IS IT A '9'
+40  4453 284d          272         JR      Z,MEXIT         ; YES SO EXIT
+41  4455 feff          273         CP      0FFH            
+42  4457 281b          274         JR      Z,MNEXT         ; CONTINUE IF WE DIDN't GET A CHARACTER
+43                     275 
+44  4459 fe41          276         CP      41H             ; IS IT AN 'A'? YES THEN MOVE TURRET LEFT
+45  445b 2005          277         JR      NZ,MLOOP1
+46  445d cd3149        278         CALL    TURRLEFT
+47  4460 1812          279         JR      MNEXT
+48  4462               280 MLOOP1:
+49  4462 fe47          281         CP      47H             ; IS IT AN 'G'? YES THEN MOVE TURRET RIGHT
+50  4464 2005          282         JR      NZ,MLOOP2
+51  4466 cd0049        283         CALL    TURRRIGHT
+52  4469 1809          284         JR      MNEXT
+53  446b               285 MLOOP2:
+54  446b fe20          286         CP      20H             ; IS IT AN ' '? YES THEN FIRE PHASORS
+55  446d 2005          287         JR      NZ,MLOOP3
+56  446f cd5c49        288         CALL    FIREPHAS
+57  4472 1800          289         JR      MNEXT
+58  4474               290 MLOOP3:
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page   6
+
+ 1  4474               291 MNEXT:
+ 2  4474 3a0151        292         LD      A,(EXPSHIPT)
+ 3  4477 fe00          293         CP      00H
+ 4  4479 2805          294         JR      Z,MDOSHIP
+ 5  447b cd2047        295         CALL    ESHIP                   ; EXPLODE SHIP
+ 6  447e 1803          296         JR      MNEXT1
+ 7  4480               297 MDOSHIP:
+ 8  4480 cd5048        298         CALL    DRAWSHIP
+ 9  4483               299 MNEXT1:
+10  4483 3a0051        300         LD      A,(EXPBOMBT)
+11  4486 fe00          301         CP      00H
+12  4488 2805          302         JR      Z,MDOBOMB
+13  448a cd5147        303         CALL    EBOMB                   ; EXPLODE BOMB
+14  448d 18bf          304         JR      MLOOP
+15  448f               305 MDOBOMB:
+16  448f cd9b48        306         CALL    DRAWBOMB
+17  4492 feff          307         CP      0FFH
+18  4494 20b8          308         JR      NZ,MLOOP
+19  4496 cd2f43        309         CALL    EXPBASE                 ; EXPLODE BASE
+20  4499 cd6043        310         CALL    THEEND
+21  449c cd9047        311         CALL    CHIME                   ; EITHER CALL LOCAL CHIME OR
+22  449f cd7e43        312         CALL    CLEAR                   ; THE FINAL CHIME DESCRIBED AT END
+23                     313                                         ; OF REPORT
+24  44a2 df            314 MEXIT:  RST     18H             ; EXIT
+25                     315 
+26                     316 ;
+27                     317 ;       PHASOR NOISE ROUTINE DOES INCREMENTALLY MORE OF THE NOISE EVERY
+28                     318 ;       TIME THAT IT IS CALLED
+29                     319 
+30  44a3               320 PNOISE:
+31  44a3 08            321         EX      AF,AF'
+32  44a4 d9            322         EXX                             ; save all registers
+33  44a5 3a044a        323         LD      A,(FLAG)                ; ARE WE IN ERASE?
+34  44a8 fe00          324         CP      00H
+35  44aa 2027          325         JR      NZ,PEXT                 ; 
+36  44ac 3a054a        326         LD      A,(ZAP)                 ;
+37  44af cb67          327         BIT     4,A                     ; DONE YET?
+38  44b1 2020          328         JR      NZ,PEXT
+39  44b3 57            329         LD      D,A
+40  44b4 3c            330         INC     A
+41  44b5 32054a        331         LD      (ZAP),A
+42  44b8 3e00          332         LD      A,00H   
+43  44ba 0ec0          333         LD      C,0C0H                  ; START NOISE
+44  44bc cb67          334 PLP1:   BIT     4,A                     ; ARE WE DONE?
+45  44be 200d          335         JR      NZ,PNDONE
+46  44c0 f5            336         PUSH    AF
+47  44c1 81            337         ADD     A,C                     ; A = C0 to CF
+48  44c2 cd9343        338         CALL    ENTER
+49  44c5 7a            339         LD      A,D
+50  44c6 cd9343        340         CALL    ENTER
+51  44c9 f1            341         POP     AF
+52  44ca 3c            342         INC     A
+53  44cb 18ef          343         JR      PLP1
+54  44cd               344 PNDONE:
+55  44cd 7a            345         LD      A,D
+56  44ce c6f0          346         ADD     A,0F0H                  ; FINAL
+57  44d0 cd9343        347         CALL    ENTER
+58  44d3               348 PEXT:
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page   7
+
+ 1  44d3 d9            349         EXX
+ 2  44d4 08            350         EX      AF,AF'
+ 3  44d5 c9            351         RET
+ 4                     352 
+ 5                     353 
+ 6                     354 
+ 7                     355 
+ 8                     356 ;
+ 9                     357 ;       INPUT X2 in B, Y2 in C, X1 in D, Y1 in E
+10                     358 ;       Draw a vector from X1,Y1 to X2,Y2
+11  4500               359         .ORG    4500H
+12  4500               360 LINE:
+13  4500 c5            361         PUSH    BC
+14  4501 d5            362         PUSH    DE
+15  4502 e5            363         PUSH    HL
+16                     364 
+17  4503 e600          365         AND     00H
+18  4505 78            366         LD      A,B                     ; A = X2
+19  4506 9a            367         SBC     A,D                     ; A = X2 - X1
+20  4507 67            368         LD      H,A                     ; H = XDEL = X2 - X1
+21                     369 
+22  4508 3e01          370         LD      A,1
+23  450a 32014a        371         LD      (XINC),A
+24  450d 32004a        372         LD      (YINC),A
+25                     373 
+26  4510 e600          374         AND     00H
+27  4512 79            375         LD      A,C                     ; A = X2
+28  4513 9b            376         SBC     A,E                     ; A = X2 - X1
+29  4514 6f            377         LD      L,A                     ; L = YDEL = Y2 - Y1
+30                     378 
+31  4515 cb7f          379         BIT     7,A                     ; CHECK SEE IF YDEL < 0
+32  4517 2809          380         JR      Z,L1                    ; NEGATIVE CONTINUE
+33  4519 3d            381         DEC     A                       ; SUBTRACT ONE
+34  451a eeff          382         XOR     0FFH                    ; Take the Complement of A
+35  451c 6f            383         LD      L,A
+36  451d 3eff          384         LD      A,0FFH                  ; NEGATIVE ONE
+37  451f 32004a        385         LD      (YINC),A
+38                     386 
+39  4522 7c            387 L1:     LD      A,H                     ; A = XDEL
+40  4523 cb7f          388         BIT     7,A                     ; CHECK SEE IF XDEL < 0
+41  4525 2809          389         JR      Z,L2                    ; NEGATIVE CONTINUE
+42  4527 3d            390         DEC     A                       ; SUBTRACT ONE
+43  4528 eeff          391         XOR     0FFH                    ; Take the Complement of A
+44  452a 67            392         LD      H,A
+45  452b 3eff          393         LD      A,0FFH                  ; NEGATIVE ONE
+46  452d 32014a        394         LD      (XINC),A
+47  4530               395 L2:
+48  4530 e600          396         AND     00H
+49  4532 7c            397         LD      A,H
+50  4533 9d            398         SBC     A,L                     ; A = XDEL - YDEL
+51  4534 cb7f          399         BIT     7,A                     ; CHECK TO SEE IF NEGATIVE
+52  4536 2049          400         JR      NZ,LUND                 ; DOWN QUADRANT
+53                     401                                         ; ELSE UP QUADRANT
+54  4538 3e00          402         LD      A,00H                   ; CLEAR OUT A
+55  453a 32034a        403         LD      (XA),A                  ; XA = 0
+56  453d 7c            404         LD      A,H                     ; A = XDEL >> 1
+57  453e cb2f          405         SRA     A                       ;
+58  4540 32024a        406         LD      (YA),A                  ; YA = XDEL >> 1
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page   8
+
+ 1  4543               407 LUP:
+ 2  4543 3a024a        408         LD      A,(YA)
+ 3  4546 4f            409         LD      C,A
+ 4  4547 e600          410         AND     00H
+ 5  4549 3a034a        411         LD      A,(XA)
+ 6  454c 99            412         SBC     A,C                     ; A = XA - YA
+ 7  454d cb7f          413         BIT     7,A                     ; IF(XA >= YA)then                      
+ 8  454f 2013          414         JR      NZ,LU1                  ; ELSE JUMP
+ 9  4551 3a004a        415         LD      A,(YINC)
+10  4554 83            416         ADD     A,E                     ; INCREMENT Y1 += yinc
+11  4555 cb47          417         BIT     0,A                     ; CHECK TO SEE IF EVEN
+12  4557 2003          418         JR      NZ,LCNT
+13  4559 cda344        419         CALL    PNOISE                  ; CALL PHASER NOISE
+14  455c               420 LCNT:
+15  455c 5f            421         LD      E,A
+16  455d 3a024a        422         LD      A,(YA)
+17  4560 84            423         ADD     A,H                     ; YA += XDEL
+18  4561 32024a        424         LD      (YA),A
+19                     425 
+20  4564 3a034a        426 LU1:    LD      A,(XA)
+21  4567 85            427         ADD     A,L                     ; XA += YDEL
+22  4568 32034a        428         LD      (XA),A
+23  456b 3a014a        429         LD      A,(XINC)
+24  456e 82            430         ADD     A,D
+25  456f 57            431         LD      D,A                     ; X1 += xinc
+26  4570 3a044a        432         LD      A,(FLAG)
+27  4573 cb47          433         BIT     0,A                     ; CHECK SEE IF FLAG IS ON
+28  4575 c46046        434         CALL    NZ,DOTOFF
+29  4578 cc0046        435         CALL    Z,DOT
+30  457b 7a            436         LD      A,D
+31  457c b8            437         CP      B                       ; IF(X1 == X2) QUIT
+32  457d 2849          438         JR      Z,LEXT
+33  457f 18c2          439         JR      LUP
+34                     440         
+35  4581               441 LUND:
+36  4581 3e00          442         LD      A,00H                   ; CLEAR OUT A
+37  4583 32024a        443         LD      (YA),A                  ; YA = 0
+38  4586 7d            444         LD      A,L                     ; A = YDEL >> 1
+39  4587 cb2f          445         SRA     A                       ;
+40  4589 32034a        446         LD      (XA),A                  ; YA = YDEL >> 1
+41  458c               447 LUNDT:
+42  458c 3a034a        448         LD      A,(XA)
+43  458f 47            449         LD      B,A
+44  4590 e600          450         AND     00H
+45  4592 3a024a        451         LD      A,(YA)
+46  4595 98            452         SBC     A,B                     ; A = YA - XA
+47  4596 cb7f          453         BIT     7,A                     ; IF(YA >= XA)then                      
+48  4598 200c          454         JR      NZ,LUN1                 ; ELSE JUMP
+49  459a 3a014a        455         LD      A,(XINC)
+50  459d 82            456         ADD     A,D                     ; INCREMENT X1 += xinc
+51  459e 57            457         LD      D,A
+52  459f 3a034a        458         LD      A,(XA)
+53  45a2 85            459         ADD     A,L                     ; XA += YDEL
+54  45a3 32034a        460         LD      (XA),A
+55                     461 
+56  45a6 3a024a        462 LUN1:   LD      A,(YA)
+57  45a9 84            463         ADD     A,H                     ; YA += XDEL
+58  45aa 32024a        464         LD      (YA),A
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page   9
+
+ 1  45ad 3a004a        465         LD      A,(YINC)
+ 2  45b0 83            466         ADD     A,E
+ 3  45b1 cb47          467         BIT     0,A                     ; CHECK TO SEE IF EVEN
+ 4  45b3 2003          468         JR      NZ,LNCNT
+ 5  45b5 cda344        469         CALL    PNOISE                  ; CALL PHASER NOISE
+ 6  45b8               470 LNCNT:
+ 7  45b8 5f            471         LD      E,A                     ; Y1 += yinc
+ 8  45b9 3a044a        472         LD      A,(FLAG)
+ 9  45bc cb47          473         BIT     0,A                     ; CHECK SEE IF FLAG IS ON
+10  45be c46046        474         CALL    NZ,DOTOFF
+11  45c1 cc0046        475         CALL    Z,DOT
+12  45c4 7b            476         LD      A,E
+13  45c5 b9            477         CP      C                       ; IF(Y1 == Y2) QUIT
+14  45c6 20c4          478         JR      NZ,LUNDT
+15                     479         
+16  45c8               480 LEXT:
+17  45c8 e1            481         POP     HL
+18  45c9 d1            482         POP     DE
+19  45ca c1            483         POP     BC
+20  45cb c9            484         RET
+21                     485 ; *
+22                     486 ; *    This is  a dot plotting routine for the 
+23                     487 ; *    trs-80 minicomputer grapics screen.
+24                     488 ; *
+25                     489 ; *    Pass x, y coordinate in D, E pair
+26                     490 ; *
+27  4600               491         .ORG    4600H
+28  4600               492 DOT:
+29  4600 d5            493         PUSH    DE
+30  4601 d9            494         EXX                             ; save all registers
+31  4602 d1            495         POP     DE
+32                     496 
+33  4603 fd213050      497         LD      IY, YDIV3               ; intialize Y/ 3 table
+34  4607 7b            498         LD      A,E
+35  4608 cb27          499         SLA     A
+36  460a 321346        500         LD      (OFF+2),a
+37  460d 3c            501         INC     A
+38  460e 321646        502         LD      (OFF2+2),a
+39                     503 
+40  4611 fd6e00        504 OFF:    LD      L,(IY+0)                ; load in HL = Y/3 * 64 + 3C00H
+41  4614 fd6600        505 OFF2:   LD      H,(IY+0)                ; 
+42                     506 
+43  4617 4a            507         LD      C,D
+44  4618 cb29          508         SRA     C                       ; BC = X/2
+45  461a 0600          509         LD      B,00H
+46  461c 09            510         ADD     HL,BC                   ; Add in the X PART;
+47                     511                                         ; HL now contains the screen byte to 
+48                     512                                         ; manipulate
+49  461d fd210050      513         LD      IY, YMOD3               ; intialize Y % 3 table
+50  4621 7b            514         LD      A,E
+51  4622 322746        515         LD      (OFF3+2),A
+52  4625 fd4600        516 OFF3:   LD      B,(IY+0)                ; load in B = Y%3 
+53  4628 7a            517         LD      A,D
+54  4629 e601          518         AND     01H                     ; A = X % 2
+55  462b 80            519         ADD     A,B                     ; A now Contains the bit to SET
+56  462c cb27          520         SLA     A                       ; SHIFT LEFT  So that we can create
+57  462e cb27          521         SLA     A                       ; SHIFT LEFT  a SET instruction
+58  4630 cb27          522         SLA     A                       ; SHIFT LEFT 
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  10
+
+ 1  4632 47            523         LD      B,A                     ; SAVE A VALUE
+ 2  4633 f6c6          524         OR      0C6H                    ; Make a SET ?,A instruction
+ 3  4635 324e46        525         LD      (SETB+1),A
+ 4  4638 78            526         LD      A,B
+ 5  4639 f646          527         OR      046H                    ; Make a TST ?,A instruction
+ 6  463b 324546        528         LD      (TSTB+1),A
+ 7  463e cb7e          529         BIT     7,(HL)
+ 8  4640 2002          530         JR      NZ,TSTB
+ 9  4642 3680          531         LD      (HL),80H
+10  4644 cb46          532 TSTB:   BIT     0,(HL)                  ; TEST BIT TO SET
+11  4646 2805          533         JR      Z,SETB                  ; NOT ALREADY SET SO SET IT
+12  4648 d9            534         EXX                             ; ***HIT FOUND
+13  4649 c1            535         POP     BC                      ; REMOVE RETURN ADDRESS
+14  464a c39949        536         JP      EXPLODE                 ; ***JUMP TO EXPLODE NOT LINE
+15                     537                                         ; *** GET READY FOR EXPLODE
+16                     538             
+17  464d cbc6          539 SETB:   SET     0,(HL)                  ; SET proper bit in screen byte
+18  464f d9            540         EXX                             ; RESTORE VALUES
+19  4650 c9            541         RET                             ; RETURN
+20                     542 
+21  4660               543         .ORG    4660H
+22                     544 ;
+23                     545 ; THIS ROUTINE TURNS DOTS x,y OFF OTHERWISE IT IS THE SAME AS DOT
+24  4660               546 DOTOFF:
+25  4660 d5            547         PUSH    DE
+26  4661 d9            548         EXX                             ; save all registers
+27  4662 d1            549         POP     DE
+28                     550 
+29  4663 fd213050      551         LD      IY, YDIV3               ; intialize Y/ 3 table
+30  4667 7b            552         LD      A,E
+31  4668 cb27          553         SLA     A
+32  466a 327346        554         LD      (OFFO+2),a
+33  466d 3c            555         INC     A
+34  466e 327646        556         LD      (OFF2O+2),a
+35                     557 
+36  4671 fd6e00        558 OFFO:   LD      L,(IY+0)                ; load in HL = Y/3 * 64 + 3C00H
+37  4674 fd6600        559 OFF2O:  LD      H,(IY+0)                ; 
+38                     560 
+39  4677 4a            561         LD      C,D
+40  4678 cb29          562         SRA     C                       ; BC = X/2
+41  467a 0600          563         LD      B,00H
+42  467c 09            564         ADD     HL,BC                   ; Add in the X PART;
+43                     565                                         ; HL now contains the screen byte to 
+44                     566                                         ; manipulate
+45  467d fd210050      567         LD      IY, YMOD3               ; intialize Y % 3 table
+46  4681 7b            568         LD      A,E
+47  4682 328746        569         LD      (OFF3O+2),A
+48  4685 fd4600        570 OFF3O:  LD      B,(IY+0)                ; load in B = Y%3 
+49  4688 7a            571         LD      A,D
+50  4689 e601          572         AND     01H                     ; A = X % 2
+51  468b 80            573         ADD     A,B                     ; A now Contains the bit to SET
+52  468c cb27          574         SLA     A                       ; SHIFT LEFT  So that we can create
+53  468e cb27          575         SLA     A                       ; SHIFT LEFT  a SET instruction
+54  4690 cb27          576         SLA     A                       ; SHIFT LEFT 
+55  4692 f686          577         OR      086H                    ; Make a SET ?,A instruction
+56  4694 329e46        578         LD      (SETBO+1),A
+57  4697 cb7e          579         BIT     7,(HL)
+58  4699 2002          580         JR      NZ,SETBO
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  11
+
+ 1  469b 3680          581         LD      (HL),80H
+ 2  469d cb86          582 SETBO:  RES     0,(HL)                  ; SET proper bit in screen byte
+ 3  469f d9            583         EXX                             ; RESTORE VALUES
+ 4  46a0 c9            584         RET                             ; RETURN
+ 5  46a1               585 BLOWBAS:
+ 6  46a1 3e03          586         LD      A,03H                   ; INCREMENTS OF NOISE
+ 7  46a3 32064a        587         LD      (EXPCT),A
+ 8  46a6 3ef0          588         LD      A,0F0H                  ; START OF LOOP OF NOISE
+ 9  46a8 32074a        589         LD      (EXPST),A
+10  46ab cd7e43        590         CALL    CLEAR                   ; CLEAR OUT NOISE
+11  46ae 3ef4          591         LD      A,0F4H                  ; SET UP BOMB NOISE
+12  46b0 cd9343        592         CALL    ENTER
+13                     593 
+14  46b3 213b52        594         LD      HL,EXPBASE1     ; BLOW UP BASE
+15  46b6 22224a        595         LD      (BASEADDR),HL
+16  46b9 cd3148        596         CALL    DRAWBASE
+17  46bc cde443        597         CALL    BASENOISE
+18  46bf cd1543        598         CALL    POLL
+19  46c2 216e52        599         LD      HL,EXPBASE2     ; BLOW UP BASE
+20  46c5 22224a        600         LD      (BASEADDR),HL
+21  46c8 cd3148        601         CALL    DRAWBASE
+22  46cb cde443        602         CALL    BASENOISE
+23  46ce cd1543        603         CALL    POLL
+24  46d1 21a152        604         LD      HL,EXPBASE3     ; BLOW UP BASE
+25  46d4 22224a        605         LD      (BASEADDR),HL
+26  46d7 cd3148        606         CALL    DRAWBASE
+27  46da cde443        607         CALL    BASENOISE
+28  46dd cd1543        608         CALL    POLL
+29  46e0 21d452        609         LD      HL,EXPBASE4     ; BLOW UP BASE
+30  46e3 22224a        610         LD      (BASEADDR),HL
+31  46e6 cd3148        611         CALL    DRAWBASE
+32  46e9 cde443        612         CALL    BASENOISE
+33  46ec cd1543        613         CALL    POLL
+34  46ef 21d452        614         LD      HL,EXPBASE4     ; BLOW UP BASE
+35  46f2 22224a        615         LD      (BASEADDR),HL
+36  46f5 cd3148        616         CALL    DRAWBASE
+37  46f8 cde443        617         CALL    BASENOISE
+38  46fb cd1543        618         CALL    POLL
+39  46fe c9            619         RET
+40                     620 
+41                     621 
+42                     622 
+43  4700               623         .ORG    4700H
+44                     624 ;
+45                     625 ;       GET THE ADDRESS OF THE SCREEN WHERE X,Y IS LOCATED      
+46                     626 ;       D,E and RETURN IT IN HL
+47                     627 ;
+48  4700               628 LOC:
+49  4700 f5            629         PUSH    AF
+50  4701 c5            630         PUSH    BC
+51                     631 
+52  4702 fd213050      632         LD      IY, YDIV3               ; intialize Y/ 3 table
+53  4706 7b            633         LD      A,E
+54  4707 cb27          634         SLA     A
+55  4709 321247        635         LD      (LOFF+2),a
+56  470c 3c            636         INC     A
+57  470d 321547        637         LD      (LOFF2+2),a
+58                     638 
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  12
+
+ 1  4710 fd6e00        639 LOFF:   LD      L,(IY+0)                ; load in HL = Y/3 * 64 + 3C00H
+ 2  4713 fd6600        640 LOFF2:  LD      H,(IY+0)                ; 
+ 3                     641 
+ 4  4716 4a            642         LD      C,D
+ 5  4717 cb29          643         SRA     C                       ; BC = X/2
+ 6  4719 0600          644         LD      B,00H
+ 7  471b 09            645         ADD     HL,BC                   ; Add in the X PART;
+ 8                     646                                         ; HL now contains the screen byte to 
+ 9                     647                                         ; manipulate
+10  471c c1            648         POP     BC
+11  471d f1            649         POP     AF
+12  471e c9            650         RET
+13                     651 
+14  4720               652         .ORG 4720H
+15                     653 ;
+16                     654 ; DRAW THE EXPLODING SHIPS PICTURES
+17  4720               655 ESHIP:
+18  4720 2a004e        656         LD      HL,(SHIPPOS)            ; GET CURSOR POSITION
+19  4723 56            657         LD      D,(HL)
+20  4724 23            658         INC     HL
+21  4725 5e            659         LD      E,(HL)
+22                     660 
+23  4726 2a024e        661         LD      HL,(SHIPADDR)
+24  4729 4e            662         LD      C,(HL)                  ; LOAD IN NUMBER CHARS /ROW
+25  472a 23            663         INC     HL
+26  472b 46            664         LD      B,(HL)                  ; LOAD IN # OF ROWS
+27  472c 23            665         INC     HL
+28                     666 
+29  472d cd0048        667         CALL    DRAW
+30  4730 113800        668         LD      DE,0038H                ; ADD THE EXPLOSION SHIP OFFSET
+31  4733 19            669         ADD     HL,DE
+32                     670 
+33  4734 3d            671         DEC     A                       ; DECREMENT # OF EXPLOSIONS
+34  4735 320151        672         LD      (EXPSHIPT),A            ; SAVE A AGAIN
+35  4738 fe00          673         CP      00H                     ; IS THIS THE LAST EXPLOSION?
+36  473a 2008          674         JR      NZ,ESH1
+37  473c 32ff50        675         LD      (ENABLSHIP),A           ; DISABLE SHIP
+38  473f 21044e        676         LD      HL,SHIP                 ; RESET ADDRESS
+39  4742 1803          677         JR      ESH2                    ; JUMP OVER NOISE
+40  4744 3a074a        678 ESH1:   LD      A,(EXPST)               ; START OF EXPLOSION
+41  4747 cdae43        679 ESH2:   CALL    EXPNOISE                ; EXPLOSION NOISE
+42  474a 32074a        680         LD      (EXPST),A
+43  474d 22024e        681         LD      (SHIPADDR),HL           ; SAVE THIS ADDRESS
+44  4750 c9            682         RET
+45                     683 
+46                     684 ; DRAW THE EXPLODING BOMBS PICTURES
+47                     685 
+48  4751               686 EBOMB:
+49  4751 2a004c        687         LD      HL,(BOMBPOS)            ; GET CURSOR POSITION
+50  4754 56            688         LD      D,(HL)
+51  4755 23            689         INC     HL
+52  4756 5e            690         LD      E,(HL)
+53                     691 
+54  4757 2a024c        692         LD      HL,(BOMBADDR)
+55  475a 4e            693         LD      C,(HL)                  ; LOAD IN NUMBER CHARS /ROW
+56  475b 23            694         INC     HL
+57  475c 46            695         LD      B,(HL)                  ; LOAD IN # OF ROWS
+58  475d 23            696         INC     HL
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  13
+
+ 1                     697 
+ 2  475e cd0048        698         CALL    DRAW
+ 3  4761 111200        699         LD      DE,0012H                ; ADD THE EXPLOSION BOMB OFFSET
+ 4  4764 19            700         ADD     HL,DE
+ 5                     701 
+ 6  4765 3d            702         DEC     A                       ; DECREMENT # OF EXPLOSIONS
+ 7  4766 320051        703         LD      (EXPBOMBT),A            ; SAVE A AGAIN
+ 8  4769 fe00          704         CP      00H                     ; IS THIS THE LAST EXPLOSION?
+ 9  476b 200e          705         JR      NZ,EBM1
+10  476d 21004d        706         LD      HL,STARTBOMB
+11  4770 22004c        707         LD      (BOMBPOS),HL            ; RESET POSITION
+12  4773 21044c        708         LD      HL,BOMB                 ; RESET ADDRESS
+13  4776 320251        709         LD      (ENABLBOMB),A           ; DISABLE BOMB DRAWING
+14  4779 1803          710         JR      EBM2                    ; JUMP OVER NOISE
+15  477b 3a074a        711 EBM1:   LD      A,(EXPST)               ; START OF EXPLOSION
+16  477e cdae43        712 EBM2:   CALL    EXPNOISE                ; EXPLOSION NOISE
+17  4781 32074a        713         LD      (EXPST),A
+18                     714         
+19  4784 22024c        715         LD      (BOMBADDR),HL           ; SAVE THIS ADDRESS
+20  4787 c9            716         RET
+21                     717 
+22  4790               718         .ORG    4790H
+23                     719 ; LOCAL CHIME ROUTINE THE CORRECT VERSION IS 
+24                     720 ; CALLED IN RUNNING OF PROGRAM
+25  4790               721 CHIME:
+26  4790 3e8c          722         LD      A,8CH
+27  4792 cd9343        723         CALL    ENTER                   ; SET UP CHIME
+28  4795 3e05          724         LD      A,05H
+29  4797 cd9343        725         CALL    ENTER                   ; SET UP CHIME
+30  479a 3eaa          726         LD      A,0AAH
+31  479c cd9343        727         CALL    ENTER                   ; SET UP CHIME
+32  479f 3e05          728         LD      A,05H
+33  47a1 cd9343        729         CALL    ENTER                   ; SET UP CHIME
+34  47a4 3e0b          730         LD      A,0BH                   ; 12 TIMES THROUGH
+35  47a6               731 CLP1:
+36  47a6 f5            732         PUSH    AF
+37  47a7 1691          733         LD      D,91H
+38  47a9 7a            734         LD      A,D
+39  47aa               735 CLP2:
+40  47aa cd9343        736         CALL    ENTER
+41  47ad c620          737         ADD     A,20H
+42  47af cd9343        738         CALL    ENTER
+43                     739 
+44  47b2 f5            740         PUSH    AF
+45  47b3 3e40          741         LD      A,40H                   ; DELAY 64 TIMES
+46  47b5 fe00          742 CLP3:   CP      00H
+47  47b7 2803          743         JR      Z,CLP4
+48  47b9 3d            744         DEC     A
+49  47ba 18f9          745         JR      CLP3                    ; LOOP
+50  47bc f1            746 CLP4:   POP     AF                      ; DELAY 
+51  47bd 14            747         INC     D
+52  47be 7a            748         LD      A,D
+53  47bf fea0          749         CP      0A0H                    ; ARE WE DONE?
+54  47c1 20e7          750         JR      NZ,CLP2                 ; NO SO GO DO AGAIN
+55  47c3 f1            751         POP     AF
+56  47c4 3d            752         DEC     A
+57  47c5 fe00          753         CP      00H
+58  47c7 20dd          754         JR      NZ,CLP1                 ; DO ANOTHER CHIME
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  14
+
+ 1  47c9 c9            755         RET
+ 2                     756 
+ 3                     757         
+ 4                     758         
+ 5                     759 
+ 6  4800               760         .ORG    4800H
+ 7                     761 ;       DRAW ARRAY OUTPUTS TO THE SCREEN AN ARRAY OF BYTES AT A 
+ 8                     762 ;       GIVEN X,Y POSITION
+ 9                     763 ;       DE HOLD X,Y BC HOLD HEIGHT, WIDTH HL HOLDS ADDRESS
+10                     764 ;
+11                     765 ;                    C   
+12                     766 ;       X,Y_________________________
+13                     767 ;          |  |  |  |  |  |  |  |  |
+14                     768 ;       B  |__|__|__|__|__|__|__|__|
+15                     769 ;          |  |  |  |  |  |  |  |  |
+16                     770 ;          |__|__|__|__|__|__|__|__|
+17  4800               771 DRAW:
+18  4800 f5            772         PUSH    AF
+19  4801 c5            773         PUSH    BC
+20  4802 d5            774         PUSH    DE
+21  4803 e5            775         PUSH    HL
+22  4804 e5            776         PUSH    HL
+23                     777 
+24  4805 cd0047        778         CALL    LOC                     ; LOCATE BYTE FOR X,Y COORDINATE
+25                     779                                         ; IT IS IN HL
+26  4808 54            780         LD      D,H
+27  4809 5d            781         LD      E,L                     ; SET DE TO HOLD SCREEN POSITION
+28  480a e1            782         POP     HL                      ; HL HOLDS THE MEMORY BUFFER ADDRESS
+29  480b 78            783         LD      A,B                     ; HOW MANY TIMES TO LOOP?
+30  480c 0600          784         LD      B,00H                   ; CLEAR OUT B
+31  480e               785 DLOOP:
+32  480e fe00          786         CP      00H                     ; IS A = 0?
+33  4810 2816          787         JR      Z,DEXIT                 ; YES SO NO MORE TO DO
+34  4812 3d            788         DEC     A
+35                     789 
+36  4813 d5            790         PUSH    DE                      ; SAVE SCREEN POSITION
+37  4814 c5            791         PUSH    BC
+38                     792 
+39  4815 eda0          793 DLOOP1: LDI                             ; LOAD MEMORY ONTO SCREEN
+40  4817 ea1548        794         JP      PE,DLOOP1               ;
+41                     795 
+42  481a c1            796         POP     BC
+43  481b d1            797         POP     DE                      ; RESTORE SCREEN ADDRESS AND COUNT
+44                     798 
+45  481c e5            799         PUSH    HL                      ; SAVE MEMORY ADDRESS
+46  481d 62            800         LD      H,D
+47  481e 6b            801         LD      L,E             
+48  481f 114000        802         LD      DE,0040H                ; 
+49  4822 19            803         ADD     HL,DE                   ; ADD 64 TO DE
+50  4823 54            804         LD      D,H
+51  4824 5d            805         LD      E,L
+52  4825 e1            806         POP     HL                      ; ADDED
+53  4826 18e6          807         JR      DLOOP                   ; GO AND DO IT AGAIN
+54                     808 
+55  4828               809 DEXIT:
+56  4828 e1            810         POP     HL
+57  4829 d1            811         POP     DE
+58  482a c1            812         POP     BC
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  15
+
+ 1  482b f1            813         POP     AF
+ 2  482c c9            814         RET
+ 3                     815 
+ 4  482d 00            816         NOP
+ 5  482e 00            817         NOP
+ 6  482f 00            818         NOP
+ 7  4830 00            819         NOP
+ 8                     820 ; DRAW THE BASE STATION
+ 9                     821 
+10  4831               822 DRAWBASE:
+11  4831 21204a        823         LD      HL,BASEPOS              ; GET CURSOR POSITION
+12  4834 56            824         LD      D,(HL)
+13  4835 23            825         INC     HL
+14  4836 5e            826         LD      E,(HL)
+15                     827 
+16  4837 2a224a        828         LD      HL,(BASEADDR)
+17  483a 4e            829         LD      C,(HL)                  ; LOAD IN NUMBER CHARS /ROW
+18  483b 23            830         INC     HL
+19  483c 46            831         LD      B,(HL)                  ; LOAD IN # OF ROWS
+20  483d 23            832         INC     HL
+21                     833 
+22  483e cd0048        834         CALL    DRAW
+23  4841 c9            835         RET
+24                     836 
+25  4850               837         .ORG    4850H
+26                     838 ; DRAW THE SHIP IN THE SHIPPOS POSITION
+27                     839 
+28  4850               840 DRAWSHIP:
+29  4850 2a004e        841         LD      HL,(SHIPPOS)            ; GET CURSOR POSITION
+30  4853 56            842         LD      D,(HL)
+31  4854 7a            843         LD      A,D
+32  4855 fe62          844         CP      62H                     ; IS THE SHIP AT THE BEGINNING?
+33  4857 2006          845         JR      NZ,DRWS1
+34  4859 320251        846         LD      (ENABLBOMB),A           ; SET THE BOMB ENABLE
+35  485c 32ff50        847         LD      (ENABLSHIP),A           ; ENABLE SHIP
+36  485f               848 DRWS1:
+37  485f 23            849         INC     HL
+38  4860 5e            850         LD      E,(HL)
+39  4861 23            851         INC     HL
+40  4862 7e            852         LD      A,(HL)
+41  4863 fe00          853         CP      00H                     ; ARE WE AT THE END?
+42  4865 200b          854         JR      NZ,SHIPSET
+43  4867 21004f        855         LD      HL,STARTSHIP            ; BEGINNING ADDRESS FOR SHIP
+44  486a 22004e        856         LD      (SHIPPOS),HL
+45  486d 21504e        857         LD      HL,ERASHIP
+46  4870 1806          858         JR      SHSET
+47                     859         
+48  4872               860 SHIPSET:
+49  4872 22004e        861         LD      (SHIPPOS),HL
+50                     862 
+51  4875 2a024e        863         LD      HL,(SHIPADDR)
+52  4878 4e            864 SHSET:  LD      C,(HL)                  ; LOAD IN NUMBER CHARS /ROW
+53  4879 23            865         INC     HL
+54  487a 46            866         LD      B,(HL)                  ; LOAD IN # OF ROWS
+55  487b 23            867         INC     HL
+56                     868 
+57  487c 3aff50        869         LD      A,(ENABLSHIP)
+58  487f fe00          870         CP      00H
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  16
+
+ 1  4881 2803          871         JR      Z,SEXIT
+ 2  4883 cd0048        872         CALL    DRAW
+ 3  4886 c9            873 SEXIT:  RET
+ 4                     874 
+ 5  489b               875         .ORG    489BH
+ 6                     876 
+ 7                     877 ; DRAW THE BOMB IN THE BOMBPOS POSITION
+ 8                     878 
+ 9  489b               879 DRAWBOMB:
+10  489b 3a0251        880         LD      A,(ENABLBOMB)
+11  489e fe00          881         CP      00H                     ; IS THE BOMB ENABLED?
+12  48a0 2829          882         JR      Z,DEXT                  ; NO SO EXIT
+13  48a2 2a004c        883         LD      HL,(BOMBPOS)            ; GET CURSOR POSITION
+14  48a5 56            884         LD      D,(HL)
+15  48a6 23            885         INC     HL
+16  48a7 5e            886         LD      E,(HL)
+17  48a8 23            887         INC     HL
+18  48a9 7e            888         LD      A,(HL)
+19  48aa fe00          889         CP      00H                     ; ARE WE AT THE END?
+20  48ac 2010          890         JR      NZ,BOMBSET
+21  48ae 21004d        891         LD      HL,STARTBOMB            ; BEGINNING ADDRESS FOR SHIP
+22  48b1 22004c        892         LD      (BOMBPOS),HL
+23  48b4 21204c        893         LD      HL,ERABOMB
+24  48b7 320251        894         LD      (ENABLBOMB),A           ; ZERO OUT BOMB ENABLE
+25  48ba 3eff          895         LD      A,0FFH                  ; BLOW UP BASE
+26  48bc 1806          896         JR      BSET
+27  48be               897 BOMBSET:
+28  48be 22004c        898         LD      (BOMBPOS),HL
+29                     899 
+30  48c1 2a024c        900         LD      HL,(BOMBADDR)
+31  48c4 4e            901 BSET:   LD      C,(HL)                  ; LOAD IN NUMBER CHARS /ROW
+32  48c5 23            902         INC     HL
+33  48c6 46            903         LD      B,(HL)                  ; LOAD IN # OF ROWS
+34  48c7 23            904         INC     HL
+35                     905 
+36  48c8 cd0048        906         CALL    DRAW
+37  48cb               907 DEXT:   
+38  48cb c9            908         RET
+39  48cc 00            909         NOP
+40  48cd 00            910         NOP
+41                     911 
+42                     912 
+43  48e1               913         .ORG    48E1H
+44                     914 ; DRAW THE TURRET OF THE BASE STATION
+45  48e1               915 DRAWTURR:
+46  48e1 21284b        916         LD      HL,TURRPOS              ; GET CURSOR POSITION
+47  48e4 56            917         LD      D,(HL)
+48  48e5 23            918         INC     HL
+49  48e6 5e            919         LD      E,(HL)
+50                     920 
+51  48e7 2a2a4b        921         LD      HL,(TURRADDR)
+52  48ea 4e            922         LD      C,(HL)                  ; LOAD IN NUMBER CHARS /ROW
+53  48eb 23            923         INC     HL
+54  48ec 46            924         LD      B,(HL)                  ; LOAD IN # OF ROWS
+55  48ed 23            925         INC     HL
+56                     926 
+57  48ee cd0048        927         CALL    DRAW
+58  48f1 c9            928         RET
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  17
+
+ 1                     929 
+ 2  48f2 00            930         NOP
+ 3  48f3 00            931         NOP
+ 4  48f4 00            932         NOP
+ 5  48f5 00            933         NOP
+ 6  48f6 00            934         NOP
+ 7  48f7 00            935         NOP
+ 8  4900               936         .ORG    4900H
+ 9                     937 ;       THIS ROUTINE MOVES AND DRAWS TURRET TO THE RIGHT
+10  4900               938 TURRRIGHT:
+11  4900 f5            939         PUSH    AF
+12  4901 c5            940         PUSH    BC
+13  4902 d5            941         PUSH    DE
+14  4903 e5            942         PUSH    HL
+15                     943 
+16  4904 3a264b        944         LD      A,(TURRCNT)             ; CHECK TO SEE IF ALL THE WAY OVER
+17  4907 fe08          945         CP      8H                      ;
+18  4909 281b          946         JR      Z,TEXIT                 ; YES SO EXIT
+19  490b 3c            947         INC     A
+20  490c 32264b        948         LD      (TURRCNT),A             ; NO SO UPDATE CNT
+21  490f 2a2a4b        949         LD      HL,(TURRADDR)           ; GET THE CURRENT TURRET ADDRESS
+22  4912 111200        950         LD      DE,0012H                ; ADD ON OFFSET TO RIGHT
+23  4915 19            951         ADD     HL,DE
+24  4916 222a4b        952         LD      (TURRADDR),HL           ; UPDATE
+25  4919 2a244b        953         LD      HL,(PHASORADDR)
+26  491c 110400        954         LD      DE,0004H
+27  491f 19            955         ADD     HL,DE
+28  4920 22244b        956         LD      (PHASORADDR),HL         ; UPDATE PHASOR ADDRESS
+29  4923 cde148        957         CALL    DRAWTURR                ; OUTPUT NEW TURRET
+30  4926               958 TEXIT:
+31  4926 e1            959         POP     HL
+32  4927 d1            960         POP     DE
+33  4928 c1            961         POP     BC
+34  4929 f1            962         POP     AF
+35  492a c9            963         RET
+36                     964 
+37  492b 00            965         NOP
+38  492c 00            966         NOP
+39  492d 00            967         NOP
+40  492e 00            968         NOP
+41  492f 00            969         NOP
+42  4930 00            970         NOP
+43                     971 ;       THIS ROUTINE MOVES AND DRAWS TURRET TO THE LEFT
+44  4931               972 TURRLEFT:
+45  4931 f5            973         PUSH    AF
+46  4932 c5            974         PUSH    BC
+47  4933 d5            975         PUSH    DE
+48  4934 e5            976         PUSH    HL
+49                     977 
+50  4935 3a264b        978         LD      A,(TURRCNT)             ; CHECK TO SEE IF ALL THE WAY OVER
+51  4938 fe00          979         CP      00H                     ;
+52  493a 281b          980         JR      Z,TLEXIT                ; YES SO EXIT
+53  493c 3d            981         DEC     A
+54  493d 32264b        982         LD      (TURRCNT),A             ; NO SO UPDATE CNT
+55  4940 2a2a4b        983         LD      HL,(TURRADDR)           ; GET THE CURRENT TURRET ADDRESS
+56  4943 11eeff        984         LD      DE,0FFEEH               ; SUB OFF OFFSET TO LEFT
+57  4946 19            985         ADD     HL,DE
+58  4947 222a4b        986         LD      (TURRADDR),HL           ; UPDATE
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  18
+
+ 1  494a 2a244b        987         LD      HL,(PHASORADDR)
+ 2  494d 11fcff        988         LD      DE,0FFFCH
+ 3  4950 19            989         ADD     HL,DE
+ 4  4951 22244b        990         LD      (PHASORADDR),HL         ; UPDATE PHASOR ADDRESS
+ 5  4954 cde148        991         CALL    DRAWTURR                ; OUTPUT NEW TURRET
+ 6  4957               992 TLEXIT:
+ 7  4957 e1            993         POP     HL
+ 8  4958 d1            994         POP     DE
+ 9  4959 c1            995         POP     BC
+10  495a f1            996         POP     AF
+11  495b c9            997         RET
+12                     998 
+13  495c               999         .ORG    495CH
+14                    1000 ; FIRE THE PHASORS
+15  495c              1001 FIREPHAS:
+16  495c cd7e43       1002         CALL    CLEAR                   ; CLEAR OUT NOISES
+17  495f 3ee7         1003         LD      A,0E7H
+18  4961 cd9343       1004         CALL    ENTER
+19  4964 3e0f         1005         LD      A,0FH
+20  4966 cd9343       1006         CALL    ENTER
+21  4969 3e00         1007         LD      A,00H                   ; Initialize PHASOR
+22  496b 32054a       1008         LD      (ZAP),A
+23  496e 2a244b       1009         LD      HL,(PHASORADDR)         ; GET THE PHASOR COORDINATES
+24  4971 56           1010         LD      D,(HL)                  ; D = X1 
+25  4972 23           1011         INC     HL
+26  4973 5e           1012         LD      E,(HL)                  ; E = Y1 
+27  4974 23           1013         INC     HL
+28  4975 46           1014         LD      B,(HL)                  ; B = X2 
+29  4976 23           1015         INC     HL
+30  4977 4e           1016         LD      C,(HL)                  ; C = Y2 
+31  4978 23           1017         INC     HL
+32  4979 3e00         1018         LD      A,00H
+33  497b 32044a       1019         LD      (FLAG),A                ; SET FOR DRAWING
+34  497e cd0045       1020         CALL    LINE                    ; OUTPUT PHASOR
+35  4981 cd1543       1021         CALL    POLL
+36  4984 3e0f         1022         LD      A,0FH                   ; CLEAR PHASOR
+37  4986 32054a       1023         LD      (ZAP),A
+38  4989 3e01         1024         LD      A,01H
+39  498b 32044a       1025         LD      (FLAG),A                ; SET TO ERASE
+40  498e cd0045       1026         CALL    LINE
+41  4991 cd7e43       1027         CALL    CLEAR
+42  4994 3e00         1028         LD      A,00H
+43  4996              1029 FEXIT:
+44  4996 c9           1030         RET
+45                    1031 
+46  4999              1032         .ORG    4999H
+47                    1033 ; THIS ROUTINE IS JUMPED TO FROM DOT IF IT FINDS THAT SOMETHING WAS
+48                    1034 ; IN THE POSITION OF THE DOT ABOUT TO BE DRAWN, IT MEANS THAT SOMETHING
+49                    1035 ; SHOULD BE EXPLODED.
+50                    1036 ; THIS ROUTINE INITIALIZES EXPLOSTIONS AFTER DETERMINING WHAT EXPLODED
+51  4999              1037 EXPLODE:
+52  4999 7b           1038         LD      A,E                     ; CHECK TO SEE IF BOMB OR SHIP
+53  499a c6ed         1039         ADD     A,0EDH                  ; SUBTRACT 10 FROM E
+54  499c cb7f         1040         BIT     7,A                     ; IS THE RESULT NEGATIVE?
+55  499e 2017         1041         JR      NZ,EXPSH                ; YES SO BLOW UP SHIP
+56  49a0 3e04         1042         LD      A,04H                   ; LOAD EXPBOMBT WITH # BOMB PICTURES
+57  49a2 320051       1043         LD      (EXPBOMBT),A
+58  49a5 210351       1044         LD      HL,EXPBMB1              ; SET THE FIRST PICTURE
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  19
+
+ 1  49a8 22024c       1045         LD      (BOMBADDR),HL
+ 2  49ab              1046 EXPSET:
+ 3  49ab 3e05         1047         LD      A,05H                   ; INCREMENTS OF NOISE
+ 4  49ad 32064a       1048         LD      (EXPCT),A
+ 5  49b0 3ef0         1049         LD      A,0F0H                  ; START OF LOOP OF NOISE
+ 6  49b2 32074a       1050         LD      (EXPST),A
+ 7  49b5 1815         1051         JR      EXEXIT                  ; RETURN TO PHASOR
+ 8  49b7              1052 EXPSH:
+ 9  49b7 3e04         1053         LD      A,04H                   ; LOAD EXPSHIPT WITH # SHIP PICTURES
+10  49b9 320151       1054         LD      (EXPSHIPT),A
+11  49bc 215351       1055         LD      HL,EXPSHP1              ; SET THE FIRST PICTURE
+12  49bf 22024e       1056         LD      (SHIPADDR),HL
+13  49c2 3e05         1057         LD      A,05H                   ; INCREMENTS OF NOISE
+14  49c4 32064a       1058         LD      (EXPCT),A
+15  49c7 3ef0         1059         LD      A,0F0H                  ; START OF LOOP OF NOISE
+16  49c9 32074a       1060         LD      (EXPST),A
+17                    1061 
+18  49cc              1062 EXEXIT:
+19  49cc cd7e43       1063         CALL    CLEAR                   ; CLEAR OUT NOISE
+20  49cf 3ef4         1064         LD      A,0F4H                  ; SET UP BOMB NOISE
+21  49d1 cd9343       1065         CALL    ENTER
+22  49d4 e1           1066         POP     HL                      ; SAME AS RETURNING FROM LINE
+23  49d5 d1           1067         POP     DE
+24  49d6 c1           1068         POP     BC
+25  49d7 c9           1069         RET
+26                    1070 
+27                    1071 
+28                    1072 
+29  4a00              1073         .ORG    4A00H
+30                    1074 
+31  4a00 00           1075 YINC:   .byte   0               ; Increment used by line drawer
+32  4a01 00           1076 XINC:   .byte   0               ; Increment used by line drawer
+33  4a02 00           1077 YA:     .byte   0               ; Delta values for slope  of line
+34  4a03 00           1078 XA:     .byte   0
+35                    1079 
+36  4a04 00           1080 FLAG:   .byte   0               ; IS LINE ON OR OFF
+37  4a05 00           1081 ZAP:    .byte   0               ; FAZOR STOP
+38  4a06 00           1082 EXPCT:  .byte   0               ; EXPLOSION COUNT FOR # of 
+39                    1083                                 ; explosion Loops / picture drawn
+40  4a07 00           1084 EXPST:  .byte   0               ; Current loop variable in explosion loop
+41                    1085 
+42  4a20              1086         .ORG 4A20H              ; BASE STATION
+43  4a20 4424         1087 BASEPOS: .byte 44H, 24H         ; X, Y POSITION
+44  4a22 244a         1088 BASEADDR: .word BASE
+45  4a24 0c04         1089 BASE:   .byte 0CH, 04
+46  4a26 8080808080   1090         .byte 080H, 080H, 080H, 080H, 080H, 0AAH
+47  4a2b aa           1090 
+48  4a2c 9580808080   1091         .byte 095H, 080H, 080H, 080H, 080H, 080H
+49  4a31 80           1091 
+50  4a32 80808080a0   1092         .byte 080H, 080H, 080H, 080H, 0A0H, 0BEH
+51  4a37 be           1092 
+52  4a38 bd90808080   1093         .byte 0BDH, 090H, 080H, 080H, 080H, 080H
+53  4a3d 80           1093 
+54  4a3e a0b8bcffff   1094         .byte 0A0H, 0B8H, 0BCH, 0FFH, 0FFH, 0FFH
+55  4a43 ff           1094 
+56  4a44 ffffffbcb4   1095         .byte 0FFH, 0FFH, 0FFH, 0BCH, 0B4H, 090H
+57  4a49 90           1095 
+58  4a4a beffffffff   1096         .byte 0BEH, 0FFH, 0FFH, 0FFH, 0FFH, 0FFH
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  20
+
+ 1  4a4f ff           1096 
+ 2  4a50 ffffffffff   1097         .byte 0FFH, 0FFH, 0FFH, 0FFH, 0FFH, 05DH, 080H
+ 3  4a55 5d80         1097 
+ 4                    1098 
+ 5  4b00              1099         .ORG 4B00H                      ; TURRET 
+ 6  4b00 2e250109     1100 PHL4:   .byte 02EH, 025H, 001H, 09H     ; BOTTOM, TOP OF PHASOR
+ 7  4b04 2f241009     1101 PHL3:   .byte 02FH, 024H, 010H, 09H     ; BOTTOM, TOP OF PHASOR
+ 8  4b08 31242009     1102 PHL2:   .byte 031H, 024H, 020H, 09H     ; BOTTOM, TOP OF PHASOR
+ 9  4b0c 32243009     1103 PHL1:   .byte 032H, 024H, 030H, 09H     ; BOTTOM, TOP OF PHASOR
+10  4b10 35243509     1104 PHASOR: .byte 035H, 024H, 035H, 09H     ; BOTTOM, TOP OF PHASOR
+11  4b14 52245509     1105 PHR1:   .byte 052H, 024H, 055H, 09H     ; BOTTOM, TOP OF PHASOR
+12  4b18 38246409     1106 PHR2:   .byte 038H, 024H, 064H, 09H     ; BOTTOM, TOP OF PHASOR
+13  4b1c 39246909     1107 PHR3:   .byte 039H, 024H, 069H, 09H     ; BOTTOM, TOP OF PHASOR
+14  4b20 3e257e09     1108 PHR4:   .byte 03EH, 025H, 07EH, 09H     ; BOTTOM, TOP OF PHASOR
+15                    1109 
+16  4b24 104b         1110 PHASORADDR: .word PHASOR
+17                    1111 
+18  4b26 0400         1112 TURRCNT:  .byte 04, 00
+19  4b28 4a24         1113 TURRPOS:  .byte 4AH, 24H
+20  4b2a 744b         1114 TURRADDR: .word TURRET
+21                    1115 
+22                    1116 
+23  4b2c 0802         1117 TURRL4: .byte 08H, 02H
+24  4b2e acb0808080   1118         .byte 0ACH, 0B0H, 080H, 080H, 080H, 080H, 080H, 080H
+25  4b33 808080       1118 
+26  4b36 8082abbdbc   1119         .byte 080H, 082H, 0ABH, 0BDH, 0BCH, 090H, 080H, 080H
+27  4b3b 908080       1119 
+28                    1120 
+29  4b3e 0802         1121 TURRL3: .byte 08H, 02H
+30  4b40 82acb08080   1122         .byte 082H, 0ACH, 0B0H, 080H, 080H, 080H, 080H, 080H
+31  4b45 808080       1122 
+32  4b48 8080aabdbc   1123         .byte 080H, 080H, 0AAH, 0BDH, 0BCH, 090H, 080H, 080H
+33  4b4d 908080       1123 
+34                    1124 
+35  4b50 0802         1125 TURRL2: .byte 08H, 02H
+36  4b52 8082ad9080   1126         .byte 080H, 082H, 0ADH, 090H, 080H, 080H, 080H, 080H
+37  4b57 808080       1126 
+38  4b5a 8080a0bfbc   1127         .byte 080H, 080H, 0A0H, 0BFH, 0BCH, 090H, 080H, 080H
+39  4b5f 908080       1127 
+40                    1128 
+41  4b62 0802         1129 TURRL1: .byte 08H, 02H
+42  4b64 80808ab480   1130         .byte 080H, 080H, 08AH, 0B4H, 080H, 080H, 080H, 080H
+43  4b69 808080       1130 
+44  4b6c 8080a0bebd   1131         .byte 080H, 080H, 0A0H, 0BEH, 0BDH, 090H, 080H, 080H
+45  4b71 908080       1131 
+46                    1132 
+47  4b74 0802         1133 TURRET: .byte 08H, 02H
+48  4b76 808080aa95   1134         .byte 080H, 080H, 080H, 0AAH, 095H, 080H, 080H, 080H
+49  4b7b 808080       1134 
+50  4b7e 8080a0bebd   1135         .byte 080H, 080H, 0A0H, 0BEH, 0BDH, 090H, 080H, 080H
+51  4b83 908080       1135 
+52                    1136 
+53  4b86 0802         1137 TURRR1: .byte 08H, 02H
+54  4b88 80808080b8   1138         .byte 080H, 080H, 080H, 080H, 0B8H, 085H, 080H, 080H
+55  4b8d 858080       1138 
+56  4b90 8080a0bebd   1139         .byte 080H, 080H, 0A0H, 0BEH, 0BDH, 090H, 080H, 080H
+57  4b95 908080       1139 
+58                    1140 
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  21
+
+ 1  4b98 0802         1141 TURRR2: .byte 08H, 02H
+ 2  4b9a 80808080a0   1142         .byte 080H, 080H, 080H, 080H, 0A0H, 09EH, 081H, 080H
+ 3  4b9f 9e8180       1142 
+ 4  4ba2 8080a0bcbf   1143         .byte 080H, 080H, 0A0H, 0BCH, 0BFH, 090H, 080H, 080H
+ 5  4ba7 908080       1143 
+ 6                    1144 
+ 7  4baa 0802         1145 TURRR3: .byte 08H, 02H
+ 8  4bac 8080808080   1146         .byte 080H, 080H, 080H, 080H, 080H, 0B0H, 09CH, 081H
+ 9  4bb1 b09c81       1146 
+10  4bb4 8080a0bcbe   1147         .byte 080H, 080H, 0A0H, 0BCH, 0BEH, 095H, 080H, 080H
+11  4bb9 958080       1147 
+12                    1148 
+13  4bbc 0802         1149 TURRR4: .byte 08H, 02H
+14  4bbe 8080808080   1150         .byte 080H, 080H, 080H, 080H, 080H, 080H, 0B0H, 09CH
+15  4bc3 80b09c       1150 
+16  4bc6 8080a0bcbe   1151         .byte 080H, 080H, 0A0H, 0BCH, 0BEH, 097H, 081H, 080H
+17  4bcb 978180       1151 
+18                    1152 
+19                    1153 
+20  4c00              1154         .ORG 4C00H
+21  4c00 004d         1155 BOMBPOS: .word  STARTBOMB       ; X, Y POSITIONING
+22  4c02 044c         1156 BOMBADDR: .word BOMB
+23  4c04 0000         1157 BOMB:   .byte 00, 00
+24  4c06 0000000000   1158         .byte 00, 00, 00, 00, 00, 00
+25  4c0b 00           1158 
+26  4c0c 0000000000   1159         .byte 00, 00, 00, 00, 00, 00
+27  4c11 00           1159 
+28  4c20              1160         .ORG 4C20H
+29  4c20 0702         1161 ERABOMB: .byte 07, 02
+30  4c22 8080808080   1162         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+31  4c27 8080         1162 
+32  4c29 8080808080   1163         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+33  4c2e 8080         1163 
+34                    1164 
+35  4d00              1165         .ORG 4D00H
+36                    1166 
+37  4d00              1167 STARTBOMB:
+38  4d00 700f         1168         .byte   112, 15         ; START BOMB POSITION
+39  4d02 6c12         1169         .byte   108, 18
+40  4d04 6815         1170         .byte   104, 21
+41  4d06 6418         1171         .byte   100, 24
+42  4d08 601b         1172         .byte    96, 27
+43  4d0a 5c1e         1173         .byte    92, 30
+44  4d0c 5821         1174         .byte    88, 33
+45  4d0e 5424         1175         .byte    84, 36
+46  4d10 5027         1176         .byte    80, 39
+47  4d12 0000         1177         .byte   00, 00          ; END BOMB POSITION
+48                    1178 
+49  4e00              1179         .ORG 4E00H
+50  4e00 004f         1180 SHIPPOS: .word  STARTSHIP
+51  4e02 044e         1181 SHIPADDR: .word  SHIP
+52  4e04 0e05         1182 SHIP:   .byte 0EH, 05H
+53  4e06 0000000000   1183         .byte 00, 00, 00, 00, 00, 00, 00
+54  4e0b 0000         1183 
+55  4e0d 0000000000   1184         .byte 00, 00, 00, 00, 00, 00, 00
+56  4e12 0000         1184 
+57  4e14 0000000000   1185         .byte 00, 00, 00, 00, 00, 00, 00
+58  4e19 0000         1185 
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  22
+
+ 1  4e1b 0000000000   1186         .byte 00, 00, 00, 00, 00, 00, 00
+ 2  4e20 0000         1186 
+ 3  4e22 0000000000   1187         .byte 00, 00, 00, 00, 00, 00, 00
+ 4  4e27 0000         1187 
+ 5  4e29 0000000000   1188         .byte 00, 00, 00, 00, 00, 00, 00
+ 6  4e2e 0000         1188 
+ 7  4e30 0000000000   1189         .byte 00, 00, 00, 00, 00, 00, 00
+ 8  4e35 0000         1189 
+ 9  4e37 0000000000   1190         .byte 00, 00, 00, 00, 00, 00, 00
+10  4e3c 0000         1190 
+11  4e3e 0000000000   1191         .byte 00, 00, 00, 00, 00, 00, 00
+12  4e43 0000         1191 
+13  4e45 0000000000   1192         .byte 00, 00, 00, 00, 00, 00, 00
+14  4e4a 0000         1192 
+15  4e50              1193         .ORG    4E50H
+16  4e50 0c04         1194 ERASHIP: .byte 0CH, 04H
+17  4e52 8080808080   1195         .byte 80H, 80H, 80H, 80H, 80H, 80H, 80H
+18  4e57 8080         1195 
+19  4e59 8080808080   1196         .byte 80H, 80H, 80H, 80H, 80H, 80H, 80H
+20  4e5e 8080         1196 
+21  4e60 8080808080   1197         .byte 80H, 80H, 80H, 80H, 80H, 80H, 80H
+22  4e65 8080         1197 
+23  4e67 8080808080   1198         .byte 80H, 80H, 80H, 80H, 80H, 80H, 80H
+24  4e6c 8080         1198 
+25  4e6e 8080808080   1199         .byte 80H, 80H, 80H, 80H, 80H, 80H, 80H
+26  4e73 8080         1199 
+27  4e75 8080808080   1200         .byte 80H, 80H, 80H, 80H, 80H, 80H, 80H
+28  4e7a 8080         1200 
+29  4e7c 8080808080   1201         .byte 80H, 80H, 80H, 80H, 80H, 80H, 80H
+30  4e81 8080         1201 
+31  4e83 8080808080   1202         .byte 80H, 80H, 80H, 80H, 80H, 80H, 80H
+32  4e88 8080         1202 
+33                    1203 
+34  4f00              1204         .ORG 4F00H
+35                    1205 
+36                    1206 
+37  4f00              1207 STARTSHIP:
+38  4f00 6409         1208         .byte   100, 9          ; START SHIP POSITION
+39  4f02 6409         1209         .byte   100, 9
+40  4f04 6409         1210         .byte   100, 9
+41  4f06 6409         1211         .byte   100, 9
+42  4f08 6409         1212         .byte   100, 9
+43  4f0a 6409         1213         .byte   100, 9
+44  4f0c 6409         1214         .byte   100, 9
+45  4f0e 6209         1215         .byte    98, 9
+46  4f10 6009         1216         .byte    96, 9
+47  4f12 5e09         1217         .byte    94, 9
+48  4f14 5c09         1218         .byte    92, 9
+49  4f16 5a09         1219         .byte    90, 9
+50  4f18 5809         1220         .byte    88, 9
+51  4f1a 5609         1221         .byte    86, 9
+52  4f1c 5409         1222         .byte    84, 9
+53  4f1e 5209         1223         .byte    82, 9
+54  4f20 5009         1224         .byte    80, 9
+55  4f22 4e09         1225         .byte    78, 9
+56  4f24 4c09         1226         .byte    76, 9
+57  4f26 4a09         1227         .byte    74, 9
+58  4f28 4809         1228         .byte    72, 9
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  23
+
+ 1  4f2a 4609         1229         .byte    70, 9
+ 2  4f2c 4409         1230         .byte    68, 9
+ 3  4f2e 4209         1231         .byte    66, 9
+ 4  4f30 4009         1232         .byte    64, 9
+ 5  4f32 3e09         1233         .byte    62, 9
+ 6  4f34 3c09         1234         .byte    60, 9
+ 7  4f36 3a09         1235         .byte    58, 9
+ 8  4f38 3809         1236         .byte    56, 9
+ 9  4f3a 3609         1237         .byte    54, 9
+10  4f3c 3409         1238         .byte    52, 9
+11  4f3e 3209         1239         .byte    50, 9
+12  4f40 3009         1240         .byte    48, 9
+13  4f42 2e09         1241         .byte    46, 9
+14  4f44 2c09         1242         .byte    44, 9
+15  4f46 2a09         1243         .byte    42, 9
+16  4f48 2809         1244         .byte    40, 9
+17  4f4a 2609         1245         .byte    38, 9
+18  4f4c 2409         1246         .byte    36, 9
+19  4f4e 2209         1247         .byte    34, 9
+20  4f50 2009         1248         .byte    32, 9
+21  4f52 1e09         1249         .byte    30, 9
+22  4f54 1c09         1250         .byte    28, 9
+23  4f56 1a09         1251         .byte    26, 9
+24  4f58 1809         1252         .byte    24, 9
+25  4f5a 1609         1253         .byte    22, 9
+26  4f5c 1409         1254         .byte    20, 9
+27  4f5e 1209         1255         .byte    18, 9
+28  4f60 1009         1256         .byte    16, 9
+29  4f62 0e09         1257         .byte    14, 9
+30  4f64 0c09         1258         .byte    12, 9
+31  4f66 0a09         1259         .byte    10, 9
+32  4f68 0000         1260         .byte    00, 00         ; END SHIP POSITION
+33                    1261 
+34                    1262 
+35  5000              1263         .ORG    5000H
+36  5000 000204       1264 YMOD3:  .byte 0, 2, 4           ; Y % 3 * 2
+37  5003 000204       1265         .byte 0, 2, 4
+38  5006 000204       1266         .byte 0, 2, 4
+39  5009 000204       1267         .byte 0, 2, 4
+40  500c 000204       1268         .byte 0, 2, 4
+41  500f 000204       1269         .byte 0, 2, 4
+42  5012 000204       1270         .byte 0, 2, 4
+43  5015 000204       1271         .byte 0, 2, 4
+44  5018 000204       1272         .byte 0, 2, 4
+45  501b 000204       1273         .byte 0, 2, 4
+46  501e 000204       1274         .byte 0, 2, 4
+47  5021 000204       1275         .byte 0, 2, 4
+48  5024 000204       1276         .byte 0, 2, 4
+49  5027 000204       1277         .byte 0, 2, 4
+50  502a 000204       1278         .byte 0, 2, 4
+51  502d 000204       1279         .byte 0, 2, 4
+52  5030 003c003c00   1280 YDIV3:  .word 3C00H, 3C00H, 3C00H
+53  5035 3c           1280 
+54  5036 403c403c40   1281         .word 3C40H, 3C40H, 3C40H
+55  503b 3c           1281 
+56  503c 803c803c80   1282         .word 3C80H, 3C80H, 3C80H
+57  5041 3c           1282 
+58  5042 c03cc03cc0   1283         .word 3CC0H, 3CC0H, 3CC0H
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  24
+
+ 1  5047 3c           1283 
+ 2  5048 003d003d00   1284         .word 3D00H, 3D00H, 3D00H
+ 3  504d 3d           1284 
+ 4  504e 403d403d40   1285         .word 3D40H, 3D40H, 3D40H
+ 5  5053 3d           1285 
+ 6  5054 803d803d80   1286         .word 3D80H, 3D80H, 3D80H
+ 7  5059 3d           1286 
+ 8  505a c03dc03dc0   1287         .word 3DC0H, 3DC0H, 3DC0H
+ 9  505f 3d           1287 
+10  5060 003e003e00   1288         .word 3E00H, 3E00H, 3E00H
+11  5065 3e           1288 
+12  5066 403e403e40   1289         .word 3E40H, 3E40H, 3E40H
+13  506b 3e           1289 
+14  506c 803e803e80   1290         .word 3E80H, 3E80H, 3E80H
+15  5071 3e           1290 
+16  5072 c03ec03ec0   1291         .word 3EC0H, 3EC0H, 3EC0H
+17  5077 3e           1291 
+18  5078 003f003f00   1292         .word 3F00H, 3F00H, 3F00H
+19  507d 3f           1292 
+20  507e 403f403f40   1293         .word 3F40H, 3F40H, 3F40H
+21  5083 3f           1293 
+22  5084 803f803f80   1294         .word 3F80H, 3F80H, 3F80H
+23  5089 3f           1294 
+24  508a c03fc03fc0   1295         .word 3FC0H, 3FC0H, 3FC0H
+25  508f 3f           1295 
+26                    1296 
+27  50ff              1297         .ORG    50FFH
+28  50ff 00           1298 ENABLSHIP: .byte 00H
+29  5100 00           1299 EXPBOMBT: .byte 00H
+30  5101 00           1300 EXPSHIPT: .byte 00H
+31  5102 00           1301 ENABLBOMB: .byte 00H
+32                    1302 
+33  5103 0603         1303 EXPBMB1: .byte 06, 03
+34  5105 8080808080   1304         .byte 080H, 080H, 080H, 080H, 080H, 080H
+35  510a 80           1304 
+36  510b 8080808080   1305         .byte 080H, 080H, 080H, 080H, 080H, 080H
+37  5110 80           1305 
+38  5111 8080808080   1306         .byte 080H, 080H, 080H, 080H, 080H, 080H
+39  5116 80           1306 
+40  5117 0603         1307 EXPBMB2: .byte 06, 03
+41  5119 8080808080   1308         .byte 080H, 080H, 080H, 080H, 080H, 080H
+42  511e 80           1308 
+43  511f 8080808080   1309         .byte 080H, 080H, 080H, 080H, 080H, 080H
+44  5124 80           1309 
+45  5125 8080808080   1310         .byte 080H, 080H, 080H, 080H, 080H, 080H
+46  512a 80           1310 
+47  512b 0603         1311 EXPBMB3: .byte 06, 03
+48  512d 8080808080   1312         .byte 080H, 080H, 080H, 080H, 080H, 080H
+49  5132 80           1312 
+50  5133 8080808080   1313         .byte 080H, 080H, 080H, 080H, 080H, 080H
+51  5138 80           1313 
+52  5139 8080808080   1314         .byte 080H, 080H, 080H, 080H, 080H, 080H
+53  513e 80           1314 
+54  513f 0603         1315 EXPBMB4: .byte 06, 03
+55  5141 8080808080   1316         .byte 080H, 080H, 080H, 080H, 080H, 080H
+56  5146 80           1316 
+57  5147 8080808080   1317         .byte 080H, 080H, 080H, 080H, 080H, 080H
+58  514c 80           1317 
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  25
+
+ 1  514d 8080808080   1318         .byte 080H, 080H, 080H, 080H, 080H, 080H
+ 2  5152 80           1318 
+ 3                    1319 
+ 4  5153 0e04         1320 EXPSHP1: .byte 0EH, 04H
+ 5  5155 8080808080   1321         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+ 6  515a 8080         1321 
+ 7  515c 8080808080   1322         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+ 8  5161 8080         1322 
+ 9  5163 8080808080   1323         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+10  5168 8080         1323 
+11  516a 8080808080   1324         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+12  516f 8080         1324 
+13  5171 8080808080   1325         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+14  5176 8080         1325 
+15  5178 8080808080   1326         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+16  517d 8080         1326 
+17  517f 8080808080   1327         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+18  5184 8080         1327 
+19  5186 8080808080   1328         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+20  518b 8080         1328 
+21                    1329 
+22  518d 0e04         1330 EXPSHP2: .byte 0EH, 04H
+23  518f 8080808080   1331         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+24  5194 8080         1331 
+25  5196 8080808080   1332         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+26  519b 8080         1332 
+27  519d 8080808080   1333         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+28  51a2 8080         1333 
+29  51a4 8080808080   1334         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+30  51a9 8080         1334 
+31  51ab 8080808080   1335         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+32  51b0 8080         1335 
+33  51b2 8080808080   1336         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+34  51b7 8080         1336 
+35  51b9 8080808080   1337         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+36  51be 8080         1337 
+37  51c0 8080808080   1338         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+38  51c5 8080         1338 
+39                    1339 
+40  51c7 0e04         1340 EXPSHP3: .byte 0EH, 04H
+41  51c9 8080808080   1341         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+42  51ce 8080         1341 
+43  51d0 8080808080   1342         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+44  51d5 8080         1342 
+45  51d7 8080808080   1343         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+46  51dc 8080         1343 
+47  51de 8080808080   1344         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+48  51e3 8080         1344 
+49  51e5 8080808080   1345         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+50  51ea 8080         1345 
+51  51ec 8080808080   1346         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+52  51f1 8080         1346 
+53  51f3 8080808080   1347         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+54  51f8 8080         1347 
+55  51fa 8080808080   1348         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+56  51ff 8080         1348 
+57                    1349 
+58  5201 0e04         1350 EXPSHP4: .byte 0EH, 04H
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  26
+
+ 1  5203 8080808080   1351         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+ 2  5208 8080         1351 
+ 3  520a 8080808080   1352         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+ 4  520f 8080         1352 
+ 5  5211 8080808080   1353         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+ 6  5216 8080         1353 
+ 7  5218 8080808080   1354         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+ 8  521d 8080         1354 
+ 9  521f 8080808080   1355         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+10  5224 8080         1355 
+11  5226 8080808080   1356         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+12  522b 8080         1356 
+13  522d 8080808080   1357         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+14  5232 8080         1357 
+15  5234 8080808080   1358         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
+16  5239 8080         1358 
+17                    1359 
+18  523b              1360 EXPBASE1:       
+19  523b 0c04         1361         .byte 0CH, 04
+20  523d 8080808080   1362         .byte 080H, 080H, 080H, 080H, 080H, 0AAH
+21  5242 aa           1362 
+22  5243 9580808080   1363         .byte 095H, 080H, 080H, 080H, 080H, 080H
+23  5248 80           1363 
+24  5249 80808080a0   1364         .byte 080H, 080H, 080H, 080H, 0A0H, 0BEH
+25  524e be           1364 
+26  524f bd90808080   1365         .byte 0BDH, 090H, 080H, 080H, 080H, 080H
+27  5254 80           1365 
+28  5255 a0b8bcffff   1366         .byte 0A0H, 0B8H, 0BCH, 0FFH, 0FFH, 0FFH
+29  525a ff           1366 
+30  525b ffffffbcb4   1367         .byte 0FFH, 0FFH, 0FFH, 0BCH, 0B4H, 090H
+31  5260 90           1367 
+32  5261 beffffffff   1368         .byte 0BEH, 0FFH, 0FFH, 0FFH, 0FFH, 0FFH
+33  5266 ff           1368 
+34  5267 ffffffffff   1369         .byte 0FFH, 0FFH, 0FFH, 0FFH, 0FFH, 05DH, 080H
+35  526c 5d80         1369 
+36                    1370 
+37  526e              1371 EXPBASE2:       
+38  526e 0c04         1372         .byte 0CH, 04
+39  5270 8080808080   1373         .byte 080H, 080H, 080H, 080H, 080H, 0AAH
+40  5275 aa           1373 
+41  5276 9580808080   1374         .byte 095H, 080H, 080H, 080H, 080H, 080H
+42  527b 80           1374 
+43  527c 80808080a0   1375         .byte 080H, 080H, 080H, 080H, 0A0H, 0BEH
+44  5281 be           1375 
+45  5282 bd90808080   1376         .byte 0BDH, 090H, 080H, 080H, 080H, 080H
+46  5287 80           1376 
+47  5288 a0b8bcffff   1377         .byte 0A0H, 0B8H, 0BCH, 0FFH, 0FFH, 0FFH
+48  528d ff           1377 
+49  528e ffffffbcb4   1378         .byte 0FFH, 0FFH, 0FFH, 0BCH, 0B4H, 090H
+50  5293 90           1378 
+51  5294 beffffffff   1379         .byte 0BEH, 0FFH, 0FFH, 0FFH, 0FFH, 0FFH
+52  5299 ff           1379 
+53  529a ffffffffff   1380         .byte 0FFH, 0FFH, 0FFH, 0FFH, 0FFH, 05DH, 080H
+54  529f 5d80         1380 
+55                    1381 
+56  52a1              1382 EXPBASE3:       
+57  52a1 0c04         1383         .byte 0CH, 04
+58  52a3 8080808080   1384         .byte 080H, 080H, 080H, 080H, 080H, 0AAH
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  27
+
+ 1  52a8 aa           1384 
+ 2  52a9 9580808080   1385         .byte 095H, 080H, 080H, 080H, 080H, 080H
+ 3  52ae 80           1385 
+ 4  52af 80808080a0   1386         .byte 080H, 080H, 080H, 080H, 0A0H, 0BEH
+ 5  52b4 be           1386 
+ 6  52b5 bd90808080   1387         .byte 0BDH, 090H, 080H, 080H, 080H, 080H
+ 7  52ba 80           1387 
+ 8  52bb a0b8bcffff   1388         .byte 0A0H, 0B8H, 0BCH, 0FFH, 0FFH, 0FFH
+ 9  52c0 ff           1388 
+10  52c1 ffffffbcb4   1389         .byte 0FFH, 0FFH, 0FFH, 0BCH, 0B4H, 090H
+11  52c6 90           1389 
+12  52c7 beffffffff   1390         .byte 0BEH, 0FFH, 0FFH, 0FFH, 0FFH, 0FFH
+13  52cc ff           1390 
+14  52cd ffffffffff   1391         .byte 0FFH, 0FFH, 0FFH, 0FFH, 0FFH, 05DH, 080H
+15  52d2 5d80         1391 
+16                    1392 
+17  52d4              1393 EXPBASE4:       
+18  52d4 0c04         1394         .byte 0CH, 04
+19  52d6 8080808080   1395         .byte 080H, 080H, 080H, 080H, 080H, 0AAH
+20  52db aa           1395 
+21  52dc 9580808080   1396         .byte 095H, 080H, 080H, 080H, 080H, 080H
+22  52e1 80           1396 
+23  52e2 80808080a0   1397         .byte 080H, 080H, 080H, 080H, 0A0H, 0BEH
+24  52e7 be           1397 
+25  52e8 bd90808080   1398         .byte 0BDH, 090H, 080H, 080H, 080H, 080H
+26  52ed 80           1398 
+27  52ee a0b8bcffff   1399         .byte 0A0H, 0B8H, 0BCH, 0FFH, 0FFH, 0FFH
+28  52f3 ff           1399 
+29  52f4 ffffffbcb4   1400         .byte 0FFH, 0FFH, 0FFH, 0BCH, 0B4H, 090H
+30  52f9 90           1400 
+31  52fa beffffffff   1401         .byte 0BEH, 0FFH, 0FFH, 0FFH, 0FFH, 0FFH
+32  52ff ff           1401 
+33  5300 ffffffffff   1402         .byte 0FFH, 0FFH, 0FFH, 0FFH, 0FFH, 05DH, 080H
+34  5305 5d80         1402 
+35                    1403 
+36  5307              1404 TEND:
+37  5307 2004         1405         .byte 20H, 04H
+38  5309 8080808080   1406         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H, 080H
+39  530e 808080       1406 
+40  5311 8080808080   1407         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H, 080H
+41  5316 808080       1407 
+42  5319 8080808080   1408         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H, 080H
+43  531e 808080       1408 
+44  5321 8080808080   1409         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H, 080H
+45  5326 808080       1409 
+46                    1410 
+47  5329 ffffffffff   1411         .byte 0FFH, 0FFH, 0FFH, 0FFH, 0FFH, 0FFH, 080H, 0FFH
+48  532e ff80ff       1411 
+49  5331 808080ff80   1412         .byte 080H, 080H, 080H, 0FFH, 080H, 0FFH, 0FFH, 0FFH
+50  5336 ffffff       1412 
+51  5339 8080ffffff   1413         .byte 080H, 080H, 0FFH, 0FFH, 0FFH, 080H, 0FFH, 0FFH
+52  533e 80ffff       1413 
+53  5341 8080ff80ff   1414         .byte 080H, 080H, 0FFH, 080H, 0FFH, 0FFH, 080H, 080H
+54  5346 ff8080       1414 
+55                    1415 
+56  5349 8080ffff80   1416         .byte 080H, 080H, 0FFH, 0FFH, 080H, 080H, 080H, 0FFH
+57  534e 8080ff       1416 
+58  5351 ffffff80ff   1417         .byte 0FFH, 0FFH, 0FFH, 080H, 0FFH, 08CH, 080H, 080H
+
+
+uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+                                                                Page  28
+
+ 1  5356 8c8080       1417 
+ 2  5359 80ff8c8080   1418         .byte 080H, 0FFH, 08CH, 080H, 080H, 0FFH, 080H, 0FFH
+ 3  535e ff80ff       1418 
+ 4  5361 80ff80ff80   1419         .byte 080H, 0FFH, 080H, 0FFH, 080H, 0FFH, 080H, 080H
+ 5  5366 ff8080       1419 
+ 6                    1420 
+ 7  5369 8080ffff80   1421         .byte 080H, 080H, 0FFH, 0FFH, 080H, 080H, 080H, 0FFH
+ 8  536e 8080ff       1421 
+ 9  5371 8080ff80ff   1422         .byte 080H, 080H, 0FFH, 080H, 0FFH, 0FFH, 0FFH, 080H
+10  5376 ffff80       1422 
+11  5379 80ffffff80   1423         .byte 080H, 0FFH, 0FFH, 0FFH, 080H, 0FFH, 080H, 080H
+12  537e ff8080       1423 
+13  5381 ffff80ffff   1424         .byte 0FFH, 0FFH, 080H, 0FFH, 0FFH, 080H, 080H, 080H
+14  5386 808080       1424 
+15                    1425 
+
+0 errors, 0 warnings
+

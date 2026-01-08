@@ -47,6 +47,9 @@ static char rcsid[] =
 #include "../incl/urel.h"
 #include "../incl/ulktab.h"
 #endif
+#include "funcdefs.h"
+
+#include <string.h>
 
 static char	*relact[32];
 static char	*relhsh[32];
@@ -75,6 +78,22 @@ static char	*txtlim;	/* point to end of text			*/
 static uns	itmoff;		/* offset from txtstt in curadu's	*/
 static uns	reloc;		/* relocation item			*/
 
+/* Declarations (Local) */
+
+void aldl(IACC* isp, int n);
+void aldm(IACC* isp, int n);
+void astl(IACC* isp, int n);
+void astm(IACC* isp, int n);
+void bitovr();
+long getbau(int off);
+void interp(char* ip);
+int newrel();
+void obrlt();
+void putbau(long v, int off);
+void relovr();
+void rltxtovr();
+void rngerr(long v, long lo, long hi);
+
 
 /* new construction for relocation: an interpretive table is
    used.  There is a standard interpretive table, that is instantiated
@@ -91,7 +110,7 @@ static uns	reloc;		/* relocation item			*/
  * there is no item present
  */
 
-getrelitem(){
+void getrelitem() {
 
 	itmoff = *objblk.ob_ptr++ & 0xff;
 	if( (curadu < 8) && (itmoff & 0x80) )
@@ -159,10 +178,10 @@ sbase( reloc ) reg uns reloc;{
 
 /*
  * routine to change old reloc value to new reloc value - use in the
- * -r option to keep the relocation information 
+ * -r option to keep the relocation information
  */
 
-newrel(){
+int newrel() {
 
 	reg uns		trel;
 	reg char	*p;
@@ -240,7 +259,7 @@ selook( s ) reg char *s;{
  * treloc - Performs all relocation possible on a text block.
  */
 
-treloc(){
+void treloc() {
 
 	reg uns		nrel;
 	reg char	*ip;
@@ -287,7 +306,7 @@ xx(n,isp) reg IACC	*isp; {
 }
 #endif
 
-interp( ip ) char *ip; {
+void interp(char* ip) {
 
 	reg IACC	*isp;
 	reg int		i;
@@ -323,7 +342,7 @@ case A_INCAP:		/* increment addru pointer by tos		*/
 
 		itmoff += *isp++;
 		continue;
-		
+
 case A_ADD:		/* tos1 + tos ==> tos				*/
 		isp[1] += isp[0];
 		isp++;
@@ -366,7 +385,7 @@ case A_SHL:		/* tos1 << tos ==> tos				*/
 
 case A_NEG:		/* -tos ==> tos					*/
 
-		
+
 		*isp = -*isp;
 		continue;
 
@@ -532,8 +551,7 @@ default:	switch( i & 0xe0 ){
 	}
 }
 
-long
-getbau( off ){	
+long getbau(int off) {
 
 	/* fetch one addr unit (byte or bigger) starting at off */
 
@@ -549,7 +567,7 @@ getbau( off ){
 	return v;
 }
 
-putbau( v, off ) long v;{	
+void putbau( long v, int off ) {
 
 	/* store one addr unit (byte or bigger) starting at off */
 
@@ -563,7 +581,7 @@ putbau( v, off ) long v;{
 	for( i=0; i<n; i++ ) *p++ = v, v >>= 8;
 }
 
-aldl( isp, n ) reg IACC *isp; {
+void aldl(IACC* isp, int n) {
 
 	/* load n+1 curadu's from least significant first */
 	reg long	v;
@@ -596,7 +614,7 @@ aldl( isp, n ) reg IACC *isp; {
 	*isp = v;
 }
 
-aldm( isp, n ) reg IACC *isp; {
+void aldm(IACC* isp, int n) {
 
 	/* load n+1 curadu's from most significant first */
 	reg long	v;
@@ -632,15 +650,15 @@ aldm( isp, n ) reg IACC *isp; {
 	*isp = v;
 }
 
-bitovr(){
+void bitovr() {
 	error("F22 Bit field overflow");
 }
 
-rltxtovr(){
+void rltxtovr() {
 	error("F99 Rel Txt Error (Internal)");
 }
 
-astl( isp, n ) reg IACC *isp; {
+void astl(IACC* isp, int n) {
 
 	/* store n+1 curadu's from least significant first */
 
@@ -685,7 +703,7 @@ astl( isp, n ) reg IACC *isp; {
 	for( i=0; i<n; i++ ) putbau( v, itmoff+i ), v >>= curadu;
 }
 
-astm( isp, n ) reg IACC *isp; {
+void astm(IACC* isp, int n) {
 
 	/* store n+1 curadu's from most significant first */
 
@@ -734,7 +752,7 @@ astm( isp, n ) reg IACC *isp; {
 }
 
 
-rngerr(v,lo,hi)long v,lo,hi;{
+void rngerr(long v, long lo, long hi) {
 
 	char	rgsym[34];
 
@@ -752,10 +770,10 @@ rngerr(v,lo,hi)long v,lo,hi;{
 			rgsym,itmaddr,lo,v,hi);
 }
 
-relinit(){
+void relinit() {
 
 	/* routine called at the start of each object module to
-	   reinstantiate the default table 
+	   reinstantiate the default table
 	*/
 
 	reg int	i;
@@ -767,7 +785,7 @@ relinit(){
  * obrlt - Builds a relocation action map
  */
 
-obrlt(){		/* table of local action - global action pairs */
+void obrlt() {		/* table of local action - global action pairs */
 
 	reg int		i;
 	reg char	*p;
@@ -797,6 +815,6 @@ obrlt(){		/* table of local action - global action pairs */
 	relp = p;
 }
 
-relovr(){
+void relovr() {
 	error("F35 Relocation action table overflow");
 }

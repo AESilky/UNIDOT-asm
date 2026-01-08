@@ -45,6 +45,15 @@ static char rcsid[] =
 #endif
 #include "funcdefs.h"
 
+#include <string.h>
+
+/* Definitions (Local) */
+
+void dofile(char* s);
+void library();
+void ovlctl(char* s);
+
+
 /*
  * dopass - Performs a single pass over all of the object and library
  * files.
@@ -76,7 +85,7 @@ void dopass( filex, files ) int filex; char **files;{
 	for( i=0; i<filex; i++ ) dofile( files[i] );
 }
 
-dofile(s) char *s;{
+void dofile(char* s) {
 
 	reg char	*sp;
 	reg int		i;
@@ -107,10 +116,10 @@ prstats("start of dofile");
 	else
 		object();
 	curmod[0] = NULLCA;
-	fclose( OBJIN );
+	fclose( OBJIN ); OBJIN = (FILE*)0;
 }
 
-ovlctl(s) char *s; {
+void ovlctl(char* s) {
 
 	reg int		i;
 	reg char	*p;
@@ -157,7 +166,7 @@ ovlctl(s) char *s; {
  * the library start block.
  */
 
-library(){		/* simply reads OBJIN - RMM */
+void library() {		/* simply reads OBJIN - RMM */
 
 	long		off;
 	reg char	*sym;

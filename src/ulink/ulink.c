@@ -41,6 +41,10 @@ static char rcsid[] =
 #define LNKCNT	200		/* max number of files to link		*/
 
 #include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
 #ifdef vms
 #include "[-.incl]uobj.h"
 #endif
@@ -54,6 +58,7 @@ int	_iomode = 1;
 #include "../incl/uobj.h"
 #endif
 #include "ulink.h"
+#include "funcdefs.h"		/* Forward defines for GCC */
 
 char	*symfname;
 char	*relfname;
@@ -69,12 +74,26 @@ char	datstr[32];
 char	date[16];
 char	timstr[16];
 
+/* Declarations (local) */
 
-intr(){  fprintf(stderr,"INTERRUPT!\n"); quit( FATEXIT ); }
+void afinish();
+void bigspace(int n);
+void copymsg(FILE* f);
+void defsym(char* s);
+void flushclos(FILE* f);
+void linkspec(char* lnkfile);
+void map();
+void page();
+void pent(SYTAB* syp);
+void psect(SECTION* sep);
+void usage();
+
+
+void intr(){  fprintf(stderr,"INTERRUPT!\n"); quit( FATEXIT ); }
 /*		Here starts ulink			*/
 
 
-main( argc, argv ) int argc; char *argv[];{
+void main(argc, argv, env) int argc; char* argv[]; char* env[]; {
 
 	reg SECTION	*sep;
 
@@ -208,7 +227,7 @@ prstats("before interlude");
 		}
 		if( verbose ) printf("end of linking\n");
 	}
-	flushclos( OBJOUT );
+	flushclos( OBJOUT ); OBJOUT=(FILE*)0;
 	if( errct && verbose ) printf("pass 2 not performed\n");
 	if( mflag ) map();
 	if( ovct ) printf( "%4d overlapping sections\n", ovct );
@@ -227,10 +246,10 @@ prstats("before interlude");
  * init - Initialization processing.
  */
 
-init( argc, argv ) int argc; char **argv;{
+void init( argc, argv ) int argc; char **argv;{
 
-	reg char	*ap;
-	reg		i;
+	char	*ap;
+	int	i;
 
 	for( i=0; i<argc; i++ ){
 		ap = argv[i];
@@ -341,11 +360,11 @@ init( argc, argv ) int argc; char **argv;{
 		error("F94 The -s and -r options may not be used together");
 }
 
-linkspec( lnkfile ) char *lnkfile; {	/* do a link file */
+void linkspec( char *lnkfile ) {	/* do a link file */
 
-	reg char	*ap;
-	reg		i;
-	reg		ax;
+	char		*ap;
+	int		i;
+	int		ax;
 	FILE		*LNKFILE;
 	char		tmp[128];
 #define LNKSIZ	128
@@ -381,7 +400,7 @@ linkspec( lnkfile ) char *lnkfile; {	/* do a link file */
 		strcpy( ap, tmp );
 	}
 	aav[ax] = NULLCA;
-	flushclos( LNKFILE );
+	flushclos( LNKFILE ); LNKFILE=(FILE*)0;
 	init( ax, aav );		/* recurse */
 }
 /*
@@ -409,7 +428,7 @@ scanaddr( s ) reg char *s; {
  * locspec - Processes a location specification string.
  */
 
-locspec( s ) reg char *s;{
+void locspec(char* s) {
 
 
 	reg char	*n;
@@ -431,7 +450,7 @@ locspec( s ) reg char *s;{
  * defsym - Processes a symbol definition
  */
 
-defsym( s ) reg char *s;{
+void defsym( char *s) {
 
 
 	reg char	*n;
@@ -452,8 +471,7 @@ defsym( s ) reg char *s;{
  * rev - reverse a list
  */
 
-SYTAB *
-rev(p) reg SYTAB *p; {
+SYTAB * rev(p) reg SYTAB *p; {
 	reg SYTAB	*q;
 	reg SYTAB	*r;
 
@@ -464,7 +482,7 @@ rev(p) reg SYTAB *p; {
 
 static char *symfmt;
 
-pent(syp) reg SYTAB *syp; {	/* print a symbol entry	*/
+void pent(SYTAB* syp) {	/* print a symbol entry	*/
 
 	reg char	*valfmt;
 
@@ -476,7 +494,7 @@ pent(syp) reg SYTAB *syp; {	/* print a symbol entry	*/
 	fprintf( LIST, valfmt, syp->sy_val );
 }
 
-psect(sep) reg SECTION *sep; {	/* print a section entry	*/
+void psect(SECTION* sep) {	/* print a section entry	*/
 
 	reg SYTAB	*syp;
 	reg SECTION	*sep2;
@@ -504,7 +522,7 @@ top:	sep->se_atr2 |= SE_PRINTED;
 	}
 }
 
-bigspace(n){		/* output big space between sections */
+void bigspace(int n) {		/* output big space between sections */
 
 	if( linect < n || linect < 3 ){
 		page();
@@ -518,7 +536,7 @@ bigspace(n){		/* output big space between sections */
  * map - Outputs the load map.
  */
 
-map(){
+void map(){
 
 	reg SYTAB	*syp;
 	reg int		i;
@@ -640,7 +658,7 @@ map(){
 	if( LOCFILE ){
 		pghead =
 "Symbol      Value  Symbol      Value  Symbol      Value  Symbol      Value";
-		flushclos( LOCFILE );
+		flushclos( LOCFILE ); LOCFILE=(FILE*)0;
 		LOCFILE = fopen( locfname, "r" );
 		if( LOCFILE == NULL ) noread("local symbol file");
 		linect = 0;
@@ -658,7 +676,7 @@ map(){
 	if( ferror(LIST) ) error("F93 listing file write error");
 }
 
-page(){
+void page(){
 
 	fprintf( LIST,
 		"\f\n\n%-16s    %14s  %8s%-*sPage%4d\n\n%s\n\n",
@@ -666,7 +684,7 @@ page(){
 	linect = 56;
 }
 
-afinish(){		/* clean up the a.out format module */
+void afinish(){		/* clean up the a.out format module */
 
 	reg int		i;
 
@@ -674,18 +692,18 @@ DEB(0,("afin fpos = %ld, relsize = %ld, symsize = %ld\n",fpos,relsize,symsize));
 	fseek( OBJOUT, fpos, 0 );	/* move to end of file */
 	fclean( fpos, 0 );
 	if( rflag ){			/* copy the relocation items */
-		flushclos( RELFILE );
+		flushclos( RELFILE ); RELFILE=(FILE*)0;
 		RELFILE = fopen( relfname, "r" );
 		if( RELFILE == NULL ) noread("relocation file");
 		while( (i = getc(RELFILE)) != EOF ) putc( i, OBJOUT );
-		fclose( RELFILE );
+		fclose( RELFILE ); RELFILE=(FILE*)0;
 	}
 	if( !sflag ){			/* copy the symbols */
-		flushclos( SYMFILE );
+		flushclos( SYMFILE ); SYMFILE=(FILE*)0;
 		SYMFILE = fopen( symfname, "r" );
 		if( SYMFILE == NULL ) noread("symbol file");
 		while( (i = getc(SYMFILE)) != EOF ) putc( i, OBJOUT );
-		fclose( SYMFILE );
+		fclose( SYMFILE ); SYMFILE=(FILE*)0;
 	}
 	if( relsize || symsize || tranad ){
 		fseek( OBJOUT, 4L, 0 );
@@ -695,7 +713,7 @@ DEB(0,("afin fpos = %ld, relsize = %ld, symsize = %ld\n",fpos,relsize,symsize));
 	}
 }
 
-fclean( pos, length ) long pos;{
+void fclean(long pos, int length) {
 
 	static long hiwater = 0;
 
@@ -715,7 +733,7 @@ fclean( pos, length ) long pos;{
  * usage - Issues a fatal error message for a command line error.
  */
 
-usage(){
+void usage(){
 
 	copymsg(stdout);
 	printf("Usage: %s [options].. file [file]..\n",prname);
@@ -737,7 +755,7 @@ usage(){
 	quit(GOODEXIT);
 }
 
-copymsg(f)FILE *f;{
+void copymsg(f)FILE *f;{
 	fprintf(f, nsc ?
 "NLINK Version 1.3 by National Semiconductor Corp. (c) Copyright 1988\n" :
 "ULINK Version 4.10 by Unidot Inc (c) Copyright 1982,1985,1987,1988\n");
@@ -747,18 +765,19 @@ copymsg(f)FILE *f;{
  * quit - Exits with the specified status, after closing files.
  */
 
-quit(n){
+void quit(int n){
 
-	if( mflag ) fclose( LIST );
-	if( LOCFILE ) fclose( LOCFILE );
-	if( OBJOUT ) fclose( OBJOUT );
+	if( mflag && LIST ) {fclose( LIST ); LIST=(FILE*)0;}
+	if (OBJOUT) { fclose(OBJOUT); OBJOUT = (FILE*)0; }
+	if( LOCFILE ) {fclose( LOCFILE ); LOCFILE=(FILE*)0;}
 	fclose( stdout );
-	if( symfname ) unlink( symfname );
-	if( relfname ) unlink( relfname );
-	if( locfname ) unlink( locfname );
+	if( symfname ) {unlink( symfname ); symfname=(char*)0;}
+	if( relfname ) {unlink( relfname ); relfname=(char*)0;}
+	if( locfname ) {unlink( locfname ); locfname=(char*)0;}
 	if( (n == BADEXIT || n == FATEXIT) && objfile ){
 		if( verbose ) printf("removing %s\n",objfile);
 		unlink( objfile );
+		objfile = (char*)0;
 	}
 #ifdef STATS
 	if( verbose || n == BADEXIT || n == FATEXIT ) prstats("at quit");
@@ -778,7 +797,7 @@ prstats(s) char *s;{
 }
 #endif
 
-flushclos(f)FILE *f;{
+void flushclos(f)FILE *f;{
 	fflush( f );
 	if( ferror(f) ) error("F93object file write error");
 	fclose( f );

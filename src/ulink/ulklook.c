@@ -38,6 +38,10 @@ static char rcsid[]=
 "@(#)$Header: ulklook.c,v 4.5 92/07/17 15:04:08 rmm Rel $ ulink symbol table routines";
 
 #include "ulink.h"
+
+#include <string.h>
+
+
 /*		symbol table lookup			*/
 
 static SYTAB	**inspt;
@@ -178,7 +182,7 @@ numsort( s ) SYTAB *s; {
  * head is syhtab[0].
  */
 
-sysort(){
+void sysort(){
 
 	reg uns		halfi,
 			i,

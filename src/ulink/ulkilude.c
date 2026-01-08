@@ -43,6 +43,24 @@ static char rcsid[] =
 #else
 #include "../incl/uobj.h"
 #endif
+#include "funcdefs.h"
+
+#include <string.h>
+
+/* Definitions (Local) */
+
+void afmtstt();
+void allocseg(reg SECTION* sep, SECTION* lsep);
+void asgncom();
+void asgnsec();
+void asgnsym();
+void grpcheck(GROUP* gp);
+void grpout(GROUP* gp);
+void ovrlapch();
+void splitinit();
+void symtoaout(SECTION* csep);
+void symtoobj();
+void ufmtstt();
 
 	/* the following are the section location counters	*/
 
@@ -60,7 +78,7 @@ long			secfsize();
  */
 
 
-interlude(){
+void interlude(){
 
 	reg SECTION	*sep;
 	reg SYTAB	*syp;
@@ -137,7 +155,7 @@ DEB(0,("INTERLUDE\n"));
 DEB(0,("INTERLUDE end\n"));
 }
 
-afmtstt(){
+void afmtstt() {
 
 	reg SECTION	*sep;
 	reg int		i;
@@ -176,7 +194,7 @@ afmtstt(){
 	}
 }
 
-ufmtstt(){
+void ufmtstt() {
 
 	reg SECTION	*sep;
 	reg int		i;
@@ -302,7 +320,7 @@ secfsize( sep ) reg SECTION *sep; {
 }
 
 
-grpout( gp ) GROUP *gp; {
+void grpout(GROUP* gp) {
 
 	reg GROUP 	*gl;
 	reg char	*p;
@@ -324,7 +342,7 @@ grpout( gp ) GROUP *gp; {
 	oflush();
 }
 
-grpcheck(gp) GROUP *gp;{	/* check for group consistency		*/
+void grpcheck(GROUP* gp) {	/* check for group consistency		*/
 
 	reg SECTION 	*sep;
 	reg GROUP 	*gl;
@@ -354,7 +372,7 @@ grpcheck(gp) GROUP *gp;{	/* check for group consistency		*/
 	}
 }
 
-asgncom(){		/* assign addresses to common variables	*/
+void asgncom() {		/* assign addresses to common variables	*/
 
 	reg SECTION	*sep;
 	reg SYTAB	*syp;
@@ -418,7 +436,7 @@ asgncom(){		/* assign addresses to common variables	*/
 #endif
 }
 
-splitinit(){		/* called immediately after init	*/
+void splitinit(){		/* called immediately after init	*/
 
 #ifdef STATS
 	codsep = (SECTION *)zpalloc(sizeof(SECTION),SECUSE);
@@ -439,7 +457,7 @@ splitinit(){		/* called immediately after init	*/
 	datsep->se_sym->sy_rel = datsec = 2;
 }
 
-asgnsec(){		/* assign addresses to sections		*/
+void asgnsec() {		/* assign addresses to sections		*/
 
 	reg SECTION	*sep;
 	reg GROUP	*gl;
@@ -480,7 +498,7 @@ asgnsec(){		/* assign addresses to sections		*/
 	}
 }
 
-allocseg( sep, lsep ) reg SECTION *sep; SECTION *lsep;{
+void allocseg(reg SECTION* sep, SECTION* lsep) {
 
 	reg int		i;
 	reg long	base;		/* general location counter	*/
@@ -570,7 +588,7 @@ error("47 Location for sect %s does not meet alignment/extent constraints",
 }
 
 
-ovrlapch(){
+void ovrlapch() {
 
 	reg SECTION	*sep;
 	reg SECTION	*xsep;
@@ -616,7 +634,7 @@ ovrlapch(){
 	}
 }
 
-asgnsym(){		/* assign addresses to symbols		*/
+void asgnsym() {		/* assign addresses to symbols		*/
 
 	reg SECTION	*sep;
 	reg SYTAB	*syp;
@@ -635,7 +653,7 @@ asgnsym(){		/* assign addresses to symbols		*/
 }
 
 
-symtoobj(){		/* output symbols */
+void symtoobj() {		/* output symbols */
 
 	reg SYTAB	*syp;
 	reg uns		h;
@@ -673,7 +691,7 @@ symtoobj(){		/* output symbols */
 }
 
 
-symtoaout(csep) reg SECTION *csep;{	
+void symtoaout(SECTION* csep) {
 
 	/* output common symbols to a.out */
 

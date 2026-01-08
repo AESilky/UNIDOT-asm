@@ -36,14 +36,18 @@
 static char rcsid[]=
 "@(#)$Header: ulkmisc.c,v 4.7 92/04/26 16:13:21 rmm Rel $ ulink misc routines";
 
-#include <unistd.h> /* For 'close' and `sbrk` */
+#include <stdarg.h> 		/* For va_arg */
+#include <stdlib.h>		/* For aligned_alloc */
+#include <unistd.h> 		/* For 'close' and `sbrk` */
 
 #include "ulink.h"
+#include "funcdefs.h"
+
 /*
  * error - prints an error message and quits if fatal
  */
 
-error( s,a,b,c,d,e ) reg char *s; long a,b,c,d,e;{
+void error(char* s, ...) {
 
 	reg int		flag;
 	reg char	*p;
@@ -65,18 +69,21 @@ error( s,a,b,c,d,e ) reg char *s; long a,b,c,d,e;{
 	while( *s == ' ' ) s++;
 	if( errno[0] ) printf("(%s) ",errno);
 	if( curmod[0] ) printf("module %s: ",curmod);
-	printf( s, a, b, c, d, e );
+	va_list argptr;
+	va_start(argptr, s);
+	vprintf( s, argptr );
+	va_end(argptr);
 	printf( "\n" );
 	if( flag == 'F' ) quit( FATEXIT );
 	if( flag != 'W' ) errct++; else warnct++;
 }
 
-nocreat(s) char *s; {		/* cannot create file */
+void nocreat(char* s) {		/* cannot create file */
 
 	error("F02 cannot create %s",s);
 }
 
-noread(s) char *s; {		/* cannot read file */
+void noread(char* s) {		/* cannot read file */
 
 	error("F03 file %s does not exist or is unreadable",s);
 }
@@ -86,11 +93,11 @@ noread(s) char *s; {		/* cannot read file */
  * aligned to the coarsest boundary which might be required.
  */
 
-char *
+#ifdef USEVM
 #ifdef STATS
-palloc( size, which ) uns size;{
+char* palloc(size, which) uns size; {
 #else
-palloc( size ) uns size;{
+char* palloc(size) uns size; {
 #endif
 
 
@@ -124,6 +131,11 @@ again:		tmp = sbrk(i);
 	}
 	return oldtop;
 }
+#else
+char* palloc(uns size) {
+	return ((char*)aligned_alloc(VMALIGN, size));
+}
+#endif // USEVM
 
 /*
  * zpalloc() allocates space and guarantees that it is zero

@@ -8,23 +8,32 @@
 		"name": "uasz80 game.z80",
 		"type": "cppdbg",
 		"request": "launch",
-		"program": "${workspaceFolder}/uasz80/uasz80",
+		"cwd": "${workspaceFolder}/src/uasz80",
+		"program": "${workspaceFolder}/src/uasz80/uasz80",
 		"args": ["game.z80"],
 		"miDebuggerPath": "/usr/bin/gdb",
-		"cwd": "${workspaceFolder}/uasz80",
-		"preLaunchTask": "make: all"
+		"preLaunchTask": "Build UASZ80"
 	},
 	{
 		"name": "BAD SOURCE FILE",
 		"type": "cppdbg",
 		"request": "launch",
-		"program": "${workspaceFolder}/uasz80/uasz80",
-		"args": [
-			"NOFILE.z80"
-		],
+		"cwd": "${workspaceFolder}/src/uasz80",
+		"program": "${workspaceFolder}/src/uasz80/uasz80",
+		"args": ["NOFILE.z80"],
 		"miDebuggerPath": "/usr/bin/gdb",
-		"cwd": "${workspaceFolder}/uasz80",
-		"preLaunchTask": "make: all"
-	}
-]
+		"preLaunchTask": "Build UASZ80"
+	},
+{
+	"name": "ulink game.obj",
+	"type": "cppdbg",
+	"request": "launch",
+	"cwd": "${workspaceFolder}/src/ulink",
+	"program": "${workspaceFolder}/src/ulink/ulink",
+	"args": [
+		"-o", "game.bin", "../uasz80/game.obj"
+	],
+	"miDebuggerPath": "/usr/bin/gdb",
+	"preLaunchTask": "Build ULINK"
+}]
 }
