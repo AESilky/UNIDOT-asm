@@ -209,7 +209,7 @@ xsem01( sem ) int sem; {
 		break;
 
 	case 2:		/* <expr1> ::= addop <expr1> */
-		if( VMA2INT(pl->ps_val1) == TVADD ){ /* unary plus */
+		if( PSVAL1_I(pl->ps_val1) == TVADD ){	/* unary plus */
 			pl->ps_val0 = p->ps_val0;
 			pl->ps_val1 = p->ps_val1;
 		} else {				/* unary minus */
@@ -235,20 +235,20 @@ xsem01( sem ) int sem; {
 
 	case 5:		/* <expr2> ::= <expr2> mulop <expr1> */
 		if( rel2check(pl,p) ) goto relerr;
-		switch( VMA2INT(p[1].ps_val1) ){
+		switch( PSVAL1_I(p[1].ps_val1) ){
 		case TVMUL: pl->ps_val0 *= p->ps_val0; break;
 		case TVDIV: if( p->ps_val0 == 0 ){
 				error2("44 Divide by zero");
 				break;
 			    }
 			    pl->ps_val0 /= p->ps_val0;
-			    break;	
+			    break;
 		case TVMOD: if( p->ps_val0 == 0 ){
 				error2("45 Modulo 0");
 				break;
 			    }
 			    pl->ps_val0 %= p->ps_val0;
-			    break;	
+			    break;
 		case TVSHL: if( p->ps_val0 < 0 ){
 				error2("46 Shift value negative");
 				break;
@@ -271,7 +271,7 @@ xsem01( sem ) int sem; {
 		break;
 
 	case 6:		/* <expr3> ::= <expr3> addop <expr2> */
-		if( VMA2INT(p[1].ps_val1) == TVADD ){		/* addition */
+		if( PSVAL1_UI(p[1].ps_val1) == TVADD ){		/* addition */
 			if( pl->ps_val1 && p->ps_val1 && rel1check(p) )
 				rel1check( pl );
 			if( pl->ps_val1 && p->ps_val1 ){
@@ -279,7 +279,7 @@ xsem01( sem ) int sem; {
 				goto errex;
 			}
 			pl->ps_val0 += p->ps_val0;
-			pl->ps_val1 = ULONG2VMA(VMA2ULONG(pl->ps_val1) + VMA2ULONG(p->ps_val1));
+			pl->ps_val1 = PSVAL1(PSVAL1_UL(pl->ps_val1) + PSVAL1_UL(p->ps_val1));
 		} else {				/* subtraction */
 			if( p->ps_val1 ) rel1check( p );
 			if( pl->ps_val1 != p->ps_val1 ) rel1check( pl );
@@ -307,7 +307,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 
 	case 9:		/* <expr4> ::= <expr3> relop <expr3> */
 		rel2check(pl,p);	/* kill dummy sections only */
-		switch( VMA2INT(p[1].ps_val1) ){
+		switch( PSVAL1_I(p[1].ps_val1) ){
 		case TVEQ: pl->ps_val0 = pl->ps_val1 == p->ps_val1 &&
 				      pl->ps_val0 == p->ps_val0;
 			   break;
@@ -316,7 +316,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 			   break;
 		default:   if( pl->ps_val1 != p->ps_val1 ) goto cmperr;
 		}
-		switch( VMA2INT(p[1].ps_val1) ){
+		switch( PSVAL1_I(p[1].ps_val1) ){
 		case TVLT: pl->ps_val0 = pl->ps_val0 <  p->ps_val0; break;
 		case TVGT: pl->ps_val0 = pl->ps_val0 >  p->ps_val0; break;
 		case TVLE: pl->ps_val0 = pl->ps_val0 <= p->ps_val0; break;
@@ -334,7 +334,8 @@ error2("29 Both operands of subtraction must belong to the same section");
 		break;
 
 	case 11:	/* <primary> ::= constant */
-		pl->ps_val1 = pl->ps_flg = 0;
+		pl->ps_val1 = PSVAL1(0);
+		pl->ps_flg = 0;
 		break;
 
 	case 12:	/* <primary> ::= symbol */
@@ -347,7 +348,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 			  goto errex;
 			}
 			pl->ps_val0 = 0;
-			pl->ps_val1 = syp->sy_rel | URAMSK;
+			pl->ps_val1 = PSVAL1(syp->sy_rel | URAMSK);
 			break;
 		}
 		if(!( syp->sy_atr & SAREF )){	/* Must set referenced flag */
@@ -358,18 +359,19 @@ error2("29 Both operands of subtraction must belong to the same section");
 		    syp->sy_typ == STVAR && pass2 && !(syp->sy_atr&SADP2) ){
 			error2("25 Undefined symbol");
 			uflg = 1;
-			pl->ps_val0 = pl->ps_val1 = 0;
+			pl->ps_val0 = 0;
+			pl->ps_val1 = PSVAL1(0);
 			pl->ps_flg = OFFOR;
 		} else {
 			pl->ps_val0 = (long)syp->sy_val;
-			pl->ps_val1 = syp->sy_rel;
+			pl->ps_val1 = PSVAL1(syp->sy_rel);
 			pl->ps_flg = pass2 && !(syp->sy_atr&SADP2) ? OFFOR : 0;
 		}
 		break;
 
 	case 13:	/* <primary> ::= $ */
 		pl->ps_val0 = curloc/curadu;
-		pl->ps_val1 = cursec;
+		pl->ps_val1 = PSVAL1(cursec);
 		pl->ps_flg = 0;
 		break;
 
@@ -385,7 +387,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 			curop.op_val = curop.op_rel = curop.op_flg = 0;
 		} else {
 			curop.op_val = p->ps_val0;
-			curop.op_rel = p->ps_val1;
+			curop.op_rel = PSVAL1_UI(p->ps_val1);
 			curop.op_flg = p->ps_flg;
 		}
 		break;
@@ -399,7 +401,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 			break;
 		}
 		curop.op_val = p[1].ps_val0;		/* value	*/
-		curop.op_rel = p[1].ps_val1;		/* relocation	*/
+		curop.op_rel = PSVAL1_UI(p[1].ps_val1);	/* relocation	*/
 		curop.op_flg = pl->ps_val0;		/* repeat	*/
 		break;
 
@@ -411,7 +413,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 		c = 0;
 		while( i > 0 && j > 0 && ( c = *sp++ - *dp++ )== 0 ) i--, j--;
 		if( c == 0 ) c = i-j; /* c reflects the comparison outcome */
-		switch( p[1].ps_val1 ){
+		switch( PSVAL1_I(p[1].ps_val1) ){
 		case TVEQ: pl->ps_val0 = c == 0; break;
 		case TVNE: pl->ps_val0 = c!= 0; break;
 		case TVLT: pl->ps_val0 = c < 0; break;
@@ -420,7 +422,8 @@ error2("29 Both operands of subtraction must belong to the same section");
 		case TVGE: pl->ps_val0 = c >= 0; break;
 		}
 		if( pl->ps_val0 ) pl->ps_val0 = -1;
-		pl->ps_val1 = pl->ps_flg = 0;
+		pl->ps_val1 = PSVAL1(0);
+		pl->ps_flg = 0;
 		break;
 
 	case 18:	/* <operand> ::= <string1>		*/
@@ -431,7 +434,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 		break;
 
 	case 19:	/* <operand> ::= <expr> ( <string1> )	*/
-		
+
 		curop.op_cls = 1L << OCSTR;
 		rel1check( pl );			/* kill dummy sect */
 		if( eflg || uflg || pl->ps_val1 ){
@@ -453,7 +456,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 		lastsym = numlab((int)tokval);
 		nml = (NUMLAB *)rfetch(lastsym);
 		pl->ps_val0 = nml->nm_val;
-		pl->ps_val1 = nml->nm_rel;
+		pl->ps_val1 = PSVAL1(nml->nm_rel);
 		pl->ps_flg = OFFOR;
 		if( nml->nm_typ == STUND ){
 			error2("92 Undefined local label");
@@ -469,23 +472,24 @@ cmperr:	error2( "30 Relationals must refer to the same section");
 	goto errex;
 experr: error2( "26 Error in expression" );
 errex:	eflg = 1;
-	pl->ps_val0 = pl->ps_val1 = 0;
+	pl->ps_val0 = 0;
+	pl->ps_val1 = PSVAL1(0);
 }
 
 int rel1check(PSFRAME* p) {
 
-	if( p->ps_val1 < URBUND &&
-	    sectab[p->ps_val1].se_atr & (USEFIX|SEATDUMY) ) p->ps_val1 = 0;
+	if( PSVAL1_I(p->ps_val1) < URBUND &&
+	    sectab[PSVAL1_I(p->ps_val1)].se_atr & (USEFIX|SEATDUMY) ) p->ps_val1 = PSVAL1(0);
 	if( p->ps_val1 ) return 1;
 	return 0;
 }
 
 int rel2check(PSFRAME* pl, PSFRAME* p) {
 
-	if( p->ps_val1 < URBUND &&
-	    sectab[p->ps_val1].se_atr & (USEFIX|SEATDUMY) ) p->ps_val1 = 0;
-	if( pl->ps_val1 < URBUND &&
-	    sectab[pl->ps_val1].se_atr & (USEFIX|SEATDUMY) ) pl->ps_val1 = 0;
+	if( PSVAL1_I(p->ps_val1) < URBUND &&
+	    sectab[PSVAL1_I(p->ps_val1)].se_atr & (USEFIX|SEATDUMY) ) p->ps_val1 = PSVAL1(0);
+	if( PSVAL1_I(pl->ps_val1) < URBUND &&
+	    sectab[PSVAL1_I(pl->ps_val1)].se_atr & (USEFIX|SEATDUMY) ) pl->ps_val1 = PSVAL1(0);
 	if( pl->ps_val1 || p->ps_val1 ) return 1;
 	return 0;
 }

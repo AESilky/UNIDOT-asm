@@ -271,9 +271,9 @@ void rpt1(){
 	if(*opcstr ){ /* check opcode field for special cases */
 		opcode = oclook( opcstr );
 		if( opcode->oc_typ == OTDIR ){		/* directive */
-			if( opcode->oc_val == OCVAL(ADREPT) )	/* nested repeat */
+			if( OCVAL_I(opcode->oc_val) == ADREPT )	/* nested repeat */
 				rptlev++;
-			else if( opcode->oc_val == OCVAL(ADENDR) )	/* end rpt */
+			else if( OCVAL_I(opcode->oc_val) == ADENDR )	/* end rpt */
 				rptlev--;
 		}
 	}

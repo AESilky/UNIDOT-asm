@@ -4,18 +4,34 @@
 		{
 			"type": "make",
 			"targetName": "all",
-			"makeFileRelativePath": "uasz80/makefile",
+			"makeFileRelativePath": "src/uasz80/makefile",
 			"problemMatcher": [],
-			"label": "make: all",
-			"detail": "./uasz80/makefile"
+			"label": "Build UASZ80 (and common)",
+			"detail": "./src/uasz80/makefile"
 		},
 		{
-			"type": "clean",
-			"targetName": "all",
-			"makeFileRelativePath": "uasz80/makefile",
+			"type": "make",
+			"targetName": "clean",
+			"makeFileRelativePath": "src/uasz80/makefile",
 			"problemMatcher": [],
-			"label": "make: clean",
-			"detail": "./uasz80/makefile"
+			"label": "Clean UASZ80 (and common)",
+			"detail": "./src/uasz80/makefile"
+		},
+		{
+			"type": "make",
+			"targetName": "ulink",
+			"makeFileRelativePath": "src/ulink/makefile",
+			"problemMatcher": [],
+			"label": "Build ULINK",
+			"detail": "./src/ulink/makefile"
+		},
+		{
+			"type": "make",
+			"targetName": "clean",
+			"makeFileRelativePath": "src/ulink/makefile",
+			"problemMatcher": [],
+			"label": "Clean ULINK",
+			"detail": "./src/ulink/makefile"
 		}
 	]
 }

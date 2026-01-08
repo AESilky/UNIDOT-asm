@@ -165,7 +165,7 @@ int iilex(){
 	if( iilexeme.ps_sym == TKCOM ||
 	    iilexeme.ps_sym == TKSPC ||
 	    iilexeme.ps_sym == TKEOL ) iilexeme.ps_sym = TKEOF;
-	iilexeme.ps_val1 = ( uns ) iilexeme.ps_val0;
+	iilexeme.ps_val1 = PSVAL1(iilexeme.ps_val0);
 	return( iilexeme.ps_sym );
 }
 
@@ -472,12 +472,13 @@ void sem51(int sem) {
 		curop.op_cls = ( 1L << OCR8M )|( 1L << OCIHL );
 		curop.op_val = 6;
 		ixiyv = p[1].ps_val0;
-		ixiyr = p[1].ps_val1;
+		ixiyr = PSVAL1_UI(p[1].ps_val1);
 		break;
 
 	case 57:	/* <ixiy> ::= zr16 */
 		ixiy = ixiyi = p->ps_val0;
-		pl->ps_val0 = pl->ps_val1 = pl->ps_flg = 0;
+		pl->ps_val0 = pl->ps_flg = 0;
+		pl->ps_val1 = PSVAL1(0);
 		break;
 
 	case 58:	/* <operand> ::= zr8 */

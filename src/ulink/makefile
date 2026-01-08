@@ -21,11 +21,13 @@ CFLAGS=$(LAX_CC) $(DEBUG_CC) -DNOPD -DALIGN=4
 #LDFLAGS=
 
 # pdp-11 defines
-LDFLAGS=-i
+#LDFLAGS=-i
 # 3b2 and split id machines
 #LDFLAGS=
 # 32bit machines
 #LDFLAGS=
+# 64bit machines
+LDFLAGS=
 
 CC = cc
 

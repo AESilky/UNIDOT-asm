@@ -43,11 +43,28 @@ static char rcsid[] =
 #else
 #include "../incl/uobj.h"
 #endif
+#include "funcdefs.h"
+
+#include <string.h>
+
+
+/* Definitions (Local) */
+
+void fixabs(SECTION* sep);
+void obbsz();
+void obloc();
+void obpro();
+void obsec();
+void obtxt();
+void obtra();
+void odump();
+
+
 /*
  * obglo - Processes a global symbols block.
  */
 
-obglo(){
+void obglo(){
 
 	reg SYTAB	*syp;
 	reg uns		rel;
@@ -139,7 +156,7 @@ obglo(){
  *
  */
 
-obgrp(){
+void obgrp(){
 
 	reg SYTAB	*syp;
 	reg GROUP	*grp;
@@ -200,10 +217,10 @@ obgrp(){
  * object start block for the module.
  */
 
-object(){
+void object() {
 
-	reg SECTION	*sep;
-	reg		i;
+	SECTION*	sep;
+	int		i;
 
 	DEB(0,("Object file '%s'\n",curfile));
 	if( verbose ) printf("processing %s\n",curfile);
@@ -274,7 +291,7 @@ object(){
 }
 /* obloc - Processes a local symbols block.  */
 
-obloc(){
+void obloc() {
 
 	reg char	*rpt,
 			*vpt;
@@ -309,7 +326,7 @@ obloc(){
 
 /* obsec - Processes a sections block.  */
 
-obsec(){
+void obsec() {
 
 	reg SECTION	*sep;
 	reg SYTAB	*syp;
@@ -440,7 +457,7 @@ DEB(0,("sect %s is output section %d, atr is %x\n",
 	}
 }
 
-fixabs(sep) reg SECTION *sep; {
+void fixabs(SECTION* sep) {
 
 	if( sep->se_atr & USEFIX ){
 		error("W55 Absolute sections (%s) cannot be placed",
@@ -450,7 +467,7 @@ fixabs(sep) reg SECTION *sep; {
 }
 /* obtra - Processes a transfer address block.  */
 
-obtra(){
+void obtra() {
 
 	DEB(0,("\tOBTRA pass %d\n",pass2 + 1));
 	if( pass2 && !traflg ){
@@ -466,7 +483,7 @@ obtra(){
 
 /* obtxt - Processes a text block.  */
 
-obtxt(){
+void obtxt() {
 
 	reg SECTION	*sep;
 	reg int		count;
@@ -536,7 +553,7 @@ DEB(0,("obtxt: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
 }
 /* obbsz - Processes a bss block.  */
 
-obbsz(){		/* init bss section to zeroes		*/
+void obbsz() {		/* init bss section to zeroes		*/
 
 	reg SECTION	*sep;
 	reg int		count;
@@ -600,7 +617,7 @@ DEB(0,("obbsz: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
  * obpro - Handles a processor name declaration
  */
 
-obpro(){
+void obpro() {
 
 	static int once;
 
@@ -621,7 +638,7 @@ obpro(){
  * odump - Dumps an object block for debugging.
  */
 
-odump(){
+void odump() {
 
 	reg char	*optsave;
 
@@ -637,13 +654,13 @@ odump(){
 	objblk.ob_ptr = optsave;
 }
 
-outsym( sect, addr, str ) long addr; reg char *str; {
+void outsym(int sect, long addr, char* str) {
 
 	/* writes a symbol in afmt style - the address is the relocated
 	   address - it should be adjusted to be section relative if
 	   the rflag is set */
 
-	reg	i;
+	int	i;
 
 	if( rflag && sect ) addr -= sectab[sect & 0xff]->se_val;
 	putc( sect, SYMFILE );

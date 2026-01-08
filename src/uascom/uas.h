@@ -39,7 +39,7 @@
 #define UAS_H_
 
 #include <stdlib.h>
-#include "../incl/aesbfh.h"
+#include "../incl/aesbf.h"
 
 #ifndef USEVM
 #ifndef BIGMEM

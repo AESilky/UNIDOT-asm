@@ -3,5 +3,11 @@
     "editor.defaultFormatter": null,
     "editor.detectIndentation": false,
 	"editor.insertSpaces": false,
-	"editor.tabSize": 8
+	"editor.tabSize": 8,
+	"workbench.localHistory.exclude": {
+		"original/**": true
+	},
+	"search.exclude": {
+		"original/**": true
+	}
 }

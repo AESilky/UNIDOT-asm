@@ -514,7 +514,7 @@ void defsym(s) reg char *s; {
 	syp = (SYTAB *)wfetch(val);
 	if( syp->sy_typ != STUND ) usage("symbol %s previous defined",defbuf);
 	syp->sy_typ = STVAR;
-	syp->sy_val = LONG2VMA(tokval);
+	syp->sy_val = SYVAL(tokval);
 	syp->sy_atr = SADP2;
 	if( xflag ){
 		pass2++;

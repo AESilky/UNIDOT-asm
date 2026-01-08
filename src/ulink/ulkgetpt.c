@@ -38,6 +38,9 @@ static char rcsid[]=
 "@(#)$Header: ulkgetpt.c,v 4.4 88/02/25 06:58:27 rmm Rel $ ulink io module";
 
 #include "ulink.h"
+
+/* Definitions (local) */
+
 /*
  * ofill - Reads the next block into the specified object block
  * structure from the specified file.
@@ -45,7 +48,7 @@ static char rcsid[]=
 
 unsigned m_addr;
 
-ofill( obp, fp ) reg OBLOCK *obp; reg FILE *fp;{
+char ofill(OBLOCK* obp, FILE* fp) {
 
 
 	obp->ob_type = (char) getc( fp );
@@ -65,7 +68,7 @@ printf("%x: type %d size %x\n",m_addr,obp->ob_type,obp->ob_top - obp->ob_buf);
  * oflush - Outputs an object block to the object output file.
  */
 
-oflush(){
+void oflush(){
 
 	if( afmt ) return;
 	if( objblk.ob_type ){
@@ -81,7 +84,7 @@ oflush(){
 }
 /* ogetb - Returns the next byte from the specified object buffer.  */
 
-ogetb( obp ) reg OBLOCK *obp;{
+byte ogetb(OBLOCK* obp) {
 
 
 	return olodb(obp->ob_ptr++);
@@ -112,8 +115,7 @@ ogets( obp ) reg OBLOCK *obp;{
 }
 /* olodl - Returns the specified long word from the object buffer.  */
 
-long
-olodl( p ) reg char *p;{
+long olodl(char* p) {
 
 	return (long)olodw(p+2) << 16 | (long)olodw(p);
 }
@@ -121,22 +123,21 @@ olodl( p ) reg char *p;{
 
 /* olodw - Returns the specified word from the object buffer.  */
 
-ushort
-olodw( p ) reg char *p;{
+ushort olodw(char* p) {
 
 	return olodb(p+1) << 8 | olodb(p);
 }
 
 /* oputb - Puts the specified byte at the end of the object buffer.  */
 
-oputb( b ) uns b;{
+void oputb(uns b) {
 
 	ostob( b, objblk.ob_top++ );
 }
 
 /* oputl - Puts the specified long word at the end of the object buffer.  */
 
-oputl( l ) long l;{
+void oputl(long l) {
 
 	reg char	*p;
 
@@ -147,14 +148,14 @@ oputl( l ) long l;{
 	objblk.ob_top = ++p;
 }
 
-aword( w, file ) FILE *file; {/* puts word in specified file */
+void aword(ushort w, FILE* file) {/* puts word in specified file */
 
 	putc( w, file );
 	w >>= 8;
 	putc( w, file );
 }
 
-along( l, file ) long l; FILE *file; { /* puts long in specified file */
+void along(long l, FILE* file) { /* puts long in specified file */
 
 	aword( (int)l, file );
 	l >>= 16;
@@ -165,7 +166,7 @@ along( l, file ) long l; FILE *file; { /* puts long in specified file */
 
 /* oputs - Puts the specified string at the end of the object buffer.  */
 
-oputs( s ) reg char *s;{
+void oputs(char* s) {
 
 	reg char	*r;
 	r = objblk.ob_top;
@@ -174,7 +175,7 @@ oputs( s ) reg char *s;{
 }
 /* ostol - Stores the specified long word at the specified place in objbuf  */
 
-ostol( l, p ) long l; reg char *p;{
+void ostol(long l, char* p) {
 
 	ostob( (uns) l, p );
 	ostob( (uns)( l >> 8 ), p+1 );
@@ -185,7 +186,7 @@ ostol( l, p ) long l; reg char *p;{
 
 /* ostow - Stores the specified word at the specified place in objbuf.  */
 
-ostow( w, p ) uns w; reg char *p;{
+void ostow(uns w, char* p) {
 
 	ostob( w, p );
 	ostob( w >> 8, p+1 );

@@ -40,11 +40,11 @@ static char rcsid[] =
 #include "uas.h"
 #include "funcdefs.h"		/* Forward defines for GCC */
 
-#include <stdarg.h>
-#include <stdlib.h>
+#include <stdarg.h>		/* For variable arguments */
+#include <stdlib.h>		/* For aligned_alloc */
 #define _exit exit
 #include <string.h>
-#include <unistd.h> /* For 'close' and `sbrk` */
+#include <unistd.h> 		/* For 'close' and `sbrk` */
 
 void lineover();
 int oktobreak(reg int n);	/* is it ok to break a line after this character */

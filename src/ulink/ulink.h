@@ -41,6 +41,8 @@
  * Parameters.
  */
 
+#include "../incl/aesbf.h"
+
 #include <stdio.h>
 
 #ifdef vms
@@ -83,6 +85,12 @@
 #define ALIGN 4		/* this must be 4 on the 3b2 and the SUN */
 #endif
 
+#ifndef USEVM
+#define VMALIGN 4 	/* Alignment for `aligned_alloc` */
+#endif // !USEVM
+
+
+#define NULLCA 	'\000'			/* NULL char value */
 
 /* to include the variables in a module define VARS */
 /* to do the Whitesmithian thing define NOBSS */
@@ -132,17 +140,17 @@
  * Type definitions.
  */
 #ifndef reg
-#define	reg	register
+#define	reg
 #endif // reg
-#ifndef uns
-#define	uns	unsigned
-#endif // uns
-#ifndef struct
-#define struct register struct
-#endif
-#ifndef ushort
-#define ushort unsigned short
-#endif
+//#ifndef uns
+//#define	uns	unsigned
+//#endif // uns
+//#ifndef struct
+//#define struct register struct
+//#endif
+//#ifndef ushort
+//#define ushort unsigned short
+//#endif
 
 /*
  * Pseudo-functions.

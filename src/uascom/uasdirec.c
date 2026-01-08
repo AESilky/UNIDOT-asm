@@ -166,7 +166,7 @@ void dircom( dirnum ) int dirnum;{
 		if( syp->sy_typ != STUND || syp->sy_val != 0 )
 			syp->sy_atr |= SAMUD;
 		syp->sy_atr |= SAGLO;
-		syp->sy_val = LONG2VMA(l);
+		syp->sy_val = SYVAL(l);
 		xref( sym, 0 );
 		break;
 
