@@ -759,6 +759,7 @@ void copymsg(f)FILE *f;{
 	fprintf(f, nsc ?
 "NLINK Version 1.3 by National Semiconductor Corp. (c) Copyright 1988\n" :
 "ULINK Version 4.10 by Unidot Inc (c) Copyright 1982,1985,1987,1988\n");
+	fprintf(f, " Resurrected 2026, AESilky\n");
 }
 
 /*
