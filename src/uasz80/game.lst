@@ -1,6 +1,6 @@
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page   1
 
  1                       1 ;                                               GROUP # 4
@@ -63,7 +63,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4315                58 POLL:   
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page   2
 
  1  4315 c5             59         PUSH    BC
@@ -126,7 +126,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4378 d32b          116         OUT     (2BH),A
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page   3
 
  1  437a 3e00          117         LD      A,00H
@@ -189,7 +189,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  43cd 00            174         NOP
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page   4
 
  1  43ce 00            175         NOP
@@ -252,7 +252,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  43fd cd7043        232         CALL SETUP
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page   5
 
  1  4400 3e0c          233         LD      A,0CH           ; string to clear screen
@@ -315,7 +315,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4474               290 MLOOP3:
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page   6
 
  1  4474               291 MNEXT:
@@ -378,7 +378,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  44d3               348 PEXT:
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page   7
 
  1  44d3 d9            349         EXX
@@ -441,7 +441,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4540 32024a        406         LD      (YA),A                  ; YA = XDEL >> 1
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page   8
 
  1  4543               407 LUP:
@@ -504,7 +504,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  45aa 32024a        464         LD      (YA),A
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page   9
 
  1  45ad 3a004a        465         LD      A,(YINC)
@@ -567,7 +567,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4630 cb27          522         SLA     A                       ; SHIFT LEFT 
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  10
 
  1  4632 47            523         LD      B,A                     ; SAVE A VALUE
@@ -630,7 +630,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4699 2002          580         JR      NZ,SETBO
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  11
 
  1  469b 3680          581         LD      (HL),80H
@@ -693,7 +693,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58                     638 
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  12
 
  1  4710 fd6e00        639 LOFF:   LD      L,(IY+0)                ; load in HL = Y/3 * 64 + 3C00H
@@ -756,7 +756,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  475d 23            696         INC     HL
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  13
 
  1                     697 
@@ -819,7 +819,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  47c7 20dd          754         JR      NZ,CLP1                 ; DO ANOTHER CHIME
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  14
 
  1  47c9 c9            755         RET
@@ -882,7 +882,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  482a c1            812         POP     BC
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  15
 
  1  482b f1            813         POP     AF
@@ -945,7 +945,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  487f fe00          870         CP      00H
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  16
 
  1  4881 2803          871         JR      Z,SEXIT
@@ -1008,7 +1008,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  48f1 c9            928         RET
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  17
 
  1                     929 
@@ -1071,7 +1071,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4947 222a4b        986         LD      (TURRADDR),HL           ; UPDATE
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  18
 
  1  494a 2a244b        987         LD      HL,(PHASORADDR)
@@ -1134,7 +1134,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  49a5 210351       1044         LD      HL,EXPBMB1              ; SET THE FIRST PICTURE
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  19
 
  1  49a8 22024c       1045         LD      (BOMBADDR),HL
@@ -1197,7 +1197,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4a4a beffffffff   1096         .byte 0BEH, 0FFH, 0FFH, 0FFH, 0FFH, 0FFH
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  20
 
  1  4a4f ff           1096 
@@ -1260,7 +1260,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58                    1140 
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  21
 
  1  4b98 0802         1141 TURRR2: .byte 08H, 02H
@@ -1323,7 +1323,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4e19 0000         1185 
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  22
 
  1  4e1b 0000000000   1186         .byte 00, 00, 00, 00, 00, 00, 00
@@ -1386,7 +1386,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  4f28 4809         1228         .byte    72, 9
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  23
 
  1  4f2a 4609         1229         .byte    70, 9
@@ -1449,7 +1449,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  5042 c03cc03cc0   1283         .word 3CC0H, 3CC0H, 3CC0H
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  24
 
  1  5047 3c           1283 
@@ -1512,7 +1512,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  514c 80           1317 
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  25
 
  1  514d 8080808080   1318         .byte 080H, 080H, 080H, 080H, 080H, 080H
@@ -1575,7 +1575,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  5201 0e04         1350 EXPSHP4: .byte 0EH, 04H
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  26
 
  1  5203 8080808080   1351         .byte 080H, 080H, 080H, 080H, 080H, 080H, 080H
@@ -1638,7 +1638,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  52a3 8080808080   1384         .byte 080H, 080H, 080H, 080H, 080H, 0AAH
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  27
 
  1  52a8 aa           1384 
@@ -1701,7 +1701,7 @@ uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
 58  5351 ffffff80ff   1417         .byte 0FFH, 0FFH, 0FFH, 080H, 0FFH, 08CH, 080H, 080H
 
 
-uasz80  ./game.z80                                      Wed Jan  7 14:55:17 2026
+uasz80  game.z80                                        Sat Jan 10 15:57:38 2026
                                                                 Page  28
 
  1  5356 8c8080       1417 

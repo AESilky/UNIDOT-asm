@@ -12,6 +12,9 @@
 *.map
 *.exp
 
+# Listings (to include a specific listing use a '!' line)
+*.lst
+
 # Precompiled Headers
 *.gch
 *.pch

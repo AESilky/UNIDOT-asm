@@ -2,7 +2,8 @@
 /*									*/
 /* AES B.F. Hammer (to use where needed - mostly going to/from VMADR) 	*/
 /*									*/
-/* I'm not going to put a Copyright on this.				*/
+/* This file is,							*/
+/* Copyright 2026, AESilky						*/
 /*									*/
 /************************************************************************/
 
