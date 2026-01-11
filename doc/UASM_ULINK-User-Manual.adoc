@@ -1,0 +1,54 @@
+= Unidot Inc. UASM, ULINK: User's Manual
+include::man_settings.adoc[]
+:organization: Unidot Inc. (Docs: AESilky)
+// Multi-Part Book: [Assembler][Linker]
+:doctype: book
+:description: Unidot multi-processor macro-assembler and linker. Originally from the 1980s, it has been resurrected by AESilky in 2026.
+:imagesdir: ./images
+
+toc::[]
+
+[introduction]
+= Introduction
+The ((Unidot macro-assembler and linker)) (((Unidot macro-assembler)))(((Unidot linker))) was used in the 1980s (and beyond) to assemble assembly-language files for different ((microprocessors)) (i.e. ((Intel 8080))(((microprocessor, Intel 8080))), ((Zilog Z80))(((microprocessor, Zilog Z80))), etc.)
+
+[preface%nonfacing]
+= Preface
+
+The original Unidot documentation has been lost to time. This document does not pretend to be anything like the original. Rather, it has been created by reviewing the source code and some assembly-language source files that used the assembler and linker for the build toolchain. The goal is to provide a brief reference for the assembler and linker to aid in its continued use.
+
+= UASM
+
+((UASM)) is the generic, base, of the ((macro-assembler)). The macro-assembler is provided as microprocessor-specific versions that are configured for the particular processor's assembly language.
+
+In practice, a specific variant of the assembler will be used, for example *((uasz80))* for the ((Zilog Z80)) microprocessor.
+
+[%nonfacing]
+== Command Line Options
+The command line supports a number of options. (Examples from Windows).footnote:screenshots[Screenshots are from the Windows platform. The interface looks similar on Mac and Linux platforms.]
+
+== Directives
+Within an assembly source file, *directives* are used to control aspects of the build process.
+
+= ULINK
+
+== Command Line Options
+The command line supports a number of options.
+
+== Directives
+Within an assembly source file, *directives* are used to control aspects of the build process.
+
+
+ifeval::["{backend}" == "pdf"]
+[index]
+= Index
+endif::[]
+
+[colophon]
+= Colophon
+This document reflects the features of ((Unidot UASM)) and ((Unidot ULINK))
+Edit date: 1-10-2026
+
+This document is authored using *asciidoc*, and the pdf version rendered through
+*asciidoctor-pdf*, to create a manual that is more readable and more pleasing to the eye.
+

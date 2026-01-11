@@ -1,0 +1,30 @@
+
+Copyright (C) 1982,1985,1987,1988 by Unidot, Inc.
+
+Unidot, Inc.
+602 Park Point Dr.
+Golden, CO 80401
+
+All Rights Reserved
+
+This software is furnished under license and may be used and copied
+only in accordance with the terms of such license and with the
+inclusion of the above copyright notice.  This software or any other
+copies thereof may not be provided or otherwise made available to any
+other person.
+
+No title to or ownership of the software is hereby transferred.
+
+The information in this software is subject to change without notice
+and should not be construed as a commitment by Unidot, Inc.
+
+Unidot assumes no responsibility for the use or reliability of its
+software on equipment configurations that are not directly supported
+by Unidot, Inc.
+
+===
+The Assembler and Linker have been updated to compile in 'modern' (2026)
+environments by AESilky. The required modifications are,
+Copyright 2026 by AESilky (SilkyDESIGN)
+
+The source code was provided to AESilky for this purpose by Unidot (RMM).
