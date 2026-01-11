@@ -121,7 +121,9 @@ void main( argc, argv, env ) int argc; char *argv[]; char *env[];{
 	xwrdaln = wrdaln;
 	xbytaln = bytaln;
 	xlngaln = lngaln;
+	if (verbose) printf("pass1: start\n");
 	dopass();
+	if (verbose) printf("pass1: complete\n");
 	pass2 = 1;
 	interlude();
 	ulx = 0;		/* no usings or drops	*/
@@ -140,8 +142,10 @@ void main( argc, argv, env ) int argc; char *argv[]; char *env[];{
 	bytaln = xbytaln;
 	lngaln = xlngaln;
 	oflush();
+	if (verbose) printf("pass2: start\n");
 	dopass();
 	oflush();
+	if (verbose) printf("pass2: complete\n");
 	objtyp = UOBOND;
 	oflush();
 	if( lflag ){
@@ -172,9 +176,9 @@ void main( argc, argv, env ) int argc; char *argv[]; char *env[];{
 		fprintf( ERRFIL, errfmt, errct, warnct );
 		quit( BADEXIT );
 	}
-	if( verbose ) fprintf( ERRFIL, warnct ?
+	if( !quiet ) fprintf( ERRFIL, warnct ?
 			"no errors, %d warnings\n" :
-			"no errors detected\n", warnct );
+			"done (no errors, no warnings)\n", warnct );
 #ifdef msdos
 	if( warnct ) quit( WRNEXIT );
 #endif

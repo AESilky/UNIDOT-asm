@@ -278,6 +278,11 @@ top:	while( argn < argc ){	/* read command line arguments */
 				goto top;
 #endif
 
+		case 'Q':
+		case 'q':	quiet++;
+				if (argn >= argc) usage((char*)0);
+				continue;
+
 		case 'S':
 		case 's':	if( *ap ){
 					if( *ap == '=' ) ap++;
@@ -303,7 +308,8 @@ top:	while( argn < argc ){	/* read command line arguments */
 #endif
 
 		case 'U':
-		case 'u':	uext = 1;		continue;
+		case 'u':	uext = 1;
+				continue;
 
 		case 'V':
 		case 'v':	verbose++;
@@ -571,6 +577,7 @@ void usage(char* s, ...) {
 #ifndef NOPD
 	fprintf(ERRFIL,"\t-p<pdfile>    set a predefinition file\n");
 #endif
+	fprintf(ERRFIL,"\t-q            be quiet (except for errors)\n");
 	fprintf(ERRFIL,"\t-s<sectname>  set a default section name\n");
 #ifdef OLDNSCCODE
 	fprintf(ERRFIL,"\t-t<sysparm>   set a system parameter\n");
