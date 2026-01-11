@@ -30,7 +30,9 @@
 		"C_Cpp.vcFormat.newLine.beforeOpenBrace.namespace": "sameLine",
 		"C_Cpp.vcFormat.newLine.beforeOpenBrace.type": "sameLine",
 		"cSpell.words": [
-			"Unidot"
+			"BIGMEM",
+			"Unidot",
+			"USEVM"
 		]
 	}
 }

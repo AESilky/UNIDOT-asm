@@ -678,6 +678,7 @@ GLOBL char	*phylim IZ;		/* first unallocated memory location */
 GLOBL char	*phytop IZ;		/* first unused memory location	*/
 GLOBL int	prevsem IZ;		/* most recent semantic routine # */
 GLOBL char	*prname IZ;		/* name of this assembler	*/
+GLOBL char	quiet IZ;		/* be vewry, vewry, quiet (see 'verbose' */
 GLOBL char	rbrchr IX('}');		/* right brace char for macro args */
 GLOBL char	reading IX(1);		/* flag set while reading input */
 GLOBL char	*relbot IX(&objbuf[OBJSIZ]);/* ptr to reloc info in objbuf */
