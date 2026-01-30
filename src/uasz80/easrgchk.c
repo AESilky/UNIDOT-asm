@@ -1,4 +1,5 @@
-/* Function to fulfill `int regcheck(SYTAB* syp)` needed for the link. */
+/* Function to fulfill `int regcheck(SYTAB* syp)` needed for the link.      */
+/*  Will need to figure out what it is passing in and what check is needed. */
 
 #include "../uascom/funcdefs.h"
 

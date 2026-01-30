@@ -12,7 +12,7 @@
 		"program": "${workspaceFolder}/src/uasz80/uasz80",
 		"args": ["game.z80"],
 		"miDebuggerPath": "/usr/bin/gdb",
-		"preLaunchTask": "Build UASZ80"
+		"preLaunchTask": "Build UASZ80 (and common)"
 	},
 	{
 		"name": "BAD SOURCE FILE",
@@ -22,18 +22,40 @@
 		"program": "${workspaceFolder}/src/uasz80/uasz80",
 		"args": ["NOFILE.z80"],
 		"miDebuggerPath": "/usr/bin/gdb",
-		"preLaunchTask": "Build UASZ80"
+		"preLaunchTask": "Build UASZ80 (and common)"
 	},
-{
-	"name": "ulink game.obj",
-	"type": "cppdbg",
-	"request": "launch",
-	"cwd": "${workspaceFolder}/src/ulink",
-	"program": "${workspaceFolder}/src/ulink/ulink",
-	"args": [
-		"-o", "game.bin", "../uasz80/game.obj"
-	],
-	"miDebuggerPath": "/usr/bin/gdb",
-	"preLaunchTask": "Build ULINK"
-}]
+	{
+		"name": "ulink game.obj",
+		"type": "cppdbg",
+		"request": "launch",
+		"cwd": "${workspaceFolder}/src/ulink",
+		"program": "${workspaceFolder}/src/ulink/ulink",
+		"args": [
+			"-o", "game.bin", "../uasz80/game.obj"
+		],
+		"miDebuggerPath": "/usr/bin/gdb",
+		"preLaunchTask": "Build ULINK"
+	},
+	{
+		"name": "mkpdtab",
+		"type": "cppdbg",
+		"request": "launch",
+		"cwd": "${workspaceFolder}/src/mktable",
+		"program": "${workspaceFolder}/src/mktable/mkpdtab",
+		"args": [
+		],
+		"miDebuggerPath": "/usr/bin/gdb",
+		"preLaunchTask": "Build MKTABLE"
+	},
+	{
+		"name": "mktable",
+		"type": "cppdbg",
+		"request": "launch",
+		"cwd": "${workspaceFolder}/src/mktable",
+		"program": "${workspaceFolder}/src/mktable/mktable",
+		"args": [],
+		"miDebuggerPath": "/usr/bin/gdb",
+		"preLaunchTask": "Build MKTABLE"
+	}
+]
 }

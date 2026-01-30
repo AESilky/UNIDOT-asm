@@ -32,6 +32,22 @@
 			"problemMatcher": [],
 			"label": "Clean ULINK",
 			"detail": "./src/ulink/makefile"
+		},
+		{
+			"type": "make",
+			"targetName": "all",
+			"makeFileRelativePath": "src/mktable/makefile",
+			"problemMatcher": [],
+			"label": "Build MKTABLE",
+			"detail": "./src/mktable/makefile"
+		},
+		{
+			"type": "make",
+			"targetName": "clean",
+			"makeFileRelativePath": "src/mktable/makefile",
+			"problemMatcher": [],
+			"label": "Clean MKTABLE",
+			"detail": "./src/mktable/makefile"
 		}
 	]
 }

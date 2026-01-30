@@ -1,4 +1,4 @@
-; @(#)$Header: uasz80.z,v 1.2 87/12/01 13:30:23 rmm Rel $
+; Test file for mktable and mkpdtab
 
 #table O S
 OCNULL			; no operand 

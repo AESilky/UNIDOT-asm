@@ -1,4 +1,4 @@
-#makefile for ULINK
+#makefile for MKTABLE and MKPDTAB
 #
 #  (ES, 1/2026) The code contains a virtual memory allocation mechanism to
 #    allow large assembly source files to be assembled on machines that
@@ -19,57 +19,34 @@
 #    a version without `USEVM` defined has been tested).
 #
 
-#@(#)$Header: Makefile,v 4.2 88/10/09 15:56:19 rmm Rel $ makefile for ulink
-
 # LAX_CC - Define to ease warnings on GCC
 LAX_CC=-Wno-pointer-to-int-cast
 # DEBUG_CC - Define to add debug symbols to executable
 DEBUG_CC=-g
 # GCC on 64-bit Linux defines (ES)
-CFLAGS=$(LAX_CC) $(DEBUG_CC) -DNOPD -DALIGN=4
-# pdp-11 defines
-#CFLAGS= -DDEBUG
-# 3b2 defines
-#CFLAGS=-DNOBSS -DALIGN=4 -DVMADR='unsigned long'
+CFLAGS=$(LAX_CC) $(DEBUG_CC) -DALIGN=4
 
-#pdp - 23 fix version
-#LDFLAGS=-Z
-# 3b2 and split id machines
-#LDFLAGS=-i
-# 32 bit machines
-#LDFLAGS=
-
-# pdp-11 defines
-#LDFLAGS=-i
-# 3b2 and split id machines
-#LDFLAGS=
-# 32bit machines
-#LDFLAGS=
 # 64bit machines
 LDFLAGS=
 
 CC = cc
 
-OBJ= ulink.o ulkpass.o ulkilude.o ulkobj.o ulkrel.o \
-	ulkgetpt.o ulklook.o ulkmisc.o
+OBJ= mkpdtab.o mktable.o
 
-SRC= ulink.c ulkpass.c ulkilude.c ulkobj.c ulkrel.c \
-	ulkgetpt.c ulklook.c ulkmisc.c
+SRC= mkpdtab.c mktable.c
 
 BIN = /usr/bin
 
-ulink:		$(OBJ)
-	$(CC) $(LDFLAGS) -o ulink $(OBJ)
+all:	mkpdtab mktable
 
-Install:	Installbin
+mkpdtab:	$(OBJ)
+	$(CC) $(LDFLAGS) -o mkpdtab mkpdtab.o
 
-Installbin:	ulink
-	cp ulink $(BIN)
-	cd $(BIN);strip ulink;chown bin ulink;chgrp bin ulink;chmod 771 ulink
-	@echo ulink is installed in /usr/bin
+mktable:	$(OBJ)
+	$(CC) $(LDFLAGS) -o mktable mktable.o
 
 
-$(OBJ):		ulink.h ../incl/uobj.h
+$(OBJ):		$(SRC)
 
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c
@@ -77,5 +54,7 @@ $(OBJ):		ulink.h ../incl/uobj.h
 clean:
 	rm -f $(OBJ)
 
-print:
-	pr -n ../incl/uobj.h $(SRC)|lpr
+test:
+	mktable test.z
+	mkpdtab test.pd >test.h
+
