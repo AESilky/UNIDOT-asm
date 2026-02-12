@@ -36,7 +36,7 @@ static char rcsid[] =
 
 #include <stdarg.h> 		/* For va_arg */
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h>		/* For exit (and others) */
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h> 		/* For 'open' */

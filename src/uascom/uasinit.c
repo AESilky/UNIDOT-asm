@@ -58,8 +58,8 @@ int	_iomode = 1;
 #include <string.h>
 #include <time.h>
 
-int argnum(reg char* s);
-void defsym(reg char* s);
+int argnum(char* s);
+void defsym(char* s);
 void usage(char* s, ...);
 
 char		objsuf[8] = "obj";	/* predef may change this */
@@ -100,9 +100,9 @@ void getdat(){
 }
 
 char *
-lastcomp(s) reg char *s;{	/* find last component of file name */
+lastcomp(s) char *s;{	/* find last component of file name */
 
-	reg char *q;
+	char *q;
 
 	/* following code works well for UNIX, MSDOS, and VMS */
 
@@ -114,18 +114,18 @@ lastcomp(s) reg char *s;{	/* find last component of file name */
 /*
  * init - Performs assembler initialization.
  */
-void init( argc, argv ) int argc; char *argv[];{
+void init(int argc, char* argv[]) {
 
 
-	reg char	**av;
-	reg char	*ap;
-	reg char	*ep;
-	reg char	*sp;
-	reg int		fd;
-	reg int		i;
-	reg int		argn;
-	reg int		j;
-	reg int		defx;
+	char		**av;
+	char		*ap;
+	char		*ep;
+	char		*sp;
+	int		fd;
+	int		i;
+	int		argn;
+	int		j;
+	int		defx;
 	short		nerrlim;
 	short		sufsiz;
 	char		*objname;
@@ -485,9 +485,9 @@ top:	while( argn < argc ){	/* read command line arguments */
 	}
 }
 
-int argnum(s) reg char *s; {
+int argnum(s) char *s; {
 
-	reg int	i;
+	int	i;
 
 	i = 0;
 	while( *s ){
@@ -497,11 +497,11 @@ int argnum(s) reg char *s; {
 	return i;
 }
 
-void defsym(s) reg char *s; {
+void defsym(s) char *s; {
 
-	reg char	*p;
-	reg SYTAB	*syp;
-	reg int		i;
+	char	*p;
+	SYTAB	*syp;
+	int		i;
 	VMADR		val;
 	char	defbuf[64];
 

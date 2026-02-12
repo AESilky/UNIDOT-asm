@@ -27,6 +27,13 @@
 
 /************************************************************************
 *									*
+* Updated 1/2026 by AESilky to compile on current GCC running on 64-bit *
+* Linux. No functional changes are intended.				*
+*									*
+*************************************************************************/
+
+/************************************************************************
+*									*
 *		    Unidot Syntax Processor				*
 *			   Includes					*
 *									*
@@ -34,12 +41,25 @@
 
 /* @(#)$Header: usp.h,v 1.2 86/10/08 22:47:03 jdp Exp $ */
 
+#ifndef USEVM		/* (ES) Added to use UNIDOT Virtual Memory system */
+#ifndef BIGMEM
+#define BIGMEM		/* Indicate BIGMEM if not using Virtual Memory */
+#endif // !BIGMEM
+#define VMALIGN 4 	/* Alignment for `aligned_alloc` */
+#endif // !USEVM
+
+
 /* compile-time parameters, i.e. sizes of things, etc */
 
-#define reg		register
+// (ES - Let compiler take care of register) #define reg		register
+/* (ES) Change these to typedefs
 #define uns		unsigned
 #define uint		unsigned int
 #define ushort		unsigned short
+*/
+typedef unsigned int	uns;
+typedef unsigned int	uint;
+typedef unsigned short	ushort;
 
 #define	DICTSIZE	256	/* # of dict entries			*/
 #define RMARG		72	/* right margin for output		*/

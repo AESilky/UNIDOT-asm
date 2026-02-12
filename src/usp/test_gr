@@ -1,0 +1,63 @@
+* Version of 3/7/83.  Changed the grammar and semantic routines 56
+* and 57 to fix a bug which caused the operand (ix-5+2) to generate an
+* offset of 7 instead of -3.  In general, all normal precedence rules
+* are now followed in these constructs.
+*
+* @(#)$Header: uaz80gr,v 1.2 87/10/23 13:33:42 rmm Exp $ z80 operand grammar
+
+*terminals
+$ symbol constant string unop mulop addop relop andop xorop orop ( )
+r8 zr8 scc a c hl sp bc de af af' lcc zr16
+
+*productions
+<s> ::= <operand> 1
+<expr7> ::= <expr6> 0
+	| <expr7> orop <expr6> 8
+<expr6> ::= <expr5> 0
+	| <expr6> xorop <expr5> 4
+<expr5> ::= <expr4> 0
+	| <expr5> andop <expr4> 7
+<expr4> ::= <expr3> 0
+	| <expr3> relop <expr3> 9
+	| <string1> relop string 17
+<expr3> ::= <expr2> 0
+	| <expr3> addop <expr2> 6
+<expr2> ::= <expr1> 0
+	| <expr2> mulop <expr1> 5
+<expr1> ::= <primary> 0
+	| addop <expr1> 2
+	| unop <expr1> 3
+<primary> ::= constant 11
+	| symbol 12
+	| $ 13
+	| ( <expr7> ) 10
+<string1> ::= string 14
+	| <string1> string 20
+<operand> ::= <expr> 15
+	| <expr> ( <expr> ) 16
+	| <string1> 18
+	| <expr> ( <string1> ) 19
+	| a 51
+	| c 52
+	| ( hl ) 53
+	| scc 54
+	| lcc 55
+	| ( <ixiy> ) 56
+	| zr8 58
+	| ( c ) 59
+	| hl 60
+	| sp 61
+	| ( sp ) 62
+	| bc 63
+	| ( bc ) 64
+	| de 65
+	| ( de ) 66
+	| af 67
+	| af' 68
+	| zr16 69
+	| r8 70
+<expr> ::= <expr7> 0
+<ixiy> ::= zr16 57
+	| <ixiy> addop <expr2> 6
+
+*end

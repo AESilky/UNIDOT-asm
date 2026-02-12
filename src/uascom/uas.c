@@ -66,7 +66,7 @@ void intr(){
 
 /* the assembler starts here		*/
 
-void main( argc, argv, env ) int argc; char *argv[]; char *env[];{
+void main(int argc, char* argv[], char* env[]) {
 
 	reg int		i;
 	reg OCTAB	*oc;

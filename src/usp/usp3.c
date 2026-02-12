@@ -27,6 +27,13 @@
 
 /************************************************************************
 *									*
+* Updated 1/2026 by AESilky to compile on current GCC running on 64-bit *
+* Linux. No functional changes are intended.				*
+*									*
+*************************************************************************/
+
+/************************************************************************
+*									*
 *		    Unidot Syntax Processor				*
 *			   USP 3					*
 *									*
@@ -36,9 +43,13 @@
 static char rcsid[] =
 "@(#)$Header: usp3.c,v 1.3 86/10/08 22:47:17 jdp Exp $";
 
+#include <stdarg.h> 		/* For va_arg (ES) */
 #include <stdio.h>
 #include "usp.h"
 #include <signal.h>
+#include <stdlib.h>		/* For exit (and others) (ES) */
+#include <fcntl.h> 		/* For 'open' (ES) */
+#include <unistd.h> 		/* For 'close' and `sbrk` (ES) */
 
 DICTENT	*dict;			/* base of dictionary			*/
 DICTENT	*termtop;		/* top of terminals			*/
@@ -49,7 +60,7 @@ DICTENT	*dictop;		/* top of dictionary			*/
 char	*string;		/* base of strings			*/
 char	*sttop;			/* top of strings			*/
 char	*oname;			/* output table name			*/
-char	*sbrk();		/* memory getter			*/
+// char	*sbrk();		/* memory getter			*/
 char	*memtop;		/* top of occupied memory		*/
 char	*memlim;		/* end of acquired memory		*/
 char	obuf[BUFSIZ];		/* output buffer			*/
@@ -80,22 +91,54 @@ short	debug;			/* debug flag				*/
 short	Zflag;			/* no execl flag			*/
 short	slist;			/* stab listing flag			*/
 
-CGRP	**bxs();
 CGRP	*closure();
 CGRP	*statemove();
-LIST	*bxl();
 #ifdef msdos
 int	_iomode = 0;
 #endif
+
+/*
+   Internal function declarations. (ES)
+*/
+STATE* bfs();
+void bsuccs(STATE* s);
+void buildhs();
+void buildstab();
+LIST* bxl(CGRP** xtab, CGRP** xtop);
+CGRP** bxs(STATE* xlp, CGRP** xtp, CGRP** xtop);
+int compatible(STATE* s, STATE* t);
+void fatal(char* s, ...);
+void fhs(int nt);
+void grow();
+void listcg(CGRP* cgp);
+void listset(SET* s);
+void liststate(STATE* s, CGRP* top);
+void listxl(LIST* xlp);
+void merge(STATE* a, STATE* b);
+int opfile(char* s);
+void putch(char ch);
+void putst(char* s);
+char* readblock(int i);
+void readdict();
+void readprods();
+void rmfiles();
+void scontext(CGRP* cgp, SET* csp);
+CGRP* statemove(short* a, short* b, short* lim);
+void writeblock(int i, char* first, char* limit);
+void writehs();
+void writestab();
+void xcomp(CGRP** a, CGRP** b);
+
+
 
-intr(){ fprintf(stderr,"usp3 interrupt!\n"); rmfiles(); }
+void intr(){ fprintf(stderr,"usp3 interrupt!\n"); rmfiles(); }
 
 
-main( argc, argv ) int argc; char **argv;{
+int main(int argc, char** argv) {
 
 
-	reg char	*flags;	/* pointer to flags */
-	reg char	*fp;	/* pointer into flags for scanning */
+	char	*flags;	/* pointer to flags */
+	char	*fp;	/* pointer into flags for scanning */
 
 	if( signal( SIGINT, SIG_IGN ) == SIG_DFL )
 		signal( SIGINT, intr );		/* interrupt		*/
@@ -153,14 +196,13 @@ case 'Z':	Zflag = 1; continue;
    pointers, as are all states.
 */
 
-STATE *
-bfs(){
+STATE* bfs(){
 
-	reg CGRP	*cgp;	/* scanning pointer			*/
-	reg STATE	*base;	/* pointer to the state			*/
-	reg DICTENT	*dp;	/* dictionary ptr for scanning goal syms */
-	reg CGRP	*bot;	/* bottom config-group			*/
-	reg CGRP	*top;	/* top of config-groups			*/
+	CGRP	*cgp;	/* scanning pointer			*/
+	STATE	*base;	/* pointer to the state			*/
+	DICTENT	*dp;	/* dictionary ptr for scanning goal syms */
+	CGRP	*bot;	/* bottom config-group			*/
+	CGRP	*top;	/* top of config-groups			*/
 	short		px;	/* relative productions pointer		*/
 
 	base = (STATE *) memtop;
@@ -198,11 +240,11 @@ bfs(){
    if possible.  this is the meat of the whole algorithm.
 */
 
-bsuccs( s ) STATE *s; {
+void bsuccs(STATE* s) {
 
 
-	reg CGRP	*cgp;	/* for scanning state			*/
-	reg LIST	*xlp;	/* pointer for walking through xlist	*/
+	CGRP	*cgp;	/* for scanning state			*/
+	LIST	*xlp;	/* pointer for walking through xlist	*/
 	CGRP		*ctop;	/* top of closure (in clo)		*/
 	CGRP		**xtop;	/* top of xtab				*/
 	CGRP		**xtp;	/* scan pointer for xtab		*/
@@ -252,10 +294,10 @@ bsuccs( s ) STATE *s; {
    buildhs - builds the headsets for all nonterminal symbols.
 */
 
-buildhs(){
+void buildhs(){
 
-	reg DICTENT	*dp;
-	reg		nt;
+	DICTENT	*dp;
+	int		nt;
 
 	hs = (SET *)memtop;
 	hstop = &hs[nontermtop - termtop];
@@ -272,9 +314,9 @@ buildhs(){
    the state table is between stab and stop.
 */
 
-buildstab(){
+void buildstab() {
 
-	reg	csx;	/* relative pointer to current state */
+	int	csx;	/* relative pointer to current state */
 
 	stab = (STATE *)memtop;
 	fstate = lstate = bfs();
@@ -298,13 +340,12 @@ buildstab(){
    the skeleton has everything filled in except the xsuc field.
 */
 
-LIST *
-bxl( xtab, xtop ) CGRP **xtab,**xtop;{
+LIST* bxl(CGRP** xtab, CGRP** xtop) {
 
 
-	reg LIST	*xlp;
-	reg PRODENT	*pp;
-	reg LIST	*xbase;
+	LIST	*xlp;
+	PRODENT	*pp;
+	LIST	*xbase;
 	short		f;
 	short		s;
 
@@ -337,8 +378,7 @@ bxl( xtab, xtop ) CGRP **xtab,**xtop;{
    successor starts.
 */
 
-CGRP **
-bxs( xlp, xtp, xtop ) STATE *xlp; CGRP **xtp,**xtop;{
+CGRP** bxs(STATE* xlp, CGRP** xtp, CGRP** xtop) {
 
 
 	CGRP	*bot;		/* bottom cgrp of new state */
@@ -399,7 +439,7 @@ bxs( xlp, xtp, xtop ) STATE *xlp; CGRP **xtp,**xtop;{
    compatible - returns true iff the two states are weakly compatible.
 */
 
-compatible( s, t ) reg STATE *s,*t;{
+int compatible(STATE* s, STATE* t) {
 
 
 	SET	*siset;
@@ -435,11 +475,11 @@ compatible( s, t ) reg STATE *s,*t;{
    has already been found, to avoid redundant calculations.
 */
 
-fhs( nt ) int nt;{
+void fhs(int nt) {
 
 
-	reg DICTENT	*dp;
-	reg PRODENT	*pp;
+	DICTENT	*dp;
+	PRODENT	*pp;
 	short		px;
 	short		el;
 
@@ -472,7 +512,7 @@ fhs( nt ) int nt;{
 	}
 }
 
-grow(){
+void grow(){
 
 	if( sbrk( 2048 ) == (char *)-1 ) fatal( "out of memory" );
 	memlim += 2048;
@@ -484,11 +524,11 @@ grow(){
    the context set.
 */
 
-listcg( cgp ) reg CGRP *cgp;{
+void listcg(CGRP* cgp) {
 
-	reg DICTENT	*dp;
-	reg PRODENT	*pp;
-	reg PRODENT	*dot;
+	DICTENT	*dp;
+	PRODENT	*pp;
+	PRODENT	*dot;
 
 	/* first list the dotted production.  */
 
@@ -511,11 +551,11 @@ listcg( cgp ) reg CGRP *cgp;{
    listset - lists the members of the specified set.
 */
 
-listset( s ) SET *s;{
+void listset(SET* s) {
 
 
-	reg DICTENT	*dp;
-	reg char	*sp;
+	DICTENT	*dp;
+	char	*sp;
 	short		t;
 	short		first;
 
@@ -540,10 +580,10 @@ listset( s ) SET *s;{
    respectively.
 */
 
-liststate( s, top ) STATE *s; CGRP *top;{
+void liststate(STATE* s, CGRP* top) {
 
 
-	reg CGRP	*cgp;
+	CGRP	*cgp;
 
 	for( cgp = &s->scg[0]; cgp < top; cgp++ ) listcg( cgp );
 }
@@ -552,10 +592,10 @@ liststate( s, top ) STATE *s; CGRP *top;{
    listxl - lists a transition list (xlist).
 */
 
-listxl( xlp ) reg LIST *xlp;{
+void listxl(LIST* xlp) {
 
 
-	reg DICTENT	*dp;
+	DICTENT	*dp;
 
 	while( !(xlp->xflags & XEND) ){
 		dp = xlp->xflags & NT ?
@@ -572,11 +612,11 @@ listxl( xlp ) reg LIST *xlp;{
    necessary.
 */
 
-merge( a, b ) STATE *a,*b;{
+void merge(STATE* a, STATE* b) {
 
 
-	reg CGRP	*bp;	 /* for walking through b */
-	reg CGRP	*cp;	 /* for walking through c */
+	CGRP	*bp;	 /* for walking through b */
+	CGRP	*cp;	 /* for walking through c */
 	short		*c;	 /* pointer to closure area for new contexts */
 	CGRP 		*ctop;	 /* top of c */
 	short		*nct;	 /* pointer to successor new contexts */
@@ -684,7 +724,7 @@ merge( a, b ) STATE *a,*b;{
    position in ocol.
 */
 
-putch( ch ) char ch;{
+void putch(char ch) {
 
 
 	if( ch == '\n' ) ocol = 0;
@@ -694,14 +734,13 @@ putch( ch ) char ch;{
 
 /* putst - output the specified string.  */
 
-putst( s ) char *s;{
+void putst(char* s) {
 
 
 	while( *s ) putch( *s++ );
 }
 
-char *
-readblock( i ) int i;{
+char* readblock(int i) {
 
 
 	ushort	length;
@@ -720,7 +759,7 @@ readblock( i ) int i;{
 	return oldtop;
 }
 
-readdict(){
+void readdict() {
 
 	lseek( dfile, 0L, 0 );
 	dict = (DICTENT *)readblock( dfile );		/* terminals	*/
@@ -732,7 +771,7 @@ readdict(){
 	sttop = memtop;				/* top of strings */
 }
 
-readprods(){
+void readprods() {
 
 	lseek( pfile, 0L, 0 );
 	prod = (PRODENT *)readblock( pfile );		/* productions */
@@ -745,11 +784,11 @@ readprods(){
    specified set.
 */
 
-scontext( cgp, csp ) reg CGRP *cgp; SET *csp;{
+void scontext(CGRP* cgp, SET* csp) {
 
 
-	reg PRODENT	*pp;
-	reg		el;
+	PRODENT	*pp;
+	int		el;
 
 	clearset( csp );
 	pp = cgp->cpp+prod;
@@ -776,11 +815,10 @@ scontext( cgp, csp ) reg CGRP *cgp; SET *csp;{
    statemove - moves a state nucleus from one place to another.
 */
 
-CGRP *
-statemove( a, b, lim ) reg short *a,*b;short *lim;{
+CGRP* statemove(short* a, short* b, short* lim) {
 
 
-	reg short	*top;
+	short	*top;
 
 	top = (short *)&ST(b)->scg[ST(a)->ssize];
 	if( top > lim ) return 0;
@@ -795,7 +833,7 @@ statemove( a, b, lim ) reg short *a,*b;short *lim;{
    byte following the last byte.
 */
 
-writeblock( i, first, limit ) int i; char *first,*limit;{
+void writeblock(int i, char* first, char* limit) {
 
 
 	ushort	length;		/* length of the block to be written */
@@ -810,7 +848,7 @@ writeblock( i, first, limit ) int i; char *first,*limit;{
    writehs - writes the headsets out to disk.
 */
 
-writehs(){
+void writehs() {
 
 	lseek( hfile, 0L, 0 );
 	writeblock( hfile, (char *)hs, (char *)hstop );
@@ -820,7 +858,7 @@ writehs(){
    writestab - writes the stab out to disk.
 */
 
-writestab(){
+void writestab() {
 
 	lseek( sfile, 0L, 0 );
 	writeblock( sfile, (char *)stab, (char *)stop );
@@ -833,12 +871,12 @@ writestab(){
    second one, respectively.
 */
 
-xcomp( a, b ) CGRP **a; CGRP **b;{
+void xcomp(CGRP** a, CGRP** b) {
 
 
-	reg PRODENT	*app;
-	reg PRODENT	*bpp;
-	reg		r;
+	PRODENT	*app;
+	PRODENT	*bpp;
+	int		r;
 
 	app = &prod[(*a)->cpp];
 	bpp = &prod[(*b)->cpp];
@@ -853,15 +891,18 @@ xcomp( a, b ) CGRP **a; CGRP **b;{
 
 
 /*VARARGS1*/
-fatal( s, a, b ) char *s; {
+void fatal(char* s, ...) {
 
+	va_list argptr;
+	va_start(argptr, s);
 	fprintf( stderr, "fatal error in usp3: ");
-	fprintf( stderr, s, a, b);
+	vfprintf( stderr, s, argptr);
 	fprintf( stderr, "\n");
+	va_end(argptr);
 	rmfiles();
 }
 
-rmfiles(){
+void rmfiles() {
 	if( !Zflag && !debug ){
 		unlink( dname );
 		unlink( pname );
@@ -873,9 +914,9 @@ rmfiles(){
 	exit(1);
 }
 
-opfile(s) char *s;{
+int opfile(char* s) {
 
-	reg	i;
+	int	i;
 
 #ifdef msdos
 	_iomode = 1;		/* intermediate files are binary */

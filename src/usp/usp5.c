@@ -27,6 +27,13 @@
 
 /************************************************************************
 *									*
+* Updated 1/2026 by AESilky to compile on current GCC running on 64-bit *
+* Linux. No functional changes are intended.				*
+*									*
+*************************************************************************/
+
+/************************************************************************
+*									*
 *		    Unidot Syntax Processor				*
 *			   USP5						*
 *			Final Table Output				*
@@ -51,7 +58,7 @@ char	*string;		/* base of strings			*/
 char	*sttop;			/* top of strings			*/
 char	*oname;			/* output file name			*/
 char	*readblock();
-char	*sbrk();
+// char	*sbrk();
 
 AENT	*atab;			/* base of action table			*/
 #define AT(a)	((AENT *)(a))	/* cast to a action tbl ptr	*/

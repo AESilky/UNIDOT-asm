@@ -27,6 +27,13 @@
 
 /************************************************************************
 *									*
+* Updated 1/2026 by AESilky to compile on current GCC running on 64-bit *
+* Linux. No functional changes are intended.				*
+*									*
+*************************************************************************/
+
+/************************************************************************
+*									*
 *		    Unidot Syntax Processor				*
 *			   Pass1					*
 *									*
@@ -36,9 +43,14 @@
 static char rcsid[] =
 "@(#)$Header: usp.c,v 1.2 86/10/06 10:21:17 rmm Exp $";
 
+#include <stdarg.h> 		/* For va_arg (ES) */
 #include <stdio.h>
+#include <string.h>		/* strcpy (ES) */
 #include "usp.h"
 #include <signal.h>
+#include <stdlib.h>		/* For exit (and others) (ES) */
+#include <fcntl.h> 		/* For 'open' (ES) */
+#include <unistd.h> 		/* For 'close' and `sbrk` (ES) */
 
 #define	CONTROL	0
 #define	SYMBOL	1
@@ -63,7 +75,7 @@ char	oname[20];	/* output name					*/
 char	debug;		/* debug flag					*/
 char	Zflag;		/* no execl flag				*/
 char	glist;		/* grammar listing flag				*/
-char	*sbrk();
+// char	*sbrk();
 
 char	string[STRINGSIZE];
 char	*sttop = &string[0];
@@ -115,21 +127,46 @@ union {
 #ifdef msdos
 int	_iomode = 0;
 #endif
+
+/*
+   Internal function declarations. (ES)
+*/
+void dlook();
+void dmove(DICTENT* start, DICTENT* finish);
+int dmt(int nt);
+void error(char* msg);
+void fatal(char* s, ...);
+void makefile(char* name);
+void markempties();
+void newgs(DICTENT* dp, int pos);
+void newsem(int semno, int pos);
+void nextch();
+void nextch();
+int opfile(char* s, int n);
+void readinput();
+void readprods();
+void rmfiles();
+void setpels();
+void sortdict();
+void writeblock(int i, char* first, char* limit);
+void writedict();
+void writeprods();
+
 /*
    main - phase 1 reads the input file and generates a symbol dictionary
    and a data structure describing the productions.  it writes these
    two data structures onto the files dfile and pfile respectively.
 */
 
-intr(){ fprintf(stderr,"usp interrupt\n"); rmfiles(); }
+void intr(){ fprintf(stderr,"usp interrupt\n"); rmfiles(); }
 
-main( argc, argv ) int argc; char **argv;{
+int main(int argc, char** argv) {
 
 
-	reg char	*ap;	/* argument pointer */
-	reg char	*fp;	/* flags pointer */
-	reg char	*iname;	/* input file name */
-	reg int		i;	/* counter */
+	char	*ap;	/* argument pointer */
+	char	*fp;	/* flags pointer */
+	char	*iname;	/* input file name */
+	int	i;	/* counter */
 	char argstr[64];
 
 	iname = NULL;
@@ -263,7 +300,7 @@ next:;
 
 /* makefile - creates a file of the specified name */
 
-makefile( name ) char *name;{
+void makefile( char *name ) {
 
 
 	int	i;	/* file descriptor */
@@ -282,9 +319,9 @@ makefile( name ) char *name;{
    the dictionary, a new entry is created for that symbol.
 */
 
-dlook(){
+void dlook(){
 
-	reg DICTENT	*dp;
+	DICTENT	*dp;
 
 	for( dp = dict; dp < dictop; dp++ ) /* search existing entries */
 		if( strcmp(dp->dstring+string, sttop) == 0 ){
@@ -305,11 +342,11 @@ dlook(){
 
 /* dmove - move a dictionary entry from source to dest */
 
-dmove( start, finish ) DICTENT *start,*finish;{
+void dmove(DICTENT* start, DICTENT* finish) {
 
-	reg		c;
-	reg char	*source;
-	reg char	*dest;
+	int		c;
+	char	*source;
+	char	*dest;
 
 	source = (char *) start;
 	dest = (char *) finish;
@@ -325,12 +362,12 @@ dmove( start, finish ) DICTENT *start,*finish;{
    calculations.
 */
 
-dmt( nt ) int nt;{
+int dmt( int nt ) {
 
 
-	reg DICTENT	*dp;
-	reg PRODENT	*pp;
-	reg		px;
+	DICTENT	*dp;
+	PRODENT	*pp;
+	int		px;
 
 	dp = nt + termtop;		/* pointer to dictionary entry */
 	if( dp->dflags & CM )		/* already have the answer */
@@ -364,7 +401,7 @@ dmt( nt ) int nt;{
 */
 
 DICTENT *
-dshuffle( dp, flags ) reg DICTENT *dp; char flags; {
+dshuffle( dp, flags ) DICTENT *dp; char flags; {
 
 
 	DICTENT	temp,	/* used for swapping around dictionary entries */
@@ -388,22 +425,25 @@ dshuffle( dp, flags ) reg DICTENT *dp; char flags; {
 }
 
 
-error( msg ) char *msg;{
+void error(char* msg) {
 
 	printf( "at line %d: %s\n", linect, msg );
 	errct++;
 }
 
 /*VARARGS1*/
-fatal( msg, a, b ) char *msg; {
+void fatal(char* msg, ...) {
 
+	va_list argptr;
+	va_start(argptr, msg);
 	fprintf(stderr,"usp fatal error at line %d: ",linect);
-	fprintf(stderr,msg,a,b);
+	vfprintf(stderr,msg, argptr);
 	fprintf(stderr,"\n");
+	va_end(argptr);
 	rmfiles();
 }
 
-rmfiles(){
+void rmfiles(){
 	unlink( dname );
 	unlink( pname );
 	unlink( sname );
@@ -418,10 +458,10 @@ rmfiles(){
    for all such entries.
 */
 
-markempties(){
+void markempties(){
 
-	reg DICTENT	*dp;
-	reg		nt;
+	DICTENT	*dp;
+	int		nt;
 
 	for( dp = termtop; dp < nontermtop; dp++ ) /* clear all CM flags */
 		dp->dflags &= ~CM;
@@ -454,10 +494,10 @@ newp(){
    newgs - add a grammar symbol entry to the productions data structure.
 */
 
-newgs( dp, pos ) DICTENT *dp; int pos;{
+void newgs(DICTENT* dp, int pos) {
 
 
-	reg PRODENT	*pp;
+	PRODENT	*pp;
 
 	pp = newp();
 	pp->pflags = pos;
@@ -473,10 +513,9 @@ newgs( dp, pos ) DICTENT *dp; int pos;{
    newsem - add a semantic number entry to the productions data structure.
 */
 
-newsem( semno, pos ) int semno, pos;{
+void newsem(int semno, int pos) {
 
-
-	reg PRODENT	*pp;
+	PRODENT	*pp;
 
 	pp = newp();
 	pp->pflags = pos | SEM;
@@ -489,7 +528,7 @@ newsem( semno, pos ) int semno, pos;{
    updated to reflect the column and line numbers, respectively.
 */
 
-nextch(){
+void nextch(){
 
 
 	if( ch == '\n' ){
@@ -517,10 +556,10 @@ nextch(){
    "|"			5 (BAR)			unused
 */
 
-nextsym(){
+void nextsym(){
 
-	reg char *sp;	/* pointer for collecting a string */
-	reg	bol,	/* flag indicating beginning of line */
+	char *sp;	/* pointer for collecting a string */
+	int	bol,	/* flag indicating beginning of line */
 		com;	/* flag indicating comments are being flushed */
 
 	do{
@@ -599,9 +638,9 @@ nextsym(){
    control words it contains.
 */
 
-readinput(){
+void readinput(){
 
-	reg	reading,	/* flag to show when we are finished */
+	int	reading,	/* flag to show when we are finished */
 		prec,		/* operator precedence */
 		freq;		/* operator frequency */
 
@@ -702,11 +741,11 @@ readinput(){
    data structure which describes the grammar.
 */
 
-readprods(){
+void readprods(){
 
-	reg	 	pos,	/* position of symbol within a production */
+	int	 	pos,	/* position of symbol within a production */
 			poundval; /* semantic num generated by pound (#) sign */
-	reg DICTENT	*oldlp;	/* dictionary ptr to most recent left part */
+	DICTENT	*oldlp;	/* dictionary ptr to most recent left part */
 
 	pos = 0;
 	oldlp = 0;
@@ -768,11 +807,11 @@ readprods(){
    confusion.
 */
 
-setpels(){
+void setpels(){
 
-	reg		px;	/* index in prod */
-	reg PRODENT	*pp;	/* pointer into prod */
-	reg DICTENT	*dp;	/* pointer into dict */
+	int		px;	/* index in prod */
+	PRODENT	*pp;	/* pointer into prod */
+	DICTENT	*dp;	/* pointer into dict */
 
 	for( dp = dict; dp < termtop; dp++ ) /* first the terminals */
 		for( px = dp->dlink; px; px = pp->plink ){
@@ -794,7 +833,7 @@ setpels(){
    within each of these classes is unchanged.
 */
 
-sortdict(){
+void sortdict(){
 
 	termtop = dshuffle( dict, RP );		/* terminals to front */
 	if( termtop >= dict+SETSIZE )		/* too many terminals */
@@ -812,7 +851,7 @@ sortdict(){
    byte following the last byte.
 */
 
-writeblock( i, first, limit ) int i; char *first,*limit;{
+void writeblock(int i, char* first, char* limit ) {
 
 
 	ushort	length;		/* length of the block to be written */
@@ -835,7 +874,7 @@ writeblock( i, first, limit ) int i; char *first,*limit;{
    zero length.
 */
 
-writedict(){
+void writedict(){
 
 	lseek( dfile, 0L, 0 );
 	writeblock( dfile, (char *)dict, (char *)termtop );
@@ -850,15 +889,15 @@ writedict(){
    block is written, which contains the entire data structure.
 */
 
-writeprods(){
+void writeprods(){
 
 	lseek( pfile, 0L, 0 );
 	writeblock( pfile, (char *)prod, (char *)prodtop );
 }
 
-opfile(s,n) char *s;{
+int opfile(char* s, int n) {
 
-	reg	i;
+	int	i;
 
 #ifdef msdos
 	_iomode = 1;		/* intermediate files are binary */

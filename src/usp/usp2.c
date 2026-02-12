@@ -27,6 +27,13 @@
 
 /************************************************************************
 *									*
+* Updated 1/2026 by AESilky to compile on current GCC running on 64-bit *
+* Linux. No functional changes are intended.				*
+*									*
+*************************************************************************/
+
+/************************************************************************
+*									*
 *		    Unidot Syntax Processor				*
 *			   Lister					*
 *									*
@@ -35,12 +42,17 @@
 
 static char rcsid[] =
 "@(#)$Header: usp2.c,v 1.3 86/10/08 22:47:12 jdp Exp $";
+
 #include <stdio.h>
 #include "usp.h"
+#include <fcntl.h> 		/* For 'open' (ES) */
 #include <signal.h>
+#include <stdarg.h> 		/* For va_arg (ES) */
+#include <stdlib.h>		/* For exit (and others) (ES) */
+#include <unistd.h> 		/* For 'close' and `sbrk` (ES) */
 
 char	obuf[BUFSIZ];	/* output buffer */
-char	*sbrk();
+// char	*sbrk();
 char	*oname;
 
 DICTENT	*dict;			/* base of dictionary			*/
@@ -68,11 +80,26 @@ int	pfile;			/* productions file			*/
 int	_iomode = 0;
 #endif
 
+/*
+   Internal function declarations. (ES)
+*/
+void dumpdict();
+void dumpprods();
+void dumpsem();
+void fatal(char* s, ...);
+void grow();
+int opfile(char* s);
+char* readblock(int i);
+void readdict();
+void readprods();
+void rmfiles();
+
+
 
 
-intr(){ fprintf(stderr,"usp2 interrupt\n"); rmfiles(); }
+void intr(){ fprintf(stderr,"usp2 interrupt\n"); rmfiles(); }
 
-main( argc, argv ) int argc; char **argv;{
+int main(int argc, char** argv) {
 
 
 	char	*flags,	/* pointer to flags */
@@ -124,7 +151,7 @@ main( argc, argv ) int argc; char **argv;{
 #endif
 }
 
-dumpdict(){
+void dumpdict(){
 
 	DICTENT	*dp;
 
@@ -143,11 +170,11 @@ dumpdict(){
 	}
 }
 
-dumpprods(){
+void dumpprods(){
 
-	reg DICTENT	*dp,
+	DICTENT	*dp,
 			*dp2;
-	reg PRODENT	*pp;
+	PRODENT	*pp;
 	short		px;
 	short		upel;
 	short		oldlp;
@@ -184,10 +211,10 @@ dumpprods(){
 /*
    dumpsem - Lists the unused semantic numbers.
 */
-dumpsem() {
+void dumpsem() {
 
-reg DICTENT	*dp;
-reg PRODENT	*pp;
+DICTENT	*dp;
+PRODENT	*pp;
 int		i;
 int		px;
 int		sem;
@@ -232,7 +259,7 @@ int		firsttime;
 	putchar('\n');
 }
 
-grow(){
+void grow(){
 
 	if( sbrk( 2048 ) == (char *)-1 ){
 		fprintf( stderr, "out of memory in usp2\n" );
@@ -242,8 +269,7 @@ grow(){
 	if( debug ) fprintf( stderr, "growing by 2k bytes\n" );
 }
 
-char *
-readblock( i ) int i;{
+char* readblock(int i) {
 
 
 	short	length;
@@ -262,7 +288,7 @@ readblock( i ) int i;{
 	return oldtop;
 }
 
-readdict(){
+void readdict(){
 
 	lseek( dfile, 0L, 0 );
 	dict = (DICTENT *) readblock( dfile );		/* terminals */
@@ -274,7 +300,7 @@ readdict(){
 	sttop = (char *) memtop;			/* top of strings */
 }
 
-readprods(){
+void readprods(){
 
 	lseek( pfile, 0L, 0 );
 	prod = (PRODENT *) readblock( pfile );		/* productions */
@@ -282,15 +308,18 @@ readprods(){
 }
 
 /*VARARGS1*/
-fatal(s,a,b) char *s; {
+void fatal(char* s, ...) {
 
+	va_list argptr;
+	va_start(argptr, s);
 	fprintf(stderr,"fatal error in usp2: ");
-	fprintf(stderr,s,a,b);
+	vfprintf(stderr,s,argptr);
 	fprintf(stderr,"\n");
+	va_end(argptr);
 	rmfiles();
 }
 
-rmfiles(){
+void rmfiles(){
 	if( !Zflag && !debug ){
 		unlink( dname );
 		unlink( pname );
@@ -302,9 +331,9 @@ rmfiles(){
 	exit(1);
 }
 
-opfile(s) char *s;{
+int opfile(char* s) {
 
-	reg	i;
+	int	i;
 
 #ifdef msdos
 	_iomode = 1;

@@ -60,9 +60,9 @@ LDFLAGS=
 CC = cc
 LD = cc
 
-BIN = /usr/bin
+BIN = /home/esilky/.local/bin
 
-LIB = /usr/lib
+LIB = /home/esilky/.local/lib
 
 UASCOM=  ../uascom/uas.o \
 	../uascom/uasdirec.o \
@@ -120,6 +120,15 @@ uaz80gr.c:
 	rm xxgram.c
 	@echo new uaz80 grammar tables now made
 
+# uasz80.h has been 'adjusted' to allow it to compile with the current
+# 	version of GCC, so the following build step has been removed to
+#	remove the risk of overwriting the adjusted version of the file.
+#	Since uasz80 was adjusted, the source for mktable has been
+#	acquired and has been 'adjusted' to compile. Therefore, it is
+#	possible that uasz80.h could actually be generated from uasz80.z
+#	but mktable probably needs to be updated somewhat to generate
+#	an output file that will compile correctly with current GCC.
+#
 #uasz80.h: uasz80.z
 #	mktable uasz80.z
 #	mkpdtab uz80s.pd >uz80pd.h

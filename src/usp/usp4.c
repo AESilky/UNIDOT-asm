@@ -27,6 +27,13 @@
 
 /************************************************************************
 *									*
+* Updated 1/2026 by AESilky to compile on current GCC running on 64-bit *
+* Linux. No functional changes are intended.				*
+*									*
+*************************************************************************/
+
+/************************************************************************
+*									*
 *		    Unidot Syntax Processor				*
 *			   USP 4					*
 *			Build Action Tables				*
@@ -89,7 +96,7 @@ ALTENT	*alttop;	/* top of alttab			*/
 char	*memtop;	/* top of occupied memory		*/
 char	*membase;	/* start of occupied memory		*/
 char	*memlim;	/* top of acquired memory		*/
-char	*sbrk();	/* memory getter			*/
+// char	*sbrk();	/* memory getter			*/
 char	*readblock();	/* file reader				*/
 char	obuf[BUFSIZ];	/* output buffer			*/
 

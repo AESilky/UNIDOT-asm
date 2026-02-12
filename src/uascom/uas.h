@@ -177,7 +177,7 @@ GLOBL VMTAB	vmtab[VMCNT] IZ;	/* in core headers		*/
 	/* Parameters */
 
 #define	IISIZ	  30		/* size of parse stack in frames	*/
-#define	INSIZ	(BUFSIZ*2)	/* size of input stack in bytes		*/
+#define	INSIZ	(BUFSIZ*8)	/* size of input stack in bytes		*/
 #define	LLERX	   6		/* max number of errors per line	*/
 #define	LLLOC	   4		/* length of location field in listing	*/
 #ifdef OLDSTYLE

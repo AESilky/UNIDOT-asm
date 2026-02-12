@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
 	{
+		"name": "uasz80 ZMB-Minimum",
+		"type": "cppdbg",
+		"request": "launch",
+		"cwd": "${env:HOME}//proj/sd-zmb/fw/minimum",
+		"program": "${workspaceFolder}/src/uasz80/uasz80",
+		"args": [
+			"-l","-v","boot.asm"
+		],
+		"miDebuggerPath": "/usr/bin/gdb",
+		"preLaunchTask": "Build UASZ80 (and common)"
+	},
+	{
 		"name": "uasz80 game.z80",
 		"type": "cppdbg",
 		"request": "launch",
