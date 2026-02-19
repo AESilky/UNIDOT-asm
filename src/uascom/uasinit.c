@@ -500,7 +500,7 @@ int argnum(s) char *s; {
 void defsym(s) char *s; {
 
 	char	*p;
-	SYTAB	*syp;
+	sytab_t	*syp;
 	int		i;
 	VMADR		val;
 	char	defbuf[64];
@@ -517,7 +517,7 @@ void defsym(s) char *s; {
 	scanpt = s;
 	if( token() != TKCON ) usage("illegal define value");
 	val = sylook(defbuf);
-	syp = (SYTAB *)wfetch(val);
+	syp = (sytab_t *)wfetch(val);
 	if( syp->sy_typ != STUND ) usage("symbol %s previous defined",defbuf);
 	syp->sy_typ = STVAR;
 	syp->sy_val = SYVAL(tokval);

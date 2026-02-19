@@ -125,7 +125,7 @@ intr(){ fprintf(stderr,"usp4 interrupt\n"); rmfiles(); }
 main( argc, argv ) int argc; char **argv;{
 
 
-	reg char	*flags,		/* pointer to flags */
+	char	*flags,		/* pointer to flags */
 			*fp;		/* for scanning flags */
 
 	if( signal( SIGINT, SIG_IGN ) == SIG_DFL )
@@ -443,7 +443,7 @@ fixamb( c, ctop ) STATE *c; CGRP *ctop;{
 
 grow(){
 
-	reg char *base;
+	char *base;
 
 	if( (base = sbrk( 2048 )) == (char *)-1 ) fatal( "out of memory" );
 	if( base != memlim )
@@ -551,7 +551,7 @@ listset( s ) SET *s;{
 
 
 	reg DICTENT	*dp;
-	reg char	*sp;
+	char	*sp;
 	reg		t;
 	char		first;
 
@@ -746,7 +746,7 @@ putch( ch ) char ch;{
    putst - output the specified string.
 */
 
-putst( s ) reg char *s;{
+putst( s ) char *s;{
 
 	while( *s ) putch( *s++ );
 }
@@ -1061,8 +1061,8 @@ sortatab(){
 statemove( a, b, lim ) STATE *a,*b;short *lim;{
 
 
-	reg short	*sha, *shb;
-	reg short	*top;
+	short	*sha, *shb;
+	short	*top;
 
 	sha = (short *)a;
 	shb = (short *)b;

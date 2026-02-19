@@ -49,8 +49,8 @@ static char rcsid[]=
 
 void error(char* s, ...) {
 
-	reg int		flag;
-	reg char	*p;
+	int		flag;
+	char	*p;
 	char		errno[6];
 
 	flag = *s;
@@ -103,9 +103,9 @@ char* palloc(size) uns size; {
 
 	static char	*phytop;
 	static char	*phylim;
-	reg char	*oldtop;
-	reg char	*tmp;
-	reg int		i;
+	char	*oldtop;
+	char	*tmp;
+	int		i;
 //	extern char	*sbrk();
 
 	size = (size + (ALIGN-1)) & -ALIGN;
@@ -148,7 +148,7 @@ zpalloc( size, which ) uns size; {
 zpalloc( size ) uns size; {
 #endif
 
-	reg char	*p,*q,*r;
+	char	*p,*q,*r;
 
 #ifdef STATS
 	p = q = palloc( size, which );
@@ -164,11 +164,11 @@ zpalloc( size ) uns size; {
  */
 
 char *
-lastcomp( s ) reg char *s;{
+lastcomp( s ) char *s;{
 
 
-	reg int		c;
-	reg char	*r;
+	int		c;
+	char	*r;
 
 	r = s;
 	while( c = *s++ )

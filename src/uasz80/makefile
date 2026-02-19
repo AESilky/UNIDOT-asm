@@ -38,13 +38,18 @@
 #    convert the Unidot authored virtual memory routines to compile (only
 #    a version without `USEVM` defined has been tested).
 #
+#  (ES, 2/2026) Having problems when not using the UNIDOT virtual memory,
+#    so now trying to get it working (but just with the BIGMEM flag). All
+#    occurrences of the UNIDOT 'valloc' were changed to 'uavalloc' to
+#    differentiate from the system 'valloc'.
+#
 
 # LAX_CC - Define to ease warnings on GCC
 LAX_CC=-Wno-pointer-to-int-cast
 # DEBUG_CC - Define to add debug symbols to executable
 DEBUG_CC=-g
 # GCC on 64-bit Linux defines (ES)
-CFLAGS=$(LAX_CC) $(DEBUG_CC) -DNOPD -DALIGN=4
+CFLAGS=$(LAX_CC) $(DEBUG_CC) -DNOPD -DALIGN=4 -DUSEVM -DBIGMEM
 #pdp-11 defines
 #CFLAGS=-DBIGMEM -DNOPD
 # 3b2 defines 

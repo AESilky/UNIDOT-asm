@@ -81,15 +81,15 @@ static ASIDE	*ashead = &aspool[0];
  */
 
 
-OCTAB *
+octab_t *
 oclook( s ) char *s;{
 
 
-	reg OCTAB	*q;
-	reg char	*b;
-	reg char	*a;
-	reg int		i;
-	reg uns		h;
+	octab_t	*q;
+	char	*b;
+	char	*a;
+	int		i;
+	uns		h;
 	static char	opstr[16] = {NULLCA};
 
 	h = hash(s) & ((1 << OHSHLOG)-1);
@@ -112,10 +112,10 @@ oclook( s ) char *s;{
 	/* Add a new entry to the table. (Use original string and hash
 	   unless the uppercase only flag is set) */
 
-	if( noentry ) return (OCTAB *)0;
+	if( noentry ) return (octab_t *)0;
 	if( upperonly ) s = opstr;
 	if( pass2 ) fatal("57 No new ops (%s) in pass2",s);
-	q = (OCTAB *) palloc( sizeof(OCTAB) - SYMSIZ + strlen(s) + 1 );
+	q = (octab_t *) palloc( sizeof(octab_t) - SYMSIZ + strlen(s) + 1 );
 	symcpy( q->oc_str, s );
 	q->oc_typ = 0;
 	q->oc_lnk = ochtab[h];
@@ -129,11 +129,11 @@ oclook( s ) char *s;{
    uses, it must be called with the string already converted to lower
    case.
 */
-int opval( s ) reg char *s;{
+int opval( s ) char *s;{
 
 
-	reg OCTAB	*q;
-	reg int		h;
+	octab_t	*q;
+	int		h;
 
 	h = hash(s) & ((1 << OHSHLOG) - 1);
 	for( q = ochtab[h]; q; q = q->oc_lnk )
@@ -145,9 +145,9 @@ int opval( s ) reg char *s;{
 #ifdef NOPD
 	/* quick routine for inserting pre-built opcodes into chain */
 
-void opcinsert(OCTAB* o) {
+void opcinsert(octab_t* o) {
 
-	reg uns		h;
+	uns		h;
 
 	h = hash( o->oc_str ) & ((1 << OHSHLOG) - 1);
 	o->oc_lnk = ochtab[h];
@@ -159,10 +159,10 @@ void opcinsert(OCTAB* o) {
  * and returns its value.  Same hash value in upper or lower case.
  */
 uns
-hash( s ) reg char *s;{
+hash( s ) char *s;{
 
 
-	reg uns		h;
+	uns		h;
 
 	h = 0;
 	while( *s ) h = (h << 1) + (*s++ & ~040);
@@ -184,7 +184,7 @@ sylook( s ) char *s;{
 	reg ASIDE	*apt,
 			**lpt;
 #endif
-	reg SYTAB	*qp,
+	sytab_t	*qp,
 			*rp;
 	VMADR		p;
 	VMADR		q;
@@ -232,7 +232,7 @@ sylook( s ) char *s;{
 	p = 0;
 	q = syhtab[h];
 	while( q &&
-	       (cmp = symcmp( s,(qp =(SYTAB *)rfetch(q))->sy_str)) > 0 ){
+	       (cmp = symcmp( s,(qp =(sytab_t *)rfetch(q))->sy_str)) > 0 ){
 		p = q;
 		q = qp->sy_lnk;
 #ifdef	STATS
@@ -260,15 +260,15 @@ sylook( s ) char *s;{
 	/* another place for 4 byte alignment RMM 7/26/85 */
 
 	valign();					/* align vm */
-	cmp = sizeof(SYTAB) - SYMSIZ + strlen(s) + 1;	/* entry size	*/
+	cmp = sizeof(sytab_t) - SYMSIZ + strlen(s) + 1;	/* entry size	*/
 	r = VALN(cmp);					/* get another spot */
-	rp = (SYTAB *) wfetch(r);
+	rp = (sytab_t *) wfetch(r);
 	symcpy( rp->sy_str, s );
 	rp->sy_typ = rp->sy_atr = rp->sy_rel = 0;
 	rp->sy_val = 0;
 	rp->sy_xlk = (void*)0;
 	rp->sy_lnk = q;
-	if( p ) (qp=((SYTAB *)wfetch( p )))->sy_lnk = r;
+	if( p ) (qp=((sytab_t *)wfetch( p )))->sy_lnk = r;
 	else syhtab[h] = r;
 #ifndef BIGMEM
 	return ashead->as_sym = r;
@@ -280,17 +280,17 @@ sylook( s ) char *s;{
 VMADR
 numlab( n )unsigned n;{		/* find the relevant numeric label */
 
-	reg NUMLAB	*nml;
+	numlab_t	*nml;
 	VMADR		nnn;
 	VMADR		mmm;
 	int		nx;
 
 	if( nchd == 0 )			/* no numchain yet */
-		nchd = nctl = (NUMCHN *)palloc(sizeof(NUMCHN));
+		nchd = nctl = (numchn_t *)palloc(sizeof(numchn_t));
 	nx = n % NMCCNT;
 	nnn = nctl->nc_nm[nx];
 	while( nnn ){
-		nml = (NUMLAB *) rfetch( nnn );
+		nml = (numlab_t *) rfetch( nnn );
 		if( nml->nm_lab == n ) return nnn;
 		nnn = nml->nm_lnk;
 	}
@@ -298,8 +298,8 @@ numlab( n )unsigned n;{		/* find the relevant numeric label */
 	/* no such label - append one */
 
 	valign();					/* align vm */
-	nnn = VALN( sizeof(NUMLAB) );
-	nml = (NUMLAB *)wfetch( nnn );
+	nnn = VALN( sizeof(numlab_t) );
+	nml = (numlab_t *)wfetch( nnn );
 	nml->nm_lnk = nctl->nc_nm[nx];
 	nml->nm_lab = n;
 	nctl->nc_nm[nx] = nnn;

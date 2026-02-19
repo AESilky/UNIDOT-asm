@@ -161,7 +161,7 @@
  * Structure declarations.
  */
 
-#ifdef XREF
+#ifdef xref_t
 #define XREFENT	struct xref
 XREFENT {			/* cross reference entry	*/
 	XREFENT		*xr_lnk;	/* next entry in chain	*/
@@ -186,10 +186,10 @@ OBLOCK {			/* object block */
 	char	ob_buf[OBJSIZ];		/* data from the block */
 };
 
-#define SYTAB struct sytab
-SYTAB {				/* symbol table entry */
-	SYTAB		*sy_lnk;	/* link to next entry in hash chain */
-#ifdef XREF
+#define sytab_t struct sytab
+sytab_t {				/* symbol table entry */
+	sytab_t		*sy_lnk;	/* link to next entry in hash chain */
+#ifdef xref_t
 	XREFENT		*sy_xref;	/* head of cross reference chain */
 #endif
 	long		sy_val;		/* value of symbol */
@@ -201,9 +201,9 @@ SYTAB {				/* symbol table entry */
 	char		sy_str[2];	/* actually variable length */
 };
 
-#define SECTION struct section
-SECTION {			/* section table entry */
-	SYTAB		*se_sym;	/* symbol table pointer		*/
+#define section_t struct section
+section_t {			/* section table entry */
+	sytab_t		*se_sym;	/* symbol table pointer		*/
 	long		se_val;		/* base address of section	*/
 	long		se_cum;		/* cumulative size to current module */
 	long		se_mod;		/* size in current module	*/
@@ -243,7 +243,7 @@ SECTION {			/* section table entry */
 
 GROUP {				/* Group table entry			*/
 	GROUP		*gr_lnk;	/* link to next item		*/
-	SYTAB		*gr_sym;	/* Symtab pointer for group	*/
+	sytab_t		*gr_sym;	/* Symtab pointer for group	*/
 
 	/* Note: the first item in the chain points to the symbol for
 	   the group, the subsequent items point to the symbols for
@@ -257,18 +257,18 @@ GROUP {				/* Group table entry			*/
 GLOBL short	afmt IZ;	/* produce a.out format			*/
 GLOBL short	absadu IZ;	/* absolute addressing unit		*/
 GLOBL short	codadu IZ;	/* code addressing unit			*/
-GLOBL SECTION	*codsep IZ;	/* code section ptr for split		*/
+GLOBL section_t	*codsep IZ;	/* code section ptr for split		*/
 GLOBL short	commalign IX(1); /* common alignment			*/
 GLOBL char	*commvar IZ;	/* name of unnamed section		*/
 GLOBL short	curadu IZ;	/* current addressing unit		*/
 GLOBL char	*curfile IZ;	/* current file name			*/
-#ifdef XREF
+#ifdef xref_t
 GLOBL char	*curmdp IZ;	/* pointer to saved current module name	*/
 #endif
 GLOBL long	curoff IZ;	/* offset of current text block		*/
 GLOBL ushort	cursec IZ;	/* section of current text block	*/
 GLOBL short	datadu IZ;	/* data addressing unit			*/
-GLOBL SECTION	*datsep IZ;	/* data section ptr for split		*/
+GLOBL section_t	*datsep IZ;	/* data section ptr for split		*/
 GLOBL short	debug IZ;	/* old debug flag			*/
 GLOBL ushort	errct IZ;	/* count of errors			*/
 GLOBL ushort	evct IZ;	/* number of entries in extvec		*/
@@ -318,11 +318,11 @@ GLOBL short	verbose IZ;	/* be talky				*/
 GLOBL ushort	warnct IZ;	/* count of warnings			*/
 
 GLOBL char	curmod[NAMSIZ+1] IZ; /* current module name		*/
-GLOBL SYTAB	*extvec[EXTSIZ] IZ; /* ext symbol vector for relocation */
+GLOBL sytab_t	*extvec[EXTSIZ] IZ; /* ext symbol vector for relocation */
 GLOBL GROUP	*grptab[GRPSIZ] IZ; /* pointers to group headers	*/
-GLOBL SECTION	*sectab[SECSIZ] IZ; /* section information table	*/
+GLOBL section_t	*sectab[SECSIZ] IZ; /* section information table	*/
 GLOBL char	secvec[SECSIZ] IZ;  /* section vector for relocation	*/
-GLOBL SYTAB	*syhtab[1<<HSHLOG] IZ; /* symbol hash table		*/
+GLOBL sytab_t	*syhtab[1<<HSHLOG] IZ; /* symbol hash table		*/
 
 /*
  * Function declarations.
@@ -342,10 +342,10 @@ char		*zpalloc();	/* Memory allocation guarantees zero	*/
 long		rbase();	/* Return relocation base address */
 char		*lastcomp();	/* Return pointer to last component	*/
 long		sbase();	/* Return section base address (for 8086) */
-SECTION		*selook();	/* Section table lookup and entry routine */
-SYTAB		*sylook();	/* Symbol table lookup and entry routine */
-SYTAB		*symerge();	/* Symbol table hash chain merger */
-SYTAB		*sypeek();	/* Symbol table lookup routine */
+section_t		*selook();	/* Section table lookup and entry routine */
+sytab_t		*sylook();	/* Symbol table lookup and entry routine */
+sytab_t		*symerge();	/* Symbol table hash chain merger */
+sytab_t		*sypeek();	/* Symbol table lookup routine */
 
 
 /*

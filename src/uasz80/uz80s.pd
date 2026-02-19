@@ -1,0 +1,169 @@
+5 55h 88h 0
+5 61h 0ceh 0
+0fh 29h 4ah 16h adc
+5 55h 80h 0
+5 61h 0c6h 0
+0fh 29h 9 10h add
+55h 0 0a0h 0
+61h 0 0e6h 10h and
+21h 55h 40h 11h bit
+81h 0 0cdh 0
+28h 81h 0c4h 0
+6 81h 0dch 10h call
+0 0 3fh 10h ccf
+55h 0 0b8h 0
+61h 0 0feh 10h cp
+0 0 0a9h 12h cpd
+0 0 0b9h 12h cpdr
+0 0 0a1h 12h cpi
+0 0 0b1h 12h cpir
+0 0 2fh 10h cpl
+0 0 27h 10h daa
+35h 0 5 0
+29h 0 0bh 10h dec
+0 0 0f3h 10h di
+0a1h 0 10h 10h djnz
+0 0 0fbh 10h ei
+13h 0fh 0ebh 0
+14h 0fh 0e3h 0
+0dh 0eh 8 0
+0fh 13h 0ebh 0
+0fh 14h 0e3h 0
+0eh 0dh 8 10h ex
+0 0 0d9h 10h exx
+0 0 76h 10h halt
+0e1h 0 46h 12h im
+5 62h 0dbh 0
+24h 0bh 40h 12h in
+35h 0 4 0
+29h 0 3 10h inc
+0 0 0aah 12h ind
+0 0 0bah 12h indr
+0 0 0a2h 12h ini
+0 0 0b2h 12h inir
+81h 0 0c3h 0
+28h 81h 0c2h 0
+6 81h 0dah 0
+10h 0 0e9h 18h jp
+0a1h 0 18h 0
+27h 0a1h 20h 0
+6 0a1h 38h 10h jr
+24h 55h 40h 0
+10h 44h 70h 0
+35h 61h 6 0
+5 82h 3ah 0
+82h 5 32h 0
+0fh 82h 2ah 0
+82h 0fh 22h 0
+29h 81h 1 0
+29h 82h 4bh 2
+82h 29h 43h 2
+5 31h 0ah 0
+31h 5 2 0
+12h 0fh 0f9h 0
+5 2ch 57h 2
+2ch 5 47h 12h ld
+0 0 0a8h 12h ldd
+0 0 0b8h 12h lddr
+0 0 0a0h 12h ldi
+0 0 0b0h 12h ldir
+0 0 44h 12h neg
+0 0 0 10h nop
+55h 0 0b0h 0
+61h 0 0f6h 10h or
+0 0 0bbh 12h otdr
+0 0 0b3h 12h otir
+62h 5 0d3h 0
+0bh 24h 41h 12h out
+0 0 0abh 12h outd
+0 0 0a3h 12h outi
+2ah 0 0c1h 10h pop
+2ah 0 0c5h 10h push
+21h 55h 80h 11h res
+0 0 0c9h 0
+28h 0 0c0h 0
+6 0 0d8h 10h ret
+0 0 4dh 12h reti
+0 0 45h 12h retn
+55h 0 10h 11h rl
+0 0 17h 10h rla
+55h 0 0 11h rlc
+0 0 7 10h rlca
+0 0 6fh 12h rld
+55h 0 18h 11h rr
+0 0 1fh 10h rra
+55h 0 8 11h rrc
+0 0 0fh 10h rrca
+0 0 67h 12h rrd
+0c1h 0 0c7h 10h rst
+5 55h 98h 0
+5 61h 0deh 0
+0fh 29h 42h 16h sbc
+0 0 37h 10h scf
+21h 55h 0c0h 11h set
+55h 0 20h 11h sla
+55h 0 28h 11h sra
+55h 0 38h 11h srl
+55h 0 90h 0
+61h 0 0d6h 10h sub
+55h 0 0a8h 0
+61h 0 0eeh 10h xor
+
+1	.end
+2	.equ
+3	.input
+4	.byte
+5	.word
+6	.set
+7	.block
+8	.org
+9	.clist
+10	.sect
+11	.space
+12	.stitle
+13	.title
+14	.list
+15	.else
+16	.endif
+17	.if
+18	.global
+19	.abs
+20	.align
+21	.within
+22	.macro
+23	.endm
+24	.long
+25	.eject
+26	.common
+28	.endr
+29	.repeat
+30	.error
+31	.exit
+33	.warn
+
+0100h	$
+0e00h	b	B
+0e02h	d	D
+0e03h	e	E
+0e04h	h	H
+0e05h	l	L
+0f00h	i	I
+0f01h	r	R
+1000h	nz	NZ
+1001h	z	Z
+1002h	nc	NC
+1100h	a	A
+1200h	c	C
+1300h	hl	HL
+1400h	sp	SP
+1500h	bc	BC
+1600h	de	DE
+1700h	af	AF
+1904h	po	PO
+1905h	pe	PE
+1906h	p	P
+1907h	m	M
+1addh	ix	IX
+1afdh	iy	IY
+
+obj lst z80

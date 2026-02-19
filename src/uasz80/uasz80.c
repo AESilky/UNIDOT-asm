@@ -145,13 +145,13 @@ skip:		skipeol();
 
 int iilex(){
 
-	SYTAB	*syp;
+	sytab_t	*syp;
 
 	iilexeme.ps_sym = token();
 	iilexeme.ps_val0 = tokval;
 	if( iilexeme.ps_sym == TKSYM ){ /* symbol */
 		iilexeme.ps_val0 = (long) sylook( tokstr );
-		syp = (SYTAB *) rfetch(( VMADR ) iilexeme.ps_val0 );
+		syp = (sytab_t *) rfetch(( VMADR ) iilexeme.ps_val0 );
 		if( syp->sy_typ == STKEY ){ /* keyword */
 			iilexeme.ps_val0 = (uns)syp->sy_val & 0xff;
 			iilexeme.ps_sym = (uns)syp->sy_val >> 8&0xff;
@@ -382,7 +382,7 @@ void predef(){
 		val = tokval;
 		while( token() == TKSPC ){	/* read symbol mnemonics */
 			preget( TKSYM );
-			syp = (SYTAB *) wfetch( sylook( tokstr ));
+			syp = (sytab_t *) wfetch( sylook( tokstr ));
 			syp->sy_typ = STKEY;
 			syp->sy_val = val;
 			syp->sy_atr = SADP2;
@@ -416,7 +416,7 @@ void predef(){
 	/* now the reserved words */
 	for( i=0; rsw[i].rw_str; i++ ){
 		val = sylook(rsw[i].rw_str);
-		syp = (SYTAB *)wfetch(val);
+		syp = (sytab_t *)wfetch(val);
 		syp->sy_typ = STKEY;
 		syp->sy_val = SYVAL((unsigned long)rsw[i].rw_val);
 		syp->sy_atr = SADP2;

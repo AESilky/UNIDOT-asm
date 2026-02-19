@@ -44,7 +44,7 @@ static char rcsid[]=
 
 /*		symbol table lookup			*/
 
-static SYTAB	**inspt;
+static sytab_t	**inspt;
 
 /*
  * sylook - Returns a pointer to the symbol table entry for the
@@ -52,20 +52,20 @@ static SYTAB	**inspt;
  * necessary.
  */
 
-SYTAB *
-sylook( s ) reg char *s;{
+sytab_t *
+sylook( s ) char *s;{
 
 
-	reg SYTAB	*syp;
+	sytab_t	*syp;
 
 	if( syp = sypeek( s )) return( syp ); /* found */
 
 	/* Add a new entry to the table.  */
 
 #ifdef STATS
-	syp = (SYTAB *) palloc( sizeof(SYTAB) + strlen(s) - 1, SYMUSE);
+	syp = (sytab_t *) palloc( sizeof(sytab_t) + strlen(s) - 1, SYMUSE);
 #else
-	syp = (SYTAB *) palloc( sizeof(SYTAB) + strlen(s) - 1);
+	syp = (sytab_t *) palloc( sizeof(sytab_t) + strlen(s) - 1);
 #endif
 	strcpy( syp->sy_str, s );
 	syp->sy_ovl = syp->sy_typ = syp->sy_atr = 0;
@@ -73,7 +73,7 @@ sylook( s ) reg char *s;{
 	syp->sy_ord = 0;
 	syp->sy_rel = 0;
 	syp->sy_lnk = *inspt;
-#ifdef XREF
+#ifdef xref_t
 	syp->sy_xref = 0;	/* null the cross reference chain */
 #endif
 	return *inspt = syp;
@@ -83,12 +83,12 @@ sylook( s ) reg char *s;{
  * returns a pointer to the resulting chain.
  */
 
-SYTAB *
-symerge( a, b ) reg SYTAB *a, *b;{
+sytab_t *
+symerge( a, b ) sytab_t *a, *b;{
 
 
-	reg SYTAB	**re;		/* ptr to last link field in chain */
-	SYTAB	*r;			/* resulting chain */
+	sytab_t	**re;		/* ptr to last link field in chain */
+	sytab_t	*r;			/* resulting chain */
 
 	re = &r;
 	if( numorder )
@@ -125,15 +125,15 @@ symerge( a, b ) reg SYTAB *a, *b;{
  * should be linked in, and returns 0.
  */
 
-SYTAB *
+sytab_t *
 sypeek( s ) char *s;{
 
 
-	reg SYTAB	*p,
+	sytab_t	*p,
 			*q;
-	reg uns		h;
-	reg int		cmp;
-	reg char	*r;
+	uns		h;
+	int		cmp;
+	char	*r;
 
 	h = 0;
 	r = s;
@@ -154,9 +154,9 @@ sypeek( s ) char *s;{
  * numsort sorts a list by value with an insertion sort
  */
 
-SYTAB *
-numsort( s ) SYTAB *s; {
-	SYTAB *a,*b,*c;
+sytab_t *
+numsort( s ) sytab_t *s; {
+	sytab_t *a,*b,*c;
 	if( s == NULL ) return s;
 	b = s->sy_lnk;
 	a = s;
@@ -184,7 +184,7 @@ numsort( s ) SYTAB *s; {
 
 void sysort(){
 
-	reg uns		halfi,
+	uns		halfi,
 			i,
 			j;
 

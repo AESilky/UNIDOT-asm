@@ -124,13 +124,13 @@ extern int xscanc();
 
 #ifdef USEVM
 #ifdef BIGMEM		/* define this to avoid virtual memory overhead */
-#define VALN(n)		(virtop+(n)>blklim?valloc(n):(virtop+=(n))-(n))
-#define rfetch(n)	(phyp[(n)>>blklog]+(n&(BUFSIZ-1)))
-#define wfetch(n)	(phyp[(n)>>blklog]+(n&(BUFSIZ-1)))
-#define rlimit(n)	(phyp[(n)>>blklog]+BUFSIZ)
+#define VALN(n)		(virtop+(n)>blklim?uavalloc(n):(VMADR)(virtop+=(n))-(n))
+#define rfetch(n)	(phyp[((int)(n))>>blklog]+(((int)(n))&(BUFSIZ-1)))
+#define wfetch(n)	(phyp[((int)(n))>>blklog]+(((int)(n))&(BUFSIZ-1)))
+#define rlimit(n)	(phyp[((int)(n))>>blklog]+BUFSIZ)
 #define PHNUM		128		/* number of BUFSIZ block allowed */
 #else
-#define VALN(n)		valloc(n)
+#define VALN(n)		uavalloc(n)
 #define VMTAB struct vmtab
 #define VMNUM		10		/* number of in-core buffers	*/
 #define VMCNT		256		/* number of out-core buffers	*/
@@ -158,18 +158,20 @@ extern char	*wfetch();
 #define rlimit(n)	(vmtab[(n)>>blklog].vm_buf + BUFSIZ)
 	/* note rlimit must be called only AFTER calling rfetch or wfetch */
 #endif // BIGMEM
-#define VAL1		(virtop>=blklim?valloc(1):virtop++)
+#define VAL1		(virtop>=blklim?uavalloc(1):virtop++)
 #ifdef BIGMEM
 GLOBL char* phyp[PHNUM] IZ;	/* in core pointers		*/
 #else
 GLOBL VMTAB	vmtab[VMCNT] IZ;	/* in core headers		*/
 #endif // BIGMEM
 #else
+#define PHNUM		128		/* number of BUFSIZ block allowed */
+GLOBL char* phyp[PHNUM] IZ;	/* in core pointers		*/
 #define VAL1		aligned_alloc(VMALIGN, 1)
 #define VALN(n)		aligned_alloc(VMALIGN, n)
-#define rfetch(n)	(n)
-#define wfetch(n)	(n)
-#define rlimit(n)	(n+1)
+#define rfetch(n)	(phyp[((int)(n))>>blklog]+(((int)(n))&(BUFSIZ-1)))
+#define wfetch(n)	(phyp[((int)(n))>>blklog]+(((int)(n))&(BUFSIZ-1)))
+#define rlimit(n)	(phyp[((int)(n))>>blklog]+BUFSIZ)
 #endif // USEVM
 
 
@@ -177,7 +179,7 @@ GLOBL VMTAB	vmtab[VMCNT] IZ;	/* in core headers		*/
 	/* Parameters */
 
 #define	IISIZ	  30		/* size of parse stack in frames	*/
-#define	INSIZ	(BUFSIZ*8)	/* size of input stack in bytes		*/
+#define	INSIZ	(BUFSIZ*16)	/* size of input stack in bytes		*/
 #define	LLERX	   6		/* max number of errors per line	*/
 #define	LLLOC	   4		/* length of location field in listing	*/
 #ifdef OLDSTYLE
@@ -374,59 +376,60 @@ GLOBL FILE	*ERRFIL	IZ;	/* error file				*/
 #define white(c)	(c==' ' || c=='\t')
 #define eof(c)		((c & 0xff) == 0xff)
 
-	/* Structure declarations */
+	/* Structure declarations & type definitions */
 
+typedef	struct chent chent_t;
+typedef struct errframe errframe_t;
+typedef struct grchain grchain_t;
+typedef struct input input_t;
+typedef struct mchain mchain_t;
+typedef struct numchn numchn_t;
+typedef struct numlab numlab_t;
+typedef	struct octab octab_t;
+typedef struct operand operand_t;
+typedef struct psframe psframe_t;
+typedef struct section section_t;
+typedef	struct sytab sytab_t;
+typedef struct szyentry szyent_t;
+typedef struct szytab szytab_t;
+typedef struct using using_t;
+typedef struct varinstr vlsiz_t;
+typedef struct xref xref_t;
 
-#define CHENT	struct chent
-#define SECTION struct section
-#define PSFRAME struct psframe
-#define OPERAND struct operand
-#define OCTAB	struct octab
-#define INPUT	struct input
-#define SYTAB	struct sytab
-#define NUMLAB	struct numlab
-#define NUMCHN	struct numchn
-#define XREF	struct xref
-#define VLSIZ	struct varinstr
-#define ERF	struct errframe
-#define USING	struct using
-#define SZY	struct szytab
-#define SZE	struct szyentry
-#define MCH	struct mchain
-#define GRP	struct grchain
+	/* Structure definitions */
 
-GRP {
+struct grchain {
 	VMADR	gr_lnk;			/* next item in group list	*/
 	VMADR	gr_sym;			/* ptr to symbol		*/
 };
 
-MCH {
+struct mchain {
 	VMADR	mc_lnk;			/* link to next macro def	*/
 	VMADR	mc_def;			/* pass 1 definition		*/
 	short	mc_arg;			/* number of arguments		*/
 };
 
-SZE {			/* one szymanski entry				*/
+struct szyentry {			/* one szymanski entry				*/
 	long	sze_lc;			/* location of vli		*/
 	uns	sze_flg;		/* flag bits			*/
 	VMADR	sze_tgt;		/* symbol table for tgt		*/
 };
 
-#define SZENO	((BUFSIZ-sizeof(SZY *)-sizeof(short))/sizeof(SZE))
+#define SZENO	((BUFSIZ-sizeof(szytab_t *)-sizeof(short))/sizeof(szyent_t))
 
-SZY {			/* table for szymanski work			*/
-	SZY	*szy_lnk;		/* link to next table		*/
+struct szytab {			/* table for szymanski work			*/
+	szytab_t	*szy_lnk;		/* link to next table		*/
 	short	szy_cnt;		/* number of entries		*/
-	SZE	szy_sze[SZENO];		/* entries			*/
+	szyent_t	szy_sze[SZENO];		/* entries			*/
 };
 
-USING {
+struct using {
 	uns	us_reg;			/* symbol entry for reg		*/
 	uns	us_sect;		/* section number		*/
 	long	us_off;			/* possible offset in sect	*/
 };
 
-ERF {				/* save for structures			*/
+struct errframe {				/* save for structures			*/
 	char	*er_msg;		/* message string		*/
 	int	er_par[2];		/* message parameters		*/
 	char	er_flg;			/* warning or hard error flag	*/
@@ -435,20 +438,20 @@ ERF {				/* save for structures			*/
 
 #define	ER_WRN	1		/* used in er_flg to make it a warning	*/
 
-VLSIZ {			/* table for variable length instructions	*/
+struct varinstr {			/* table for variable length instructions	*/
 	short	vl_inc;			/* increment for this choice	*/
 	short	vl_neg;			/* negative reach (in adu's)	*/
 	short	vl_pos;			/* positive reach (in adu's)	*/
 };
 
-CHENT {			/* single-character token table entry		*/
+struct chent {			/* single-character token table entry		*/
 	char	ch_chr;			/* character			*/
 	char	ch_typ;			/* token type			*/
 	char	ch_val;			/* token value			*/
 };
 
-INPUT {			/* input stack frame				*/
-	INPUT	*in_ofp;		/* pointer to previous frame	*/
+struct input {			/* input stack frame				*/
+	input_t	*in_ofp;		/* pointer to previous frame	*/
 	char	in_typ;			/* frame type			*/
 	char	in_rpt;			/* repeat count			*/
 	char	in_lst;			/* listing level		*/
@@ -470,15 +473,15 @@ INPUT {			/* input stack frame				*/
 #define in_cnt in_yy.in_xx.ix_ct
 #define in_vmp in_yy.ix_vmp
 
-OCTAB {			/* opcode table entry				*/
-	OCTAB	*oc_lnk;		/* link to next entry in hash chain */
+struct octab {			/* opcode table entry				*/
+	octab_t	*oc_lnk;		/* link to next entry in hash chain */
 	VMADR	oc_val;			/* value of opcode		*/
 	char	oc_typ;			/* type of opcode		*/
 	char	oc_arg;			/* highest formal # for macro	*/
 	char	oc_str[SYMSIZ];		/* opcode mnemonic string	*/
 };
 
-OPERAND {		/* operand descriptor				*/
+struct operand {		/* operand descriptor				*/
 	long	op_cls;			/* set of classes (bit vector)	*/
 	long	op_val;			/* value of operand		*/
 	uns	op_rel;			/* relocation of operand	*/
@@ -486,7 +489,7 @@ OPERAND {		/* operand descriptor				*/
 	char	*op_ptr;		/* for error messages		*/
 };
 
-PSFRAME {		/* parse stack frame				*/
+struct psframe {		/* parse stack frame				*/
 	short	*ps_state;		/* parse state			*/
 	int	ps_sym;			/* lookahead symbol		*/
 	long	ps_val0;		/* usually subexpression value	*/
@@ -494,7 +497,7 @@ PSFRAME {		/* parse stack frame				*/
 	int	ps_flg;			/* flags			*/
 };
 
-SECTION {		/* section table entry				*/
+struct section {		/* section table entry				*/
 	VMADR	se_sym;			/* symbol table pointer		*/
 	long	se_loc;			/* location counter		*/
 	char	se_aln;			/* alignment			*/
@@ -516,7 +519,7 @@ SECTION {		/* section table entry				*/
 #define SEATWITH (USMWTH<<8)		/* within byte			*/
 #define SEATSLEN (USMLEN<<8)		/* section length present	*/
 
-SYTAB {				/* symbol table entry			*/
+struct sytab {				/* symbol table entry			*/
 	VMADR	sy_lnk;			/* link to next hash entry	*/
 	VMADR	sy_xlk;			/* link to rear of xref chain	*/
 	VMADR	sy_val;			/* value of symbol		*/
@@ -526,22 +529,22 @@ SYTAB {				/* symbol table entry			*/
 	char	sy_str[SYMSIZ];		/* symbol mnemonic string	*/
 };
 
-NUMLAB {			/* numeric label entry			*/
+struct numlab {			/* numeric label entry			*/
 	VMADR	nm_lnk;			/* link to next entry		*/
 	uns	nm_lab;			/* this numeric entry		*/
 	long	nm_val;			/* value of symbol		*/
 	uns	nm_rel;			/* relocation of symbol		*/
 	char	nm_typ;			/* type of symbol		*/
 	char	nm_atr;			/* attributes of symbol		*/
-	/* NOTE this structure MUST be laid out like SYTAB */
+	/* NOTE this structure MUST be laid out like sytab_t */
 };
 
-NUMCHN {			/* chain of entries this local level	*/
-	NUMCHN	*nc_lnk;		/* link to next chain		*/
+struct numchn {			/* chain of entries this local level	*/
+	numchn_t	*nc_lnk;		/* link to next chain		*/
 	VMADR	nc_nm[NMCCNT];		/* chains at this level		*/
 };
 
-XREF {			/* cross reference entry			*/
+struct xref {			/* cross reference entry			*/
 	VMADR	xr_lnk;			/* circular link to next entry	*/
 	int	xr_pl;			/* page and line number		*/
 };
@@ -550,32 +553,32 @@ XREF {			/* cross reference entry			*/
 
 
 extern char	chclass[];		/* character classification table (in assy src) */
-extern CHENT	chtab[];		/* single-character token table (in assy src) */
+extern chent_t	chtab[];		/* single-character token table (in assy src) */
 GLOBL char	date[12] IZ;		/* string containing date	*/
 GLOBL char	datstr[26] IZ;		/* string containing date and time */
-GLOBL GRP	grptab[8] IZ;		/* heads of group chains	*/
-GLOBL PSFRAME	iips[IISIZ] IZ;		/* parsing stack		*/
+GLOBL grchain_t	grptab[8] IZ;		/* heads of group chains	*/
+GLOBL psframe_t	iips[IISIZ] IZ;		/* parsing stack		*/
 GLOBL long	instk[INSIZ/sizeof(long)] IZ;	/* input stack		*/
 GLOBL char	labstr[SYMSIZ+1] IZ;	/* label string			*/
-GLOBL ERF	llerf[LLERX] IZ;	/* error message frames		*/
+GLOBL errframe_t	llerf[LLERX] IZ;	/* error message frames		*/
 GLOBL char	llloc[LLLOC+4] IZ;	/* location field in listing line */
 GLOBL char	llobj[LLOBJ+3] IZ;	/* object field in listing line */
 GLOBL char	llseq[LLSEQ+2] IZ;	/* sequence field in listing line */
 GLOBL char	llsrc[SLINSIZ+2] IZ;	/* source field in listing line */
 GLOBL char	objbuf[OBJSIZ] IZ;	/* object block construction area */
-GLOBL OCTAB	*ochtab[1<<OHSHLOG] IZ;	/* opcode hash table		*/
+GLOBL octab_t	*ochtab[1<<OHSHLOG] IZ;	/* opcode hash table		*/
 GLOBL char	opcstr[SYMSIZ+1] IZ;	/* opcode string		*/
 GLOBL uns	pendrel IZ;		/* pending reloc		*/
 GLOBL long	pendv IZ;		/* pending value		*/
 GLOBL char	proctype[64] IZ;	/* processor type		*/
 GLOBL char	savstr[STRSIZ+1] IZ;	/* string save area		*/
-GLOBL SECTION	sectab[SECSIZ] IZ;	/* section table		*/
+GLOBL section_t	sectab[SECSIZ] IZ;	/* section table		*/
 GLOBL char	sline[SLINSIZ+2] IZ;	/* buffer with current source line */
 GLOBL VMADR	syhtab[1<<SHSHLOG] IZ;	/* symbol hash table		*/
 GLOBL char	titl1[TITSIZ+1] IZ;	/* first title line		*/
 GLOBL char	titl2[TITSIZ+1] IZ;	/* second title line		*/
 GLOBL char	tokstr[STRSIZ+1] IZ;	/* string from token scanner	*/
-GLOBL USING	ulist[ULXSIZ] IZ;	/* using table			*/
+GLOBL using_t	ulist[ULXSIZ] IZ;	/* using table			*/
 
 GLOBL char	aduspace IZ;		/* space in listing after adu	*/
 GLOBL char	aduspc2 IZ;		/* auxiliary for aduspace	*/
@@ -594,12 +597,12 @@ GLOBL char	condlst IZ;		/* flag enabling list of skipped code */
 GLOBL uns	curadu IZ;		/* current address unit		*/
 GLOBL uns	curaln IZ;		/* alignment for current section */
 GLOBL uns	curatr IZ;		/* attributes for current section */
-GLOBL OCTAB	*curdef IZ;		/* current macro being defined	*/
+GLOBL octab_t	*curdef IZ;		/* current macro being defined	*/
 GLOBL uns	curext IX(32);		/* extent for current section	*/
 GLOBL uns	curline IZ;		/* current line number		*/
 GLOBL long	curloc IZ;		/* current location counter value */
 GLOBL uns	curlst IZ;		/* current listing level	*/
-GLOBL OPERAND	curop IZ;		/* current operand information	*/
+GLOBL operand_t	curop IZ;		/* current operand information	*/
 GLOBL uns	cursec IZ;		/* current section number	*/
 GLOBL int	curxpl IZ;		/* current xref page and line	*/
 GLOBL char	debug IZ;		/* debugging flag		*/
@@ -616,15 +619,15 @@ GLOBL char	escchr IX('\\');	/* escape character		*/
 GLOBL short	globflg IZ;		/* label was followed by ::	*/
 GLOBL short	grpx IZ;		/* number of groups		*/
 GLOBL char	*hextab IX("0123456789abcdef");	/* hex translate	*/
-GLOBL PSFRAME	iilexeme IZ;		/* info returned from lexical scanner */
+GLOBL psframe_t	iilexeme IZ;		/* info returned from lexical scanner */
 GLOBL int	iilset IZ;		/* alternate left parts set	*/
 GLOBL int	iilsym IZ;		/* new left part symbol		*/
-GLOBL PSFRAME	*iipsp IX(&iips[0]);	/* parsing stack pointer	*/
-GLOBL PSFRAME	*iipspl IX(&iips[0]);	/* parsing left end pointer	*/
+GLOBL psframe_t	*iipsp IX(&iips[0]);	/* parsing stack pointer	*/
+GLOBL psframe_t	*iipspl IX(&iips[0]);	/* parsing left end pointer	*/
 GLOBL char	*inclpath[16] IZ;	/* include paths		*/
 GLOBL short	inclev IZ;		/* included levels		*/
 GLOBL short	inclx IZ;		/* number of include paths	*/
-GLOBL INPUT	*infp IZ;		/* input frame pointer		*/
+GLOBL input_t	*infp IZ;		/* input frame pointer		*/
 GLOBL char	*insp IX((char*)(&instk[0])); /* input stack pointer		*/
 GLOBL VMADR	label IZ;		/* sytab pointer for statement label */
 GLOBL char	*labptr IZ;		/* pointer to label		*/
@@ -659,15 +662,15 @@ GLOBL uns	minaln IZ;		/* minimum section alignment value */
 GLOBL uns	mlist IZ;		/* if 1 macro stuff is listed	*/
 GLOBL char	msbord IZ;		/* most sig byte first order	*/
 GLOBL char	msblst IZ;		/* list most sig byte first	*/
-GLOBL NUMCHN	*nchd IZ;		/* head of numeric chain	*/
-GLOBL NUMCHN	*nctl IZ;		/* tail of numeric chain	*/
+GLOBL numchn_t	*nchd IZ;		/* head of numeric chain	*/
+GLOBL numchn_t	*nctl IZ;		/* tail of numeric chain	*/
 GLOBL char	noentry IZ;		/* don't make symbol entry	*/
 GLOBL char	noobj IZ;		/* no object file written if set */
 GLOBL long	nxtloc IZ;		/* next location for text output */
 GLOBL uns	nxtsec IZ;		/* next section for text output	*/
 GLOBL char	*objtop IX(&objbuf[0]);	/* top of text info in objbuf	*/
 GLOBL char	objtyp IZ;		/* object block type being built */
-GLOBL OCTAB	*opcode IZ;		/* octab pointer for statement opcode */
+GLOBL octab_t	*opcode IZ;		/* octab pointer for statement opcode */
 GLOBL char	*opcptr IZ;		/* pointer to opcode		*/
 GLOBL uns	pagect IZ;		/* listing page number		*/
 GLOBL char	parsing IZ;		/* flag indicating we are parsing */
@@ -699,8 +702,8 @@ GLOBL char	*slbr IX(&sline[80]);	/* place to break lines in macros */
 GLOBL char	srcfile[64] IZ;		/* source file name		*/
 GLOBL short	sufreqd IZ;		/* proper suffix is required	*/
 GLOBL char	*sysparm IZ;		/* parameter for system		*/
-GLOBL SZY	*szyhead IZ;		/* head of szymanski chain	*/
-GLOBL SZY	*szycur IZ;		/* current block in szymanski	*/
+GLOBL szytab_t	*szyhead IZ;		/* head of szymanski chain	*/
+GLOBL szytab_t	*szycur IZ;		/* current block in szymanski	*/
 GLOBL char	timstr[10] IZ;		/* string containing time	*/
 GLOBL char	*tokpt IZ;		/* last token pointer		*/
 GLOBL char	*tokpt2 IZ;		/* next to last token pointer	*/
@@ -743,15 +746,15 @@ GLOBL uns	vmwct IZ;		/* number of vm disk writes	*/
 	/* Function declarations */
 
 GLOBL uns	hash();
-GLOBL OCTAB	*oclook();
+GLOBL octab_t	*oclook();
 GLOBL char	*palloc();
-GLOBL INPUT	*pushin();
+GLOBL input_t	*pushin();
 GLOBL char	*rindex();
 GLOBL VMADR	sylook();
 GLOBL VMADR	symerge();
 #ifndef __GNUC__
 GLOBL char	*sprintf(); // Conflicts with GCC <stdio.h> definition
-GLOBL VMADR	valloc(uns size);
+GLOBL VMADR	uavalloc(uns size);
 #endif // __GNUC__
 #define NULLCA 	'\000'			/* NULL char value */
 

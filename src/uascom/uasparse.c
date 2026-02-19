@@ -50,8 +50,8 @@ static char rcsid[] =
 /* Declarations (local) */
 
 void error2(char* s);
-int rel1check(PSFRAME* p);
-int rel2check(PSFRAME* pl, PSFRAME* p);
+int rel1check(psframe_t* p);
+int rel2check(psframe_t* pl, psframe_t* p);
 void sem01(int sem);
 
 /*
@@ -64,13 +64,13 @@ void sem01(int sem);
 
 int iiparse(){
 
-	reg char	*scp;			/* scntab pointer */
-	reg PSFRAME	*liipsp;		/* local for speed	*/
-	reg int		i;			/* temporary		*/
-	reg int		sym;			/* lookahead symbol */
-	reg char	*scp2;			/* scntab pointer */
-	reg short	*pp;			/* ptab pointer */
-	reg short	*smp;			/* pointer into semtab	*/
+	char	*scp;			/* scntab pointer */
+	psframe_t	*liipsp;		/* local for speed	*/
+	int		i;			/* temporary		*/
+	int		sym;			/* lookahead symbol */
+	char	*scp2;			/* scntab pointer */
+	short	*pp;			/* ptab pointer */
+	short	*smp;			/* pointer into semtab	*/
 	extern short	semtab[];		/* semantic table	*/
 	extern short	ptab[];			/* parse table		*/
 	extern short	ntdflt[];		/* non-terminal defaults */
@@ -165,7 +165,7 @@ BDEB(5,("-> %d ntaction returns %x\n",*scp & 0xff,*pp));
 
 #ifdef DEBUG
 semprint( ff, sem ) int (*ff)(); {
-	reg PSFRAME *pl;
+	psframe_t *pl;
 	pl = iipspl;
 	printf("%2d   [%8lx %4x %4x %4x]", sem,
 		(long)curop.op_val,curop.op_rel,curop.op_flg,(int)curop.op_cls);
@@ -190,15 +190,15 @@ xsem01( sem ) int sem; {
 #endif
 
 
-	reg PSFRAME	*p,
+	psframe_t	*p,
 			*pl;
-	reg SYTAB	*syp;
-	reg char	*dp,
+	sytab_t	*syp;
+	char	*dp,
 			*sp;
-	reg int		c,
+	int		c,
 			i,
 			j;
-	reg NUMLAB	*nml;
+	numlab_t	*nml;
 
 	p = iipsp;
 	pl = iipspl;
@@ -341,7 +341,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 	case 12:	/* <primary> ::= symbol */
 		lastsym = (VMADR)((unsigned long)p->ps_val1);
 		xref( lastsym, 0 );
-		syp = (SYTAB *)rfetch( lastsym );
+		syp = (sytab_t *)rfetch( lastsym );
 		if( syp->sy_typ == STSEC ){
 			if( !secexpr ){
 			  error2("31Symbol has been defined as a section name");
@@ -352,7 +352,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 			break;
 		}
 		if(!( syp->sy_atr & SAREF )){	/* Must set referenced flag */
-			syp = (SYTAB *)wfetch( lastsym );
+			syp = (sytab_t *)wfetch( lastsym );
 			syp->sy_atr |= SAREF;
 		}
 		if( syp->sy_typ == STUND || syp->sy_rel == URBUND ||
@@ -454,7 +454,7 @@ error2("29 Both operands of subtraction must belong to the same section");
 	case 21:	/* <primary> ::= numlab			*/
 
 		lastsym = numlab((int)tokval);
-		nml = (NUMLAB *)rfetch(lastsym);
+		nml = (numlab_t *)rfetch(lastsym);
 		pl->ps_val0 = nml->nm_val;
 		pl->ps_val1 = PSVAL1(nml->nm_rel);
 		pl->ps_flg = OFFOR;
@@ -476,7 +476,7 @@ errex:	eflg = 1;
 	pl->ps_val1 = PSVAL1(0);
 }
 
-int rel1check(PSFRAME* p) {
+int rel1check(psframe_t* p) {
 
 	if( PSVAL1_I(p->ps_val1) < URBUND &&
 	    sectab[PSVAL1_I(p->ps_val1)].se_atr & (USEFIX|SEATDUMY) ) p->ps_val1 = PSVAL1(0);
@@ -484,7 +484,7 @@ int rel1check(PSFRAME* p) {
 	return 0;
 }
 
-int rel2check(PSFRAME* pl, PSFRAME* p) {
+int rel2check(psframe_t* pl, psframe_t* p) {
 
 	if( PSVAL1_I(p->ps_val1) < URBUND &&
 	    sectab[PSVAL1_I(p->ps_val1)].se_atr & (USEFIX|SEATDUMY) ) p->ps_val1 = PSVAL1(0);
@@ -495,7 +495,7 @@ int rel2check(PSFRAME* pl, PSFRAME* p) {
 }
 
 void error2(char* s) {
-	reg char	*toksv;
+	char	*toksv;
 	toksv = tokpt;
 	tokpt = tokpt2;
 	if( llerx == 0 ) error(s);

@@ -44,7 +44,7 @@ static char rcsid[] =
 /* Declarations (local) */
 
 int szbump(ushort rel, long val);
-int szecheck(SZE* szep);
+int szecheck(szyent_t* szep);
 void szesyinc();
 void szyient(ushort inc, ushort rel, long val);
 
@@ -70,7 +70,7 @@ void szyient(ushort inc, ushort rel, long val);
 */
 
 static short	szenxt;
-static VLSIZ	**szevlpt;
+static vlsiz_t	**szevlpt;
 
 /* Now, to avoid going through the symbol table too often we collect
    the increments in the following table and when it is full we process
@@ -121,11 +121,11 @@ static short	szyix;
    vltab pointer set with all assemblers, we require those that will
    use vdi to initialize a pointer with the call
 
-   szyinit( vltp ) VLSIZ **vltp;
+   szyinit( vltp ) vlsiz_t **vltp;
 
 */
 
-void szyinit( vltp ) VLSIZ **vltp; {
+void szyinit( vltp ) vlsiz_t **vltp; {
 	szevlpt = vltp;
 	BDEB(1,("szyinit: %o %o %o %o %o\n",
 		vltp,vltp[0],vltp[1],vltp[2],vltp[3]));
@@ -143,15 +143,15 @@ void szyentry( sdirel, sdilc, tgt, vltabx, vldefined )
 	   the value of the location counter on entry is in bits.
 	   It is stored in adu's to simplify calculations later */
 
-	reg SZY		*szyp;
-	reg SZE		*szep;
+	szytab_t		*szyp;
+	szyent_t		*szep;
 
 	BDEB(1,("szentry( %d, %ld, %ld, %d, %d )\n",sdirel,
 		(long)sdilc,(long)tgt,vltabx,vldefined));
-	if( szyhead == 0 ) szyhead = szycur = (SZY *)palloc( BUFSIZ );
+	if( szyhead == 0 ) szyhead = szycur = (szytab_t *)palloc( BUFSIZ );
 	szyp = szycur;
 	if( szyp->szy_cnt >= SZENO ){
-		szyp->szy_lnk = szycur = (SZY *)palloc( BUFSIZ );
+		szyp->szy_lnk = szycur = (szytab_t *)palloc( BUFSIZ );
 		szyp = szycur;
 	}
 	szep = &szyp->szy_sze[szyp->szy_cnt];
@@ -166,7 +166,7 @@ void szyentry( sdirel, sdilc, tgt, vltabx, vldefined )
 
 uns szynext(){
 #ifdef BIGDEBUG
-	reg int	i;
+	int	i;
 	if(!debug) return xsznext();
 	printf("szynext");
 	i = xsznext();
@@ -176,8 +176,8 @@ uns szynext(){
 xsznext(){
 #endif
 
-	reg SZY		*szyp;
-	reg SZE		*szep;
+	szytab_t		*szyp;
+	szyent_t		*szep;
 
 	if( szycur == 0 ){
 		if( szyhead == 0 ) fatal("77 Sznext with no entries");
@@ -207,10 +207,10 @@ void szyprocess(){
 	   turned into a longer one
 	*/
 
-	reg SZY		*szyp;
-	reg SZE		*szep;
-	reg int		i;
-	reg int		j;
+	szytab_t		*szyp;
+	szyent_t		*szep;
+	int		i;
+	int		j;
 	short		inc;
 	short		again;
 	short		thissec;
@@ -253,32 +253,32 @@ top:	again = 0;
 	szycur = 0;
 }
 
-int szecheck(SZE* szep) {
+int szecheck(szyent_t* szep) {
 #ifdef BIGDEBUG
 
-	reg int	i;
+	int	i;
 	i = xszecheck( szep );
 	if( debug )printf("szecheck( %x, %ld, %ld ) returns %d\n",
 			szep->sze_flg, (long)szep->sze_lc,
 			(long)szep->sze_tgt, i );
 	return i;
 }
-xszecheck( szep ) reg SZE *szep; {
+xszecheck( szep ) szyent_t *szep; {
 #endif
 
 	/* determine proper response to an sze entry, return 0 if
 	   length did not change, return increment amount if it did */
 
-	reg int		i;
-	reg SYTAB	*syp;
-	reg VLSIZ	*vlp;
-	reg int		j;
-	reg int		sect;
-	reg short	oldinc;
-	reg long	l;
+	int		i;
+	sytab_t	*syp;
+	vlsiz_t	*vlp;
+	int		j;
+	int		sect;
+	short	oldinc;
+	long	l;
 
 	vlp = szevlpt[((szep->sze_flg >> 8) & 0xf)];
-	syp = (SYTAB *)rfetch( szep->sze_tgt );
+	syp = (sytab_t *)rfetch( szep->sze_tgt );
 	sect = szep->sze_flg & 0xff;		/* section of sdi */
 	l = (long)syp->sy_val;
 	if( sect != syp->sy_rel ) l = 0x7fffffffL;
@@ -302,7 +302,7 @@ xszecheck( szep ) reg SZE *szep; {
 
 void szyient( ushort inc, ushort rel, long val ) {
 
-	reg struct szyincrs *szp;
+	struct szyincrs *szp;
 
 	/* this maintains the table in sorted order */
 	for( szp = &szyitab[szyix-1]; szp >= szyitab; szp-- ){
@@ -338,8 +338,8 @@ int szbump(ushort rel, long val) {
 }
 xszbump(rel,val) long val; {
 #endif
-	reg struct szyincrs *szp;
-	reg struct szyincrs *szp2;
+	struct szyincrs *szp;
+	struct szyincrs *szp2;
 	long	val2;
 
 	szp2 = &szyitab[szyix];
@@ -358,12 +358,12 @@ void szesyinc(){
 	/* hard work - got through the symbol table, adjusting all
 	   entries with addresses greater than val (which is in adu's) */
 
-	reg SYTAB	*syp;
+	sytab_t	*syp;
 	reg VMADR	p;
-	reg int		h;
-	reg int		n;
+	int		h;
+	int		n;
 	reg VMADR	p2;
-	reg NUMCHN	*nmc;
+	numchn_t	*nmc;
 
 	BDEB(5,("szesyinc() %d entries\n",szyix));
 
@@ -371,7 +371,7 @@ void szesyinc(){
 	for( h = 0; h < (1 << SHSHLOG); h++ ){
 	BDEB(0,("szesyinc() h = %d\n",h));
 		for( p = syhtab[h]; p; p = p2 ){
-			syp = (SYTAB *) rfetch( p );
+			syp = (sytab_t *) rfetch( p );
 			p2 = syp->sy_lnk;
 			if( syp->sy_typ == STKEY ||
 			    syp->sy_typ == STKEQ ||
@@ -382,7 +382,7 @@ void szesyinc(){
 				continue;
 			n = szbump( syp->sy_rel, (long)syp->sy_val );
 			if( n == 0 ) continue;
-			syp = (SYTAB *) wfetch( p );
+			syp = (sytab_t *) wfetch( p );
 BDEB(1,("symbol %s value increase from %ld to %ld\n",syp->sy_str,
 	syp->sy_val, syp->sy_val+n));
 			syp->sy_val += n;
@@ -392,11 +392,11 @@ BDEB(1,("symbol %s value increase from %ld to %ld\n",syp->sy_str,
 	for( nmc = nchd; nmc; nmc = nmc->nc_lnk ){
 		for( h=0; h<NMCCNT; h++ ){
 			for( p = nmc->nc_nm[h]; p; p = p2 ){
-				syp = (SYTAB *)rfetch(p);
+				syp = (sytab_t *)rfetch(p);
 				p2 = syp->sy_lnk;
 				n = szbump( syp->sy_rel, (long)syp->sy_val );
 				if( n == 0 ) continue;
-				syp = (SYTAB *) wfetch( p );
+				syp = (sytab_t *) wfetch( p );
 				syp->sy_val += n;
 			}
 		}

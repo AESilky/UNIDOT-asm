@@ -1,10 +1,10 @@
-/* Function to fulfill `int regcheck(SYTAB* syp)` needed for the link.      */
+/* Function to fulfill `int regcheck(sytab_t* syp)` needed for the link.      */
 /*  Will need to figure out what it is passing in and what check is needed. */
 
 #include "../uascom/funcdefs.h"
 
-int regcheck(SYTAB* syp) {
-	//SYTAB{			/* symbol table entry		*/
+int regcheck(sytab_t* syp) {
+	//sytab_t{			/* symbol table entry		*/
 	//VMADR	sy_lnk;			/* link to next hash entry	*/
 	//VMADR	sy_xlk;			/* link to rear of xref chain	*/
 	//VMADR	sy_val;			/* value of symbol		*/

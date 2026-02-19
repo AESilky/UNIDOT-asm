@@ -31,6 +31,7 @@
 		"C_Cpp.vcFormat.newLine.beforeOpenBrace.type": "sameLine",
 		"cSpell.words": [
 			"BIGMEM",
+			"uavalloc",
 			"Unidot",
 			"USEVM"
 		]

@@ -39,7 +39,7 @@ extern void filchk(FILE* f, char* s);
 
 extern void fillin();
 
-extern void hexit(reg char* p, reg int n, long v);
+extern void hexit(char* p, int n, long v);
 
 extern int iilex();
 
@@ -47,7 +47,7 @@ extern int iiparse();
 
 extern void immmsg(char* s1, char* s2);	/* immediate message */
 
-extern int include(reg char* file);
+extern int include(char* file);
 
 extern void init(int argc, char* argv[]);
 
@@ -61,7 +61,7 @@ extern void iovck();
 
 extern void laboc();
 
-extern void lcalign(reg int n);
+extern void lcalign(int n);
 
 extern void lcassign();
 
@@ -87,7 +87,7 @@ extern void oflush();
 
 extern void oneed(int n);
 
-extern void opcinsert(OCTAB* o);
+extern void opcinsert(octab_t* o);
 
 extern void oputb(char c);
 
@@ -115,7 +115,7 @@ extern void putxref();
 
 extern void quit(int status);
 
-extern int regcheck(SYTAB* syp);
+extern int regcheck(sytab_t* syp);
 
 extern void rpt1();
 
@@ -138,6 +138,8 @@ extern void symcpy(char* d, char* s);
 extern void szyprocess();
 
 extern int token();
+
+extern VMADR uavalloc(uns size);
 
 extern void ugetline();
 

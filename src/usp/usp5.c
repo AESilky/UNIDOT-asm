@@ -123,7 +123,7 @@ intr(){ fprintf(stderr,"usp5 interrupt!\n"); rmfiles(1); }
 
 main( argc, argv ) int argc; char **argv;{
 
-	reg char	*fp;			/* for scanning flags */
+	char	*fp;			/* for scanning flags */
 
 	if( signal( SIGINT, SIG_IGN ) == SIG_DFL )
 		signal( SIGINT, intr );		/* interrupt		*/
@@ -536,11 +536,11 @@ grow(){
  * is a transition, add the state to the state index table.
  */
 
-inssx( pp ) reg short *pp;{
+inssx( pp ) short *pp;{
 
 
-	reg short	*sxp;
-	reg short	*mp;
+	short	*sxp;
+	short	*mp;
 	reg		sp;
 
 	if( !(*pp & 0x8000) ) return; /* not a transition */
@@ -595,10 +595,10 @@ listfa( fa ) int fa;{
 
 listfinal(){
 
-	reg short	*pp;		/* pointer into ptab */
-	reg short	*sp;		/* current state pointer in ptab */
-	reg short	*sxp;		/* pointer into state index */
-	reg char	*scanp;		/* pointer into scantab */
+	short	*pp;		/* pointer into ptab */
+	short	*sp;		/* current state pointer in ptab */
+	short	*sxp;		/* pointer into state index */
+	char	*scanp;		/* pointer into scantab */
 
 	printf( "\nfinal table list:\n\n" );
 	makesx(); /* make an index of the states */
@@ -633,7 +633,7 @@ listfl( pp, sym, dbase ) short *pp;  DICTENT *dbase;{
 
 
 	reg		px;
-	reg char	*str;
+	char	*str;
 
 	px = pp - ptab;
 	if( !intoff ) px <<= 1;
@@ -661,7 +661,7 @@ listsv( pp ) short	*pp;{
 
 makedflt(){
 
-	reg short	*pp;
+	short	*pp;
 	reg		sx;
 
 	ntdflt = (short *)ntact;
@@ -681,7 +681,7 @@ makedflt(){
 
 makefinal(){
 
-	reg short	*pp;
+	short	*pp;
 	short		ax;
 	short		sx;
 	short		first;
@@ -754,7 +754,7 @@ putch( ch ){
 
 putdflt(){
 
-	reg short	*pp;
+	short	*pp;
 	reg		n;
 
 	putst( "\nshort ntdflt[] = {\n" );
@@ -829,7 +829,7 @@ putptab(){
    any double quotes or backslash characters are preceded by a backslash.
 */
 
-putqs( s ) reg char *s;{
+putqs( s ) char *s;{
 
 
 	putch( '"' );
@@ -846,7 +846,7 @@ putqs( s ) reg char *s;{
 
 putscn(){
 
-	reg char	*sp;
+	char	*sp;
 	reg		n;
 	reg		m;
 
@@ -874,7 +874,7 @@ putscn(){
 
 putsem(){
 
-	reg short	*sp;
+	short	*sp;
 	reg		n;
 	reg		m;
 
@@ -898,7 +898,7 @@ putsem(){
 
 /* putst - output the specified string.  */
 
-putst( s ) reg char *s;{
+putst( s ) char *s;{
 
 
 	while( *s ) putch( *s++ );
@@ -912,7 +912,7 @@ putst( s ) reg char *s;{
 putstrings(){
 
 	reg DICTENT	*dp;
-	reg char	*sp;
+	char	*sp;
 	reg		n;
 
 	/* first output the terminals */
@@ -1014,8 +1014,8 @@ char *
 sclook( base, top ) char *base,*top;{
 
 
-	reg char	*scp;
-	reg char	*sclim;
+	char	*scp;
+	char	*sclim;
 	int		len;
 
 	len = top-base;
@@ -1036,7 +1036,7 @@ sclook( base, top ) char *base,*top;{
    returns true iff the strings are equal.
 */
 
-scmatch( a, b, len ) reg char *a,*b; reg len;{
+scmatch( a, b, len ) char *a,*b; len;{
 
 
 	do if(*a++ != *b++ ) return 0; while( --len );

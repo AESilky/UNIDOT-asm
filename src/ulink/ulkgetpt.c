@@ -107,7 +107,7 @@ ogetl( obp ) reg OBLOCK *obp;{
 char *
 ogets( obp ) reg OBLOCK *obp;{
 
-	reg char	*s;
+	char	*s;
 
 	s = obp->ob_ptr;
 	while( ogetb( obp ));
@@ -139,7 +139,7 @@ void oputb(uns b) {
 
 void oputl(long l) {
 
-	reg char	*p;
+	char	*p;
 
 	ostob( l, (p = objblk.ob_top) );
 	ostob( (l>>8), ++p );
@@ -168,7 +168,7 @@ void along(long l, FILE* file) { /* puts long in specified file */
 
 void oputs(char* s) {
 
-	reg char	*r;
+	char	*r;
 	r = objblk.ob_top;
 	while( *r++ = *s++ );
 	objblk.ob_top = r;

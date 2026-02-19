@@ -72,7 +72,7 @@ clearbit( b, s ) short *s;{
 
 /* clearset - clear the set pointed to by the argument.  */
 
-clearset( s ) reg short *s;{
+clearset( s ) short *s;{
 
 
 	reg	c;
@@ -153,7 +153,7 @@ closure( s, lim ) STATE *s;short *lim;{
    into the second set.
 */
 
-diffset( s, d ) reg short *s,*d;{
+diffset( s, d ) short *s,*d;{
 
 
 	reg	c;
@@ -164,7 +164,7 @@ diffset( s, d ) reg short *s,*d;{
 
 /* intersect - returns true iff the two sets intersect.  */
 
-intersect( a, b ) reg short *a,*b;{
+intersect( a, b ) short *a,*b;{
 
 
 	reg	c;
@@ -176,7 +176,7 @@ intersect( a, b ) reg short *a,*b;{
 
 /* moveset - moves a set from one place to another.  */
 
-moveset( s, d ) reg short *s,*d;{
+moveset( s, d ) short *s,*d;{
 
 
 	reg	c;
@@ -187,7 +187,7 @@ moveset( s, d ) reg short *s,*d;{
 
 /* nullset - returns true iff the specified set is empty.  */
 
-nullset( s ) reg short *s;{
+nullset( s ) short *s;{
 
 
 	reg	c;
@@ -200,7 +200,7 @@ nullset( s ) reg short *s;{
 /* orset - forms the union of two sets and puts the result into the
    second one.  */
 
-orset( s, d ) reg short *s,*d;{
+orset( s, d ) short *s,*d;{
 
 
 	reg	c;
@@ -219,7 +219,7 @@ setbit( b, s )short *s;{
 
 /* subset - returns true iff the first set is a subset of the second.  */
 
-subset( a, b ) reg short *a,*b;{
+subset( a, b ) short *a,*b;{
 
 
 	reg	c;

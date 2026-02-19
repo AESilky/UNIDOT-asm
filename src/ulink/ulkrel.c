@@ -128,11 +128,11 @@ void getrelitem() {
  * used.								*/
 
 long
-rbase( reloc ) reg uns reloc;{
+rbase( reloc ) uns reloc;{
 
 
-	reg SECTION	*sep;
-	reg long	base;
+	section_t	*sep;
+	long	base;
 
 	reloc &= URBMSK;
 	if( reloc == URBABS ) return 0L;			/* absolute */
@@ -156,9 +156,9 @@ rbase( reloc ) reg uns reloc;{
  * of the group.  This is used only in pass2, and only for the 8086. */
 
 long
-sbase( reloc ) reg uns reloc;{
+sbase( reloc ) uns reloc;{
 
-	reg SECTION	*sep;
+	section_t	*sep;
 
 	reloc &= URBMSK;
 	if( reloc == URBABS || rflag ) return 0L;		/* absolute */
@@ -183,11 +183,11 @@ sbase( reloc ) reg uns reloc;{
 
 int newrel() {
 
-	reg uns		trel;
-	reg char	*p;
-	reg int		iact;
-	reg int		len;
-	reg SYTAB	*syp;
+	uns		trel;
+	char	*p;
+	int		iact;
+	int		len;
+	sytab_t	*syp;
 
 	iact = reloc;
 	trel = iact & URBMSK;
@@ -227,12 +227,12 @@ int newrel() {
  * necessary.
  */
 
-SECTION *
-selook( s ) reg char *s;{
+section_t *
+selook( s ) char *s;{
 
 
-	reg SECTION	*sep;
-	reg SYTAB	*syp;
+	section_t	*sep;
+	sytab_t	*syp;
 
 	syp = sylook( s );
 	if( syp->sy_typ == STUND ){ /* create new section table entry */
@@ -243,9 +243,9 @@ selook( s ) reg char *s;{
 			syp->sy_rel = stct;
 			sep = sectab[stct++] =
 #ifdef STATS
-				(SECTION *)zpalloc(sizeof(SECTION),SECUSE);
+				(section_t *)zpalloc(sizeof(section_t),SECUSE);
 #else
-				(SECTION *)zpalloc(sizeof(SECTION));
+				(section_t *)zpalloc(sizeof(section_t));
 #endif
 			sep->se_sym = syp;
 			sep->se_ext = 32;
@@ -261,8 +261,8 @@ selook( s ) reg char *s;{
 
 void treloc() {
 
-	reg uns		nrel;
-	reg char	*ip;
+	uns		nrel;
+	char	*ip;
 
 	objblk.ob_ptr = txtlim = txttop;
 	txtstt = objblk.ob_buf + 6;
@@ -309,8 +309,8 @@ xx(n,isp) reg IACC	*isp; {
 void interp(char* ip) {
 
 	reg IACC	*isp;
-	reg int		i;
-	reg long	v;
+	int		i;
+	long	v;
 
 	isp = &istk[ISTKSIZ];			/* empty stack		*/
 	itmp0 = itmp1 = 0;			/* init temporaries	*/
@@ -555,9 +555,9 @@ long getbau(int off) {
 
 	/* fetch one addr unit (byte or bigger) starting at off */
 
-	reg char	*p;
-	reg int		n;
-	reg long	v;
+	char	*p;
+	int		n;
+	long	v;
 
 	n = (curadu + 7) >> 3;
 	p = txtstt + off * n;
@@ -571,9 +571,9 @@ void putbau( long v, int off ) {
 
 	/* store one addr unit (byte or bigger) starting at off */
 
-	reg char	*p;
-	reg int		i;
-	reg int		n;
+	char	*p;
+	int		i;
+	int		n;
 
 	n = (curadu + 7) >> 3;
 	p = txtstt + off * n;
@@ -584,11 +584,11 @@ void putbau( long v, int off ) {
 void aldl(IACC* isp, int n) {
 
 	/* load n+1 curadu's from least significant first */
-	reg long	v;
-	reg int		i;
-	reg int		bitlen;
-	reg int		bitoff;
-	reg char	*bytptr;
+	long	v;
+	int		i;
+	int		bitlen;
+	int		bitoff;
+	char	*bytptr;
 
 	v = 0;
 	n++;
@@ -617,11 +617,11 @@ void aldl(IACC* isp, int n) {
 void aldm(IACC* isp, int n) {
 
 	/* load n+1 curadu's from most significant first */
-	reg long	v;
-	reg int		i;
-	reg int		bitlen;
-	reg int		bitoff;
-	reg char	*bytptr;
+	long	v;
+	int		i;
+	int		bitlen;
+	int		bitoff;
+	char	*bytptr;
 
 	v = 0;
 	n++;
@@ -662,11 +662,11 @@ void astl(IACC* isp, int n) {
 
 	/* store n+1 curadu's from least significant first */
 
-	reg long	v;
-	reg char	*bytptr;
-	reg int		i;
-	reg int		bitlen;
-	reg int		bitoff;
+	long	v;
+	char	*bytptr;
+	int		i;
+	int		bitlen;
+	int		bitoff;
 
 	v = *isp;
 	n++;
@@ -707,11 +707,11 @@ void astm(IACC* isp, int n) {
 
 	/* store n+1 curadu's from most significant first */
 
-	reg long	v;
-	reg int		i;
-	reg int		bitlen;
-	reg int		bitoff;
-	reg char	*bytptr;
+	long	v;
+	int		i;
+	int		bitlen;
+	int		bitoff;
+	char	*bytptr;
 
 	v = *isp++;
 	n++;
@@ -776,7 +776,7 @@ void relinit() {
 	   reinstantiate the default table
 	*/
 
-	reg int	i;
+	int	i;
 
 	for( i=0; i<32; i++ )  relact[i] = uractions[i];
 }
@@ -787,11 +787,11 @@ void relinit() {
 
 void obrlt() {		/* table of local action - global action pairs */
 
-	reg int		i;
-	reg char	*p;
-	reg int		j;
-	reg int		k;
-	reg int		len;
+	int		i;
+	char	*p;
+	int		j;
+	int		k;
+	int		len;
 
 	i = *objblk.ob_ptr++ & 0xff;
 	if( i < 0 || i >= 32 ) error("F38 Bad relocation tag");

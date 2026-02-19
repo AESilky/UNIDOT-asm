@@ -62,8 +62,8 @@ void ovlctl(char* s);
 void dopass( filex, files ) int filex; char **files;{
 
 
-	reg char	*sp;
-	reg int		i;
+	char	*sp;
+	int		i;
 	char		line[128];
 
 	if( OVLYFILE ){		/* building an overlay */
@@ -87,8 +87,8 @@ void dopass( filex, files ) int filex; char **files;{
 
 void dofile(char* s) {
 
-	reg char	*sp;
-	reg int		i;
+	char	*sp;
+	int		i;
 
 	curfile = s;
 #ifdef STATS
@@ -121,10 +121,10 @@ prstats("start of dofile");
 
 void ovlctl(char* s) {
 
-	reg int		i;
-	reg char	*p;
-	reg SECTION	*sep;
-	reg int		j;
+	int		i;
+	char	*p;
+	section_t	*sep;
+	int		j;
 
 	if( afmt ) error("F18 no overlay in a.out format");
 	s++;
@@ -169,10 +169,10 @@ void ovlctl(char* s) {
 void library() {		/* simply reads OBJIN - RMM */
 
 	long		off;
-	reg char	*sym;
-	reg SYTAB	*stp;
+	char	*sym;
+	sytab_t	*stp;
 	char		changed;
-	reg int		i;
+	int		i;
 	long		libpos;
 
 	do {

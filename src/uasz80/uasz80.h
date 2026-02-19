@@ -78,7 +78,7 @@ typedef struct format format_t;
 /*
  * Global variable declarations.
  */
-extern char		hlflg;		/* flag indicating reg hl was used */
+extern char		hlflg;		/* flag indicating hl was used */
 extern char		ixiy;		/* prefix for ix/iy instruction, or 0 */
 extern char		ixiyi;		/* flag indicating (ix+d) or (iy+d) */
 extern uns		ixiyr;		/* (ix+d) or (iy+d) offset relocation */

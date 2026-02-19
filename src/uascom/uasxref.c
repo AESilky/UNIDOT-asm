@@ -57,8 +57,8 @@ void sysort();
 
 void putxref(){
 
-	SYTAB	*syp;
-	XREF	*xrp;
+	sytab_t	*syp;
+	xref_t	*xrp;
 	VMADR	sym;
 	VMADR	xr;
 	VMADR	xrtail;
@@ -71,7 +71,7 @@ void putxref(){
 	linect = 0;
 	sysort();
 	for( sym = syhtab[0]; sym != 0; sym = syp->sy_lnk ){
-		syp = (SYTAB *) rfetch( sym );
+		syp = (sytab_t *) rfetch( sym );
 		xrtail = syp->sy_xlk;
 		undef = syp->sy_typ == STUND || syp->sy_rel == URBUND;
 		if( syp->sy_typ == STKEY || syp->sy_typ == STSEC ||
@@ -84,7 +84,7 @@ void putxref(){
 		fputc( ' ', LIST );
 		if( syp->sy_typ == STKEQ ){
 			xr = syp->sy_val;
-			keystr = ((SYTAB *)rfetch(xr))->sy_str;
+			keystr = ((sytab_t *)rfetch(xr))->sy_str;
 			sylen = strlen(keystr);
 			putblks( 6-sylen );
 			fprintf( LIST, "<%s>     ",keystr);
@@ -104,11 +104,11 @@ void putxref(){
 			fputc( ' ', LIST );
 		}
 		if( xrtail != 0 ){ /* we have some xref entries */
-			xrp = (XREF *) rfetch( xrtail );
+			xrp = (xref_t *) rfetch( xrtail );
 			llcol = 46;
 			do {
 				xr = xrp->xr_lnk;
-				xrp = (XREF *) rfetch( xr );
+				xrp = (xref_t *) rfetch( xr );
 				if( llcol > rmarg-8 ){ /* start new line */
 					fputc( '\n', LIST );
 					pgcheck();
@@ -127,7 +127,7 @@ void putxref(){
 				llcol += 8;
 			} while( xr != xrtail );
 		}
-		syp = (SYTAB *) rfetch( sym );
+		syp = (sytab_t *) rfetch( sym );
 		fputc( '\n', LIST );
 	}
 }
@@ -144,7 +144,7 @@ VMADR
 symerge(VMADR a, VMADR b) {
 
 
-	reg SYTAB	*ap;
+	sytab_t	*ap;
 	reg VMADR	pa;
 	VMADR		r;
 	VMADR		t;
@@ -163,11 +163,11 @@ symerge(VMADR a, VMADR b) {
 	 */
 
 #ifdef BIGMEM
-	str = ((SYTAB *)rfetch(b))->sy_str;
+	str = ((sytab_t *)rfetch(b))->sy_str;
 #else
-	symcpy( str, ((SYTAB *)rfetch(b))->sy_str );
+	symcpy( str, ((sytab_t *)rfetch(b))->sy_str );
 #endif
-	if( symcmp(((SYTAB *)rfetch(a))->sy_str,str) > 0 ){
+	if( symcmp(((sytab_t *)rfetch(a))->sy_str,str) > 0 ){
 
 		/* if a > b, exchange a and b */
 
@@ -190,21 +190,21 @@ symerge(VMADR a, VMADR b) {
 		 */
 
 #ifdef BIGMEM
-		str = ((SYTAB *)rfetch(b))->sy_str;
+		str = ((sytab_t *)rfetch(b))->sy_str;
 #else
-		symcpy( str, ((SYTAB *)rfetch(b))->sy_str );
+		symcpy( str, ((sytab_t *)rfetch(b))->sy_str );
 #endif
-		ap=(SYTAB *)rfetch(a);
+		ap=(sytab_t *)rfetch(a);
 		do pa = a;
 		while( (a = ap->sy_lnk) != 0 &&
-			symcmp((ap=(SYTAB *)rfetch(a))->sy_str,str) <= 0 );
+			symcmp((ap=(sytab_t *)rfetch(a))->sy_str,str) <= 0 );
 
 		/*
 		 * Link b to the end of the result, then exchange the chains
 		 * so that a again points to the smaller of the two.
 		 */
 
-		((SYTAB *)wfetch(pa))->sy_lnk = b;
+		((sytab_t *)wfetch(pa))->sy_lnk = b;
 		t = a;
 		a = b;
 		b = t;
@@ -219,7 +219,7 @@ symerge(VMADR a, VMADR b) {
 VMADR
 lstsort( l ) reg VMADR l; {
 
-	reg SYTAB	*cp,
+	sytab_t	*cp,
 			*bp;
 	reg VMADR	a,b,c,d;
 #ifdef BIGMEM
@@ -231,20 +231,20 @@ lstsort( l ) reg VMADR l; {
 	a = 0;
 	while( l ){
 #ifdef BIGMEM
-		str = ((SYTAB *)rfetch(l))->sy_str;
+		str = ((sytab_t *)rfetch(l))->sy_str;
 #else
-		symcpy(str,((SYTAB *)rfetch(l))->sy_str);
+		symcpy(str,((sytab_t *)rfetch(l))->sy_str);
 #endif
 		c = a;
 		d = 0;
-		while( c && symcmp((cp=(SYTAB *)rfetch(c))->sy_str,str) < 0 ){
+		while( c && symcmp((cp=(sytab_t *)rfetch(c))->sy_str,str) < 0 ){
 			d = c;
 			c = cp->sy_lnk;
 		}
-		bp = (SYTAB *)wfetch(l);
+		bp = (sytab_t *)wfetch(l);
 		b = bp->sy_lnk;
 		bp->sy_lnk = c;
-		if( d )		((SYTAB *)wfetch(d))->sy_lnk = l;
+		if( d )		((sytab_t *)wfetch(d))->sy_lnk = l;
 			else	a = l;
 		l = b;
 	}
@@ -259,7 +259,7 @@ lstsort( l ) reg VMADR l; {
 
 void sysort(){
 
-	reg uns		halfi,
+	uns		halfi,
 			i,
 			j;
 
@@ -279,8 +279,8 @@ void sysort(){
 void xref( sym, type ) VMADR sym; int type;{
 
 
-	reg SYTAB	*syp;
-	reg XREF	*nxp;
+	sytab_t	*syp;
+	xref_t	*nxp;
 	reg VMADR	nxr;
 	reg VMADR	oxr;
 	int		pl;
@@ -293,27 +293,27 @@ void xref( sym, type ) VMADR sym; int type;{
 	 * of at least 3 blocks.
 	 */
 
-	syp = (SYTAB *) wfetch( sym );
+	syp = (sytab_t *) wfetch( sym );
 	oxr = syp->sy_xlk;
 	valign();			/* align virtual mem */
 	if( oxr == 0 ){			/* first xref entry for this symbol */
 
-		nxr = VALN(sizeof(XREF));
-		nxp = (XREF *)wfetch(nxr);
+		nxr = VALN(sizeof(xref_t));
+		nxp = (xref_t *)wfetch(nxr);
 		nxp->xr_lnk = nxr;
 
 	} else {	/* add to existing circular list of xref entries */
 
-		nxp = (XREF *) wfetch( oxr );
+		nxp = (xref_t *) wfetch( oxr );
 		if( nxp->xr_pl == pl ) return;		/* no duplicate xrefs */
 		oxr = nxp->xr_lnk;
-		nxp->xr_lnk = nxr = VALN(sizeof(XREF));
-		nxp = (XREF *)wfetch(nxr);
+		nxp->xr_lnk = nxr = VALN(sizeof(xref_t));
+		nxp = (xref_t *)wfetch(nxr);
 		nxp->xr_lnk = oxr;
 	}
 	nxp->xr_pl = pl;
 #ifndef BIGMEM
-	syp = (SYTAB *) wfetch( sym );			/* paranoia	*/
+	syp = (sytab_t *) wfetch( sym );			/* paranoia	*/
 #endif
 	syp->sy_xlk = nxr;
 }

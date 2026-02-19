@@ -84,8 +84,8 @@ void flushclos(FILE* f);
 void linkspec(char* lnkfile);
 void map();
 void page();
-void pent(SYTAB* syp);
-void psect(SECTION* sep);
+void pent(sytab_t* syp);
+void psect(section_t* sep);
 void usage();
 
 
@@ -95,7 +95,7 @@ void intr(){  fprintf(stderr,"INTERRUPT!\n"); quit( FATEXIT ); }
 
 void main(argc, argv, env) int argc; char* argv[]; char* env[]; {
 
-	reg SECTION	*sep;
+	section_t	*sep;
 
 #ifdef vms
 	if( signal( SIGINT, SIG_IGN ) == SIG_DFL )
@@ -196,9 +196,9 @@ void main(argc, argv, env) int argc; char* argv[]; char* env[]; {
 	}
 	if( verbose ) printf("pass1:\n");
 #ifdef STATS
-	sectab[URBABS] = sep = (SECTION *)zpalloc( sizeof(SECTION), SECUSE );
+	sectab[URBABS] = sep = (section_t *)zpalloc( sizeof(section_t), SECUSE );
 #else
-	sectab[URBABS] = sep = (SECTION *)zpalloc( sizeof(SECTION) );
+	sectab[URBABS] = sep = (section_t *)zpalloc( sizeof(section_t) );
 #endif
 	sep->se_sym = sylook( ".abs  " );		/* NOTE BLANKs	*/
 	sep->se_sym->sy_typ = STSEC;			/* no list	*/
@@ -409,10 +409,10 @@ void linkspec( char *lnkfile ) {	/* do a link file */
  */
 
 long
-scanaddr( s ) reg char *s; {
+scanaddr( s ) char *s; {
 
 	long	v;
-	reg int	c;
+	int	c;
 
 	v = 0L;
 	while( (c = *s++ ) != '\0' ){
@@ -431,8 +431,8 @@ scanaddr( s ) reg char *s; {
 void locspec(char* s) {
 
 
-	reg char	*n;
-	reg SECTION	*sep;
+	char	*n;
+	section_t	*sep;
 	char		name[128];
 
 	n = name;
@@ -453,8 +453,8 @@ void locspec(char* s) {
 void defsym( char *s) {
 
 
-	reg char	*n;
-	reg SYTAB	*syp;
+	char	*n;
+	sytab_t	*syp;
 	char		name[128];
 
 	n = name;
@@ -471,9 +471,9 @@ void defsym( char *s) {
  * rev - reverse a list
  */
 
-SYTAB * rev(p) reg SYTAB *p; {
-	reg SYTAB	*q;
-	reg SYTAB	*r;
+sytab_t * rev(p) sytab_t *p; {
+	sytab_t	*q;
+	sytab_t	*r;
 
 	q = 0;			/* last element on chain */
 	while( p ) r = p->sy_lnk, p->sy_lnk = q, q = p, p = r;
@@ -482,9 +482,9 @@ SYTAB * rev(p) reg SYTAB *p; {
 
 static char *symfmt;
 
-void pent(SYTAB* syp) {	/* print a symbol entry	*/
+void pent(sytab_t* syp) {	/* print a symbol entry	*/
 
-	reg char	*valfmt;
+	char	*valfmt;
 
 	fprintf( LIST, symfmt, syp->sy_str );
 	if( OVLYFILE ) fprintf( LIST, "%4d", syp->sy_ovl & 0xff );
@@ -494,10 +494,10 @@ void pent(SYTAB* syp) {	/* print a symbol entry	*/
 	fprintf( LIST, valfmt, syp->sy_val );
 }
 
-void psect(SECTION* sep) {	/* print a section entry	*/
+void psect(section_t* sep) {	/* print a section entry	*/
 
-	reg SYTAB	*syp;
-	reg SECTION	*sep2;
+	sytab_t	*syp;
+	section_t	*sep2;
 	int		i = 0;
 
 #define SE_PRINTED 1
@@ -538,11 +538,11 @@ void bigspace(int n) {		/* output big space between sections */
 
 void map(){
 
-	reg SYTAB	*syp;
-	reg int		i;
-	reg SYTAB	*syp2;
-	SYTAB		*c1,*c2,*c3;	/* columns for printing */
-	reg SECTION	*sep;
+	sytab_t	*syp;
+	int		i;
+	sytab_t	*syp2;
+	sytab_t		*c1,*c2,*c3;	/* columns for printing */
+	section_t	*sep;
 	long		curtime;
 	char		datstr[64];
 	char		timstr[16];
@@ -686,7 +686,7 @@ void page(){
 
 void afinish(){		/* clean up the a.out format module */
 
-	reg int		i;
+	int		i;
 
 DEB(0,("afin fpos = %ld, relsize = %ld, symsize = %ld\n",fpos,relsize,symsize));
 	fseek( OBJOUT, fpos, 0 );	/* move to end of file */

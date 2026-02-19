@@ -114,10 +114,10 @@ int hexch(){
 
 int token(){
 
-	reg CHENT	*chp;
-	reg char	*strp;
-	reg int		c;
-	reg int		radix;
+	chent_t	*chp;
+	char	*strp;
+	int		c;
+	int		radix;
 	char		lch;
 	char		*lscanpt;
 
