@@ -125,7 +125,7 @@ static short	szyix;
 
 */
 
-void szyinit( vltp ) vlsiz_t **vltp; {
+void szyinit(vlsiz_t** vltp) {
 	szevlpt = vltp;
 	BDEB(1,("szyinit: %o %o %o %o %o\n",
 		vltp,vltp[0],vltp[1],vltp[2],vltp[3]));
@@ -263,7 +263,7 @@ int szecheck(szyent_t* szep) {
 			(long)szep->sze_tgt, i );
 	return i;
 }
-xszecheck( szep ) szyent_t *szep; {
+xszecheck(szyent_t* szep) {
 #endif
 
 	/* determine proper response to an sze entry, return 0 if
@@ -336,7 +336,7 @@ int szbump(ushort rel, long val) {
 /*DEB*/if(debug>0)printf("szbump( %d, %lx ) returns %d\n",rel,val,n);
 	return n;
 }
-xszbump(rel,val) long val; {
+xszbump(ushort rel, long val) {
 #endif
 	struct szyincrs *szp;
 	struct szyincrs *szp2;
@@ -359,10 +359,10 @@ void szesyinc(){
 	   entries with addresses greater than val (which is in adu's) */
 
 	sytab_t	*syp;
-	reg VMADR	p;
+	VMADR	p;
 	int		h;
 	int		n;
-	reg VMADR	p2;
+	VMADR	p2;
 	numchn_t	*nmc;
 
 	BDEB(5,("szesyinc() %d entries\n",szyix));

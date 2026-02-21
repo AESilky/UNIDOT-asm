@@ -43,7 +43,6 @@ static char rcsid[]=
 
 
 /*		symbol table lookup			*/
-
 static sytab_t	**inspt;
 
 /*
@@ -51,9 +50,7 @@ static sytab_t	**inspt;
  * specified symbol.  Creates a new entry in the symbol table if
  * necessary.
  */
-
-sytab_t *
-sylook( s ) char *s;{
+sytab_t* sylook(char* s) {
 
 
 	sytab_t	*syp;
@@ -82,9 +79,7 @@ sylook( s ) char *s;{
  * symerge - Merges the two specified symbol table hash chains, and
  * returns a pointer to the resulting chain.
  */
-
-sytab_t *
-symerge( a, b ) sytab_t *a, *b;{
+sytab_t* symerge(sytab_t* a, sytab_t* b) {
 
 
 	sytab_t	**re;		/* ptr to last link field in chain */
@@ -124,9 +119,7 @@ symerge( a, b ) sytab_t *a, *b;{
  * Otherwise, sets up inspt to point to the spot where the new entry
  * should be linked in, and returns 0.
  */
-
-sytab_t *
-sypeek( s ) char *s;{
+sytab_t* sypeek(char* s) {
 
 
 	sytab_t	*p,
@@ -153,9 +146,7 @@ sypeek( s ) char *s;{
 /*
  * numsort sorts a list by value with an insertion sort
  */
-
-sytab_t *
-numsort( s ) sytab_t *s; {
+sytab_t* numsort(sytab_t* s) {
 	sytab_t *a,*b,*c;
 	if( s == NULL ) return s;
 	b = s->sy_lnk;

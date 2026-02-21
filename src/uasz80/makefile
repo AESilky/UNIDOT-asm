@@ -65,9 +65,9 @@ LDFLAGS=
 CC = cc
 LD = cc
 
-BIN = /home/esilky/.local/bin
+BIN = /usr/bin
 
-LIB = /home/esilky/.local/lib
+LIB = /usr/lib
 
 UASCOM=  ../uascom/uas.o \
 	../uascom/uasdirec.o \

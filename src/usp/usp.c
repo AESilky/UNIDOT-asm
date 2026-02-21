@@ -399,10 +399,7 @@ int dmt( int nt ) {
    returned is a pointer to the top of the area containing the specified
    dictionary entries (i.e. those matching flags).
 */
-
-DICTENT *
-dshuffle( dp, flags ) DICTENT *dp; char flags; {
-
+DICTENT* dshuffle(DICTENT* dp, char flags) {
 
 	DICTENT	temp,	/* used for swapping around dictionary entries */
 		*top,	/* top of area accumulating specified symbols */

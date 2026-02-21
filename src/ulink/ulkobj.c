@@ -159,8 +159,8 @@ void obglo(){
 void obgrp(){
 
 	sytab_t	*syp;
-	reg GROUP	*grp;
-	reg GROUP	*gl;
+	GROUP	*grp;
+	GROUP	*gl;
 	int		grno;
 	int		i;
 

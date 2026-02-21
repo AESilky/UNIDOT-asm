@@ -122,7 +122,7 @@ return termtop[sym].dstring+string;
 
 intr(){ fprintf(stderr,"usp4 interrupt\n"); rmfiles(); }
 
-main( argc, argv ) int argc; char **argv;{
+main(int argc, char** argv) {
 
 
 	char	*flags,		/* pointer to flags */
@@ -198,11 +198,10 @@ case 'Z':	Zflag = 1; continue;
    acomp - compares two xlist/rlist entries according to the criteria
    listed in sortatab.
 */
+acomp(LIST* a, LIST* b) {
 
-acomp( a, b ) reg LIST *a,*b;{
 
-
-	reg DICTENT	*dbase;
+	DICTENT	*dbase;
 	short		asym;
 	short		bsym;
 	short		r;
@@ -221,9 +220,9 @@ acomp( a, b ) reg LIST *a,*b;{
 
 showrsem(){
 
-	reg		ax;
-	reg LIST	*xp;
-	reg LIST 	*top;
+	int		ax;
+	LIST	*xp;
+	LIST 	*top;
 
 	printf( "rsem list***************************\n" );
 
@@ -250,8 +249,8 @@ showrsem(){
 
 adjalts(){
 
-	reg ALTENT	*altp;
-	reg ALTENT	*sp;
+	ALTENT	*altp;
+	ALTENT	*sp;
 	char		minlp;
 	char		sem;
 	char		spanerr;
@@ -282,9 +281,9 @@ adjalts(){
 
 buildatab(){
 
-	reg LIST	*xp;		/* walks thru action table entries */
-	reg AENT	*base;		/* base of current entry	*/
-	reg AENT	*top;		/* top of the entry		*/
+	LIST	*xp;		/* walks thru action table entries */
+	AENT	*base;		/* base of current entry	*/
+	AENT	*top;		/* top of the entry		*/
 	short		csx;		/* relative state pointer	*/
 	long		fpos;		/* file position		*/
 	CGRP		*ctop;		/* pointer to top of closure	*/
@@ -340,16 +339,16 @@ buildatab(){
    state.
 */
 
-fixamb( c, ctop ) STATE *c; CGRP *ctop;{
+fixamb(STATE* c, CGRP* ctop) {
 
 
-	reg LIST	*xlp;	/* for walking through xlist		*/
-	reg LIST	*mp;	/* for moving xlist entries		*/
-	reg PRODENT	*rpp;	/* reduction production pointer		*/
-	reg PRODENT	*xpp;	/* transition production pointer	*/
-	reg DICTENT	*dp;	/* for looking dictionary entries	*/
-	reg CGRP	*rp;	/* for scanning for reductions		*/
-	reg CGRP	*xp;	/* for scanning for transitions		*/
+	LIST	*xlp;	/* for walking through xlist		*/
+	LIST	*mp;	/* for moving xlist entries		*/
+	PRODENT	*rpp;	/* reduction production pointer		*/
+	PRODENT	*xpp;	/* transition production pointer	*/
+	DICTENT	*dp;	/* for looking dictionary entries	*/
+	CGRP	*rp;	/* for scanning for reductions		*/
+	CGRP	*xp;	/* for scanning for transitions		*/
 	short		rprec;	/* precedence associated with reduce	*/
 	short		xprec;	/* precedence associated with shift	*/
 	char		sym;	/* the troublesome terminal symbol	*/
@@ -457,9 +456,9 @@ grow(){
 
 listalts(){
 
-	reg ALTENT	*altp;
-	reg DICTENT	*dp;
-	reg		bvec;
+	ALTENT	*altp;
+	DICTENT	*dp;
+	int		bvec;
 
 	if( alttop <= alttab ) return; /* nothing to list */
 	printf( "\n*** semantic resolutions required ***\n\n" );
@@ -484,10 +483,10 @@ listalts(){
 
 listatab(){
 
-	reg DICTENT	*dp;
-	reg LIST	*xp;
-	reg LIST	*top;
-	reg		ax;
+	DICTENT	*dp;
+	LIST	*xp;
+	LIST	*top;
+	int		ax;
 
 	printf( "\naction table list:\n\n" );
 	ax = Ax(fact);
@@ -519,12 +518,12 @@ listatab(){
    the context set.
 */
 
-listcg( cgp ) CGRP *cgp;{
+listcg(CGRP* cgp) {
 
 
-	reg DICTENT	*dp;
-	reg PRODENT	*pp;
-	reg PRODENT	*dot;
+	DICTENT	*dp;
+	PRODENT	*pp;
+	PRODENT	*dot;
 
 	/* first list the dotted production.  */
 
@@ -547,12 +546,12 @@ listcg( cgp ) CGRP *cgp;{
    listset - lists the members of the specified set.
 */
 
-listset( s ) SET *s;{
+listset(SET* s) {
 
 
-	reg DICTENT	*dp;
+	DICTENT	*dp;
 	char	*sp;
-	reg		t;
+	int		t;
 	char		first;
 
 	first = 1;
@@ -576,10 +575,10 @@ listset( s ) SET *s;{
    respectively.
 */
 
-liststate( s, top ) STATE *s; reg CGRP *top;{
+liststate(STATE* s, CGRP* top) {
 
 
-	reg CGRP	*cgp;
+	CGRP	*cgp;
 
 	for( cgp = &s->scg[0]; cgp < top; cgp++ ) listcg( cgp );
 }
@@ -590,13 +589,13 @@ liststate( s, top ) STATE *s; reg CGRP *top;{
    from the state and writes it to afile.
 */
 
-makeact( c, ctop ) STATE *c; STATE *ctop;{
+makeact(STATE* c, STATE* ctop) {
 
 
-	reg PRODENT	*rpp;
-	reg LIST	*xlp;
-	reg LIST	*top;
-	reg CGRP	*rp;
+	PRODENT	*rpp;
+	LIST	*xlp;
+	LIST	*top;
+	CGRP	*rp;
 	AENT		*base;
 	short		*next;
 	short		sym;
@@ -669,9 +668,9 @@ makeact( c, ctop ) STATE *c; STATE *ctop;{
 
 mkreach(){
 
-	reg LIST	*xp;
-	reg LIST	*xtop;
-	reg		ax;
+	LIST	*xp;
+	LIST	*xtop;
+	int		ax;
 
 	fact->nr = BM; /* first state is reachable */
 	ax = Ax(fact);
@@ -692,8 +691,8 @@ mkreach(){
 
 otheralts(){
 
-	reg ALTENT	*newalt;
-	reg LIST	*rp;
+	ALTENT	*newalt;
+	LIST	*rp;
 	ALTENT		*oldtop;
 	ALTENT		*altp;
 	LIST		*rtop;
@@ -735,7 +734,7 @@ otheralts(){
    position in ocol.
 */
 
-putch( ch ) char ch;{
+putch(char ch) {
 
 	if( ch == '\n' ) ocol = 0;
 	putchar( ch );
@@ -745,8 +744,7 @@ putch( ch ) char ch;{
 /*
    putst - output the specified string.
 */
-
-putst( s ) char *s;{
+putst(char* s) {
 
 	while( *s ) putch( *s++ );
 }
@@ -813,10 +811,10 @@ readstab(){
 
 recalts(){
 
-	reg LIST	*rp;
-	reg LIST	*sp;
-	reg		ax;
-	reg		dlp;
+	LIST	*rp;
+	LIST	*sp;
+	int		ax;
+	int		dlp;
 	LIST		*rtop;
 	char		lp;
 	char		sem;
@@ -876,9 +874,9 @@ recalts(){
 
 rmchain(){
 
-	reg LIST	*rp;
-	reg LIST	*xp;
-	reg 		ax;
+	LIST	*rp;
+	LIST	*xp;
+			ax;
 	LIST		*base;
 	LIST		*top;
 
@@ -915,10 +913,10 @@ rmchain(){
 
 rmdupr(){
 
-	reg LIST	*rp;
-	reg LIST	*sp;
-	reg LIST	*mp;
-	reg		ax;
+	LIST	*rp;
+	LIST	*sp;
+	LIST	*mp;
+	int		ax;
 	LIST		*rtop;
 	LIST		*top;
 	char		sym;
@@ -965,9 +963,9 @@ rmdupr(){
 
 rmlr0(){
 
-	reg LIST	*xp;
-	reg LIST	*rp;
-	reg		ax;
+	LIST	*xp;
+	LIST	*rp;
+	int		ax;
 	AENT		*suc;
 	LIST		*xtop;
 	LIST		*rtop;
@@ -1005,12 +1003,11 @@ rmlr0(){
    the specified configuration group, and puts the result in the
    specified set.
 */
+scontext(CGRP* cgp, SET* csp) {
 
-scontext( cgp, csp ) CGRP *cgp; SET *csp;{
 
-
-	reg PRODENT	*pp;
-	reg		el;
+	PRODENT	*pp;
+	int		el;
 
 	clearset( csp );
 	pp = &prod[cgp->cpp];
@@ -1043,7 +1040,7 @@ scontext( cgp, csp ) CGRP *cgp; SET *csp;{
 
 sortatab(){
 
-	reg		ax;
+	int		ax;
 	extern	int	acomp();	/* comparison routine for qsort */
 
 	ax = Ax(fact);
@@ -1057,8 +1054,7 @@ sortatab(){
 /*
    statemove - moves a state nucleus from one place to another.
 */
-
-statemove( a, b, lim ) STATE *a,*b;short *lim;{
+statemove(STATE* a, STATE* bshort, STATE* lim) {
 
 
 	short	*sha, *shb;
@@ -1088,8 +1084,7 @@ writeatab(){
 	writeblock( afile, (char *)atab, (char *)atop );
 }
 
-writeblock( i, first, limit ) char *first, *limit;{
-
+writeblock(char* first, char* limit) {
 
 	ushort	length;		/* length of the block to be written */
 
@@ -1101,7 +1096,7 @@ writeblock( i, first, limit ) char *first, *limit;{
 
 
 /*VARARGS1*/
-fatal( s, a, b ) char *s; {
+fatal(char* s, a, b) {
 
 	fclose(stdout);
 	fprintf(stderr,"fatal error in usp4: ");
@@ -1113,9 +1108,9 @@ fatal( s, a, b ) char *s; {
 	rmfiles();
 }
 
-opfile(s,n) char *s;{
+opfile(char* s, int n) {
 
-	reg	i;
+	int	i;
 
 #ifdef msdos
 	_iomode = 1;		/* intermediate files are binary */

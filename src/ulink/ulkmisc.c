@@ -140,12 +140,10 @@ char* palloc(uns size) {
 /*
  * zpalloc() allocates space and guarantees that it is zero
  */
-
-char *
 #ifdef STATS
-zpalloc( size, which ) uns size; {
+char* zpalloc(uns size, int which) {
 #else
-zpalloc( size ) uns size; {
+char* zpalloc(uns size) {
 #endif
 
 	char	*p,*q,*r;
@@ -163,11 +161,10 @@ zpalloc( size ) uns size; {
  * lastcomp - Returns a pointer to the last component of a path name
  */
 
-char *
-lastcomp( s ) char *s;{
+char* lastcomp(char* s) {
 
 
-	int		c;
+	int	c;
 	char	*r;
 
 	r = s;

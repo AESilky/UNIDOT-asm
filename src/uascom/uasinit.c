@@ -100,7 +100,7 @@ void getdat(){
 }
 
 char *
-lastcomp(s) char *s;{	/* find last component of file name */
+lastcomp(char* s) {	/* find last component of file name */
 
 	char *q;
 
@@ -485,7 +485,7 @@ top:	while( argn < argc ){	/* read command line arguments */
 	}
 }
 
-int argnum(s) char *s; {
+int argnum(char* s) {
 
 	int	i;
 
@@ -497,7 +497,7 @@ int argnum(s) char *s; {
 	return i;
 }
 
-void defsym(s) char *s; {
+void defsym(char* s) {
 
 	char	*p;
 	sytab_t	*syp;
@@ -534,14 +534,14 @@ void defsym(s) char *s; {
  */
 
 #ifndef NOPD
-preget( typ ) int typ;{
+preget(int typ) {
 
 	if( token() != typ ) badpre();
 	return tokval;
 }
 #endif
 
-void copymsg(f)FILE* f; {
+void copymsg(FILE* f) {
 	fprintf(f, "UAS Macro Assembler Version 6.18 by Unidot Inc (c) Copyright 1982,1985,1987,1988\n");
 	fprintf(f, " Resurrected 2026, AESilky\n");
 }

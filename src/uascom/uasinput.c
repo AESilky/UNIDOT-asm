@@ -78,7 +78,7 @@ case INRPT:	if( rinfp->in_rpt-- == 0 ) break;
  * include - Pushes the specified file into the input stream.  Returns -1
  * if the file cannot be opened, 0 otherwise.
  */
-int include( file ) char *file;{
+int include(char* file) {
 	int		fd;
 	int		i;
 	int		per;
@@ -161,7 +161,7 @@ void popin(){
  * pushc - Pushes the specified character onto the input stack.
  */
 
-void pushc( c ) char c;{
+void pushc(char c) {
 
 	if( insp > ((char *)instk)+INSIZ-1 ) iovck();
 	*insp++ = c;

@@ -58,8 +58,7 @@ void ovlctl(char* s);
  * dopass - Performs a single pass over all of the object and library
  * files.
  */
-
-void dopass( filex, files ) int filex; char **files;{
+void dopass(int filex, char** files) {
 
 
 	char	*sp;

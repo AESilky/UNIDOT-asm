@@ -51,7 +51,7 @@ static short msk[] = {
 
 #ifndef CLEAN
 #define chk(s,b)	if((b) >= SETSIZE)berr(s,b);
-berr(s,b)char *s;{fatal("%s(%d)",s,b);}
+berr(char* s, int b) { fatal("%s(%d)", s, b); }
 #else
 #define chk(b)
 #endif
@@ -63,7 +63,7 @@ extern PRODENT *prod;		/* base of productions */
 
 /* clearbit - clears the specified bit in the specified set.  */
 
-clearbit( b, s ) short *s;{
+clearbit(short* s, int b) {
 
 
 	chk("clearbit",b);
@@ -72,10 +72,10 @@ clearbit( b, s ) short *s;{
 
 /* clearset - clear the set pointed to by the argument.  */
 
-clearset( s ) short *s;{
+clearset(short* s) {
 
 
-	reg	c;
+	int	c;
 
 	c = SETSIZE/16;
 	do *s++ = 0; while( --c );
@@ -88,8 +88,7 @@ clearset( s ) short *s;{
    needs to grow beyond lim, it stops and returns 0.
 */
 
-CGRP *
-closure( s, lim ) STATE *s;short *lim;{
+CGRP* closure(STATE* s, short* lim) {
 
 
 	CGRP	*bot;	/* first config-group of state			*/
@@ -152,11 +151,9 @@ closure( s, lim ) STATE *s;short *lim;{
    diffset - subtracts the first set from the second and puts the result
    into the second set.
 */
+diffset(short* s, short* d) {
 
-diffset( s, d ) short *s,*d;{
-
-
-	reg	c;
+	int	c;
 
 	c = SETSIZE/16;
 	do *d++ &= ~*s++; while( --c );
@@ -164,10 +161,10 @@ diffset( s, d ) short *s,*d;{
 
 /* intersect - returns true iff the two sets intersect.  */
 
-intersect( a, b ) short *a,*b;{
+intersect(short* a, short* b) {
 
 
-	reg	c;
+	int	c;
 
 	c = SETSIZE/16;
 	do if( *a++ & *b++ ) return 1; while( --c );
@@ -176,10 +173,9 @@ intersect( a, b ) short *a,*b;{
 
 /* moveset - moves a set from one place to another.  */
 
-moveset( s, d ) short *s,*d;{
+moveset(short* s, short* d) {
 
-
-	reg	c;
+	int	c;
 
 	c = SETSIZE/16;
 	do *d++ = *s++; while( --c );
@@ -187,10 +183,10 @@ moveset( s, d ) short *s,*d;{
 
 /* nullset - returns true iff the specified set is empty.  */
 
-nullset( s ) short *s;{
+nullset(short* s) {
 
 
-	reg	c;
+	int	c;
 
 	c = SETSIZE/16;
 	do if(*s++ ) return 0; while( --c );
@@ -200,10 +196,9 @@ nullset( s ) short *s;{
 /* orset - forms the union of two sets and puts the result into the
    second one.  */
 
-orset( s, d ) short *s,*d;{
+orset(short* s, short* d) {
 
-
-	reg	c;
+	int	c;
 
 	c = SETSIZE/16;
 	do *d++ |= *s++; while( --c );
@@ -211,7 +206,7 @@ orset( s, d ) short *s,*d;{
 
 /* setbit - sets the specified bit in the specified set.  */
 
-setbit( b, s )short *s;{
+setbit(int b, short* s) {
 
 	chk("setbit",b);
 	s[b >> S] |= 1 << (b&M);
@@ -219,10 +214,9 @@ setbit( b, s )short *s;{
 
 /* subset - returns true iff the first set is a subset of the second.  */
 
-subset( a, b ) short *a,*b;{
+subset(short* a, short* b) {
 
-
-	reg	c;
+	int	c;
 
 	c = SETSIZE/16;
 	do if( *a++ & ~*b++ ) return 0; while( --c );
@@ -232,8 +226,7 @@ subset( a, b ) short *a,*b;{
 /* testbit - tests the specified bit in the specified set.  returns true
    iff the bit is set.  */
 
-testbit( b, s ) short *s;{
-
+testbit(int b, short* s) {
 
 	chk("testbit",b);
 	return s[b >> S] & (1 << (b&M));

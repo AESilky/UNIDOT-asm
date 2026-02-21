@@ -54,7 +54,7 @@ void def1(){
 
 	char	*p;
 	char	*q;
-	reg VMADR	v;
+	VMADR	v;
 	int		c;
 	int		argno;
 	char		opbuf[18];
@@ -145,7 +145,7 @@ endx:	toktyp = TKEOL;
 
 
 
-void macro( vp ) VMADR vp;{
+void macro(VMADR vp) {
 
 
 	input_t	*newfp;
@@ -262,7 +262,7 @@ void macro( vp ) VMADR vp;{
 void rpt1(){
 
 	input_t	*newfp;
-	reg VMADR	vp;
+	VMADR	vp;
 	char	rch;
 
 	mexprint();

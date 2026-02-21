@@ -164,7 +164,7 @@ BDEB(5,("-> %d ntaction returns %x\n",*scp & 0xff,*pp));
  */
 
 #ifdef DEBUG
-semprint( ff, sem ) int (*ff)(); {
+void semprint(int (*ff)(), int sem) {
 	psframe_t *pl;
 	pl = iipspl;
 	printf("%2d   [%8lx %4x %4x %4x]", sem,

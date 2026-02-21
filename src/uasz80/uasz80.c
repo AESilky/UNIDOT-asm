@@ -106,8 +106,7 @@ struct	operand	optab[OPMAX] = {NULLCA};
  * direc - Processes assembler directives which are special to this
  * assembler.  Calls dircom to process other directives.
  */
-
-void direc( dirnum ) int dirnum;{
+void direc(int dirnum) {
 
 
 	if( dirnum != ADMAC )			/* look up the label */
@@ -121,8 +120,7 @@ void direc( dirnum ) int dirnum;{
  * interest code here to allow assigning symbols to registers or other
  * keywords.
  */
-
-void equ( symtype ) int symtype;{
+void equ(int symtype) {
 
 
 	if( !label ) nolabel();
@@ -194,8 +192,7 @@ void inops(){
 /*
  * instr - Generates the specified machine instruction.
  */
-
-void instr( fmpa ) VMADR fmpa;{
+void instr(VMADR fmpa) {
 
 
 	uns		v;

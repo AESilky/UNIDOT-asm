@@ -293,8 +293,7 @@ void ufmtstt() {
 	oflush();
 }
 
-long
-secfsize( sep ) section_t *sep; {
+long secfsize(section_t* sep) {
 
 	int	i;
 	long	l;
@@ -322,7 +321,7 @@ secfsize( sep ) section_t *sep; {
 
 void grpout(GROUP* gp) {
 
-	reg GROUP 	*gl;
+	GROUP 	*gl;
 	char	*p;
 	char	*p2;
 	int		n;
@@ -345,7 +344,7 @@ void grpout(GROUP* gp) {
 void grpcheck(GROUP* gp) {	/* check for group consistency		*/
 
 	section_t 	*sep;
-	reg GROUP 	*gl;
+	GROUP 	*gl;
 	int		n;
 	int		at;
 	int		adu;
@@ -460,10 +459,10 @@ void splitinit(){		/* called immediately after init	*/
 void asgnsec() {		/* assign addresses to sections		*/
 
 	section_t	*sep;
-	reg GROUP	*gl;
+	GROUP	*gl;
 	int		i;
 	int		n;
-	reg GROUP	*grp;
+	GROUP	*grp;
 	section_t	*lsep;
 
 	lsep = 0;

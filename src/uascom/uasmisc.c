@@ -64,7 +64,7 @@ char	*errfmt = "====> line %-4u         ";
  * replaces the normal exit() in libc.a, with its stdio stuff.
  */
 
-void quit( status ) int status;{
+void quit(int status) {
 
 
 #ifndef BIGMEM
@@ -243,7 +243,7 @@ if(debug>5) printf( "%d	%s",curline,sline);
 }
 
 
-int oktobreak(n)int n;{	/* is it ok to break a line after this character */
+int oktobreak(int n) {	/* is it ok to break a line after this character */
 
 	if( n == ',' || n == '(' || n == ')' ||
 	    n == '{' || n == '}' || n == ' ' ) return 1;
@@ -264,8 +264,7 @@ void lineover(){
  * headroom for interrupts and the like
  */
 
-char *
-xsbrk( size ) uns size; {
+char* xsbrk(uns size) {
 //	extern char	*sbrk();
 	char autoalloc[1000];		/* move stack down 1000 bytes */
 	autoalloc[0] = size;		/* in case of optimization */
@@ -273,8 +272,7 @@ xsbrk( size ) uns size; {
 }
 
 #ifdef USEVM
-char *
-palloc( size ) uns size;{
+char* palloc(uns size) {
 
 
 	static	char	*oldtop = 0;
@@ -385,8 +383,7 @@ void putline(){
 
 static char ernbuf[6];
 
-char *
-ernget(s) char *s;{
+char* ernget(char* s) {
 	char *p;
 	p = ernbuf;
 	while( *s == ' ' ) s++;
@@ -397,7 +394,7 @@ ernget(s) char *s;{
 	return s;
 }
 
-void prline(f)FILE *f;{
+void prline(FILE* f) {
 
 	int		i;
 	int		j;
@@ -478,7 +475,7 @@ void prline(f)FILE *f;{
  *	== 0, if a == b,
  *	< 0, if a < b.
  */
-int symcmp( a, b ) char *a, *b;{
+int symcmp(char* a, char* b) {
 
 
 	int 	i;
@@ -492,7 +489,7 @@ int symcmp( a, b ) char *a, *b;{
  * symcpy - Copies one symbol from source to destination.
  */
 
-void symcpy( d, s ) char *d, *s;{
+void symcpy(char* d, char* s) {
 
 
 	char	i;
@@ -511,7 +508,7 @@ void symcpy( d, s ) char *d, *s;{
 //}
 
 
-void lcalign( n ) int n; {
+void lcalign(int n) {
 
 	int	i;
 
@@ -521,12 +518,12 @@ void lcalign( n ) int n; {
 }
 
 
-void range( l, m, n ) long l; int m,n; {
+void range(long l, int m, int n) {
 
 	if( l < m || l > n ) error("13 Value not in range %d-%d",m,n);
 }
 
-void hexit( p, n, v ) char *p; int n; long v; {
+void hexit(char* p, int n, long v) {
 
 	/* in the low nibble of n is the field width, in the high nibble is
 	   the number of digits to print */
@@ -626,13 +623,13 @@ void fatal(char* s, ...) {
 #endif
 }
 
-void immmsg( s1, s2 ) char *s1; char *s2; {	/* immediate message */
+void immmsg(char* s1, char* s2) {	/* immediate message */
 
 	if( !pass2 ) return;
 	immms1 = s1;
 	immms2 = s2;
 }
 
-void filchk( f, s ) FILE *f; char *s; {
-	if( ferror(f) ) fatal("93write error on %s file",s);
+void filchk(FILE* f, char* s) {
+	if( ferror(f) ) fatal("93 write error on %s file",s);
 }

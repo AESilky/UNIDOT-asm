@@ -212,7 +212,7 @@ void listsec() {
 	}
 }
 
-void secprint( rel, n ) int rel; int n;{
+void secprint(int rel, int n) {
 
 	sytab_t	*syp;
 	long	l;
@@ -333,7 +333,7 @@ BDEB(0,("%d expanding: %s, (%d)  stack depth is %d\n",
  * It also records a cross reference entry.
  */
 
-void assign( typ, val, rel ) uns typ; long val; uns rel;{
+void assign(uns typ, long val, uns rel) {
 
 
 	sytab_t	*syp;
@@ -440,13 +440,13 @@ void setlabel(){		/* establish the label virtual address */
 void interlude(){
 
 	sytab_t	*syp;
-	reg VMADR	p;
+	VMADR	p;
 	uns		h;
 	uns		rel;
 	uns		r;
 	char	*pp;
 	char	*pp2;
-	reg VMADR	p2;
+	VMADR	p2;
 	char		type;
 	extern char	*lastcomp();
 
@@ -737,7 +737,7 @@ void setorg() {
  * setsec - Changes to the specified section for code generation.
  */
 
-void setsec( sec ) uns sec;{
+void setsec(uns sec) {
 
 	section_t	*sep;
 
@@ -758,7 +758,7 @@ void setsec( sec ) uns sec;{
 }
 
 /*
-dmpblk(p) char *p; {
+dmpblk(char *p) {
 	char *p2;
 	p2 = p + 16;
 	while( p < p2 ){ if( *p ) break; p++; }

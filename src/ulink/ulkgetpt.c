@@ -83,7 +83,6 @@ void oflush(){
 	objblk.ob_type = 0;
 }
 /* ogetb - Returns the next byte from the specified object buffer.  */
-
 byte ogetb(OBLOCK* obp) {
 
 
@@ -91,9 +90,7 @@ byte ogetb(OBLOCK* obp) {
 }
 
 /* ogetl - Returns the next long word from the specified object buffer.  */
-
-long
-ogetl( obp ) reg OBLOCK *obp;{
+long ogetl(OBLOCK* obp) {
 
 	long	l;
 
@@ -103,9 +100,7 @@ ogetl( obp ) reg OBLOCK *obp;{
 }
 
 /* ogets - Returns a ptr to the next string in the specified object buffer.  */
-
-char *
-ogets( obp ) reg OBLOCK *obp;{
+char* ogets(OBLOCK* obp) {
 
 	char	*s;
 
@@ -114,7 +109,6 @@ ogets( obp ) reg OBLOCK *obp;{
 	return s;
 }
 /* olodl - Returns the specified long word from the object buffer.  */
-
 long olodl(char* p) {
 
 	return (long)olodw(p+2) << 16 | (long)olodw(p);
@@ -122,21 +116,18 @@ long olodl(char* p) {
 
 
 /* olodw - Returns the specified word from the object buffer.  */
-
 ushort olodw(char* p) {
 
 	return olodb(p+1) << 8 | olodb(p);
 }
 
 /* oputb - Puts the specified byte at the end of the object buffer.  */
-
 void oputb(uns b) {
 
 	ostob( b, objblk.ob_top++ );
 }
 
 /* oputl - Puts the specified long word at the end of the object buffer.  */
-
 void oputl(long l) {
 
 	char	*p;
@@ -165,7 +156,6 @@ void along(long l, FILE* file) { /* puts long in specified file */
 
 
 /* oputs - Puts the specified string at the end of the object buffer.  */
-
 void oputs(char* s) {
 
 	char	*r;
@@ -174,7 +164,6 @@ void oputs(char* s) {
 	objblk.ob_top = r;
 }
 /* ostol - Stores the specified long word at the specified place in objbuf  */
-
 void ostol(long l, char* p) {
 
 	ostob( (uns) l, p );
@@ -185,7 +174,6 @@ void ostol(long l, char* p) {
 
 
 /* ostow - Stores the specified word at the specified place in objbuf.  */
-
 void ostow(uns w, char* p) {
 
 	ostob( w, p );

@@ -342,7 +342,7 @@ char		*zpalloc();	/* Memory allocation guarantees zero	*/
 long		rbase();	/* Return relocation base address */
 char		*lastcomp();	/* Return pointer to last component	*/
 long		sbase();	/* Return section base address (for 8086) */
-section_t		*selook();	/* Section table lookup and entry routine */
+section_t	*selook();	/* Section table lookup and entry routine */
 sytab_t		*sylook();	/* Symbol table lookup and entry routine */
 sytab_t		*symerge();	/* Symbol table hash chain merger */
 sytab_t		*sypeek();	/* Symbol table lookup routine */

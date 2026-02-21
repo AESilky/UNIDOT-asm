@@ -65,7 +65,7 @@ char	*relfname;
 char	*locfname;
 short	filex;
 short	singlecol;
-short	nsc;
+short	nsc;			/* National Semiconductor Corp. flag ('NLINK') */
 short	wrnex = WRNEXIT;
 char	nil[2];			/* empty string	*/
 char	*files[LNKCNT];
@@ -93,7 +93,7 @@ void intr(){  fprintf(stderr,"INTERRUPT!\n"); quit( FATEXIT ); }
 /*		Here starts ulink			*/
 
 
-void main(argc, argv, env) int argc; char* argv[]; char* env[]; {
+void main(int argc, char* argv[], char* env[]) {
 
 	section_t	*sep;
 
@@ -131,6 +131,7 @@ void main(argc, argv, env) int argc; char* argv[]; char* env[]; {
 #endif
 	prname = lastcomp( argv[0] );
 	if( prname[0] == 'n' || prname[0] == 'N' ){
+		// National Semiconductor 'NLINK'
 		nsc++;
 		singlecol = 1;
 	}
@@ -246,7 +247,7 @@ prstats("before interlude");
  * init - Initialization processing.
  */
 
-void init( argc, argv ) int argc; char **argv;{
+void init(int argc, char** argv) {
 
 	char	*ap;
 	int	i;
@@ -409,7 +410,7 @@ void linkspec( char *lnkfile ) {	/* do a link file */
  */
 
 long
-scanaddr( s ) char *s; {
+scanaddr(char* s) {
 
 	long	v;
 	int	c;
@@ -471,7 +472,7 @@ void defsym( char *s) {
  * rev - reverse a list
  */
 
-sytab_t * rev(p) sytab_t *p; {
+sytab_t* rev(sytab_t* p) {
 	sytab_t	*q;
 	sytab_t	*r;
 
@@ -738,8 +739,9 @@ void usage(){
 	copymsg(stdout);
 	printf("Usage: %s [options].. file [file]..\n",prname);
 	printf("	-a		produce image output in a.out style\n");
-	if( !nsc )
-	printf("	-b		single column map file for symbols\n");
+	if( !nsc ) {
+		printf("	-b		single column map file for symbols\n");
+	}
 	printf("	-f<file>	<file> is a linker control file\n");
 	printf("	-i		split I/D load\n");
 	printf("	-l<locspec>	force a section location or order:\n");
@@ -755,7 +757,7 @@ void usage(){
 	quit(GOODEXIT);
 }
 
-void copymsg(f)FILE *f;{
+void copymsg(FILE* f) {
 	fprintf(f, nsc ?
 "NLINK Version 1.3 by National Semiconductor Corp. (c) Copyright 1988\n" :
 "ULINK Version 4.10 by Unidot Inc (c) Copyright 1982,1985,1987,1988\n");
@@ -787,7 +789,7 @@ void quit(int n){
 }
 
 #ifdef STATS
-prstats(s) char *s;{ 
+prstats(char* s) {
 
 	printf("memory stats %s  (sp = %x)\n",s,&s);
 	printf("%6ld bytes used for buffers\n",usestats[BUFUSE]);
@@ -798,7 +800,7 @@ prstats(s) char *s;{
 }
 #endif
 
-void flushclos(f)FILE *f;{
+void flushclos(FILE* f) {
 	fflush( f );
 	if( ferror(f) ) error("F93object file write error");
 	fclose( f );

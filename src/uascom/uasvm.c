@@ -89,10 +89,10 @@ static	char	vmfn[] = "/tmp/vmaXXXXX";
  */
 
 VMTAB *
-vmgbuf( adr ) VMADR adr;{
+vmgbuf(VMADR adr) {
 
 	char	*bufptr;
-	reg VMTAB	*vmp;
+	VMTAB	*vmp;
 	int		i;
 	int		blk;
 	ushort	j;
@@ -198,11 +198,10 @@ readin:
  */
 
 
-char *
-vmrfetch( adr ) VMADR adr;{
+char* vmrfetch(VMADR adr) {
 
 	char	*p;
-	reg VMTAB	*vmp;
+	VMTAB	*vmp;
 	p = (vmp = vmgbuf(adr))->vm_buf + (adr & (BUFSIZ-1));
 	return p;
 }
@@ -212,10 +211,9 @@ vmrfetch( adr ) VMADR adr;{
  * a pointer to the in-core copy of the address.
  */
 
-char *
-vmwfetch( adr ) VMADR adr;{
+char* vmwfetch(VMADR adr) {
 
-	reg VMTAB	*vmp;
+	VMTAB	*vmp;
 	char	*p;
 
 	vmp = vmgbuf( adr );
@@ -337,7 +335,7 @@ int vmballoc(){		/* allocate a block - on ramdisk if possible
  * entirely within a single block.
  */
 VMADR uavalloc( uns size ) {
-	reg VMADR	base;
+	VMADR	base;
 
 #ifdef BIGMEM
 	int		n;
@@ -368,7 +366,7 @@ void valign(){		/* align the virtual pointer */
 	virtop = virtop;
 }
 
-void setvirtop(v) VMADR v; {		/* reset the virtop and blklim pointers */
+void setvirtop(VMADR v) {		/* reset the virtop and blklim pointers */
 	virtop = v;
 	blklim = (virtop + (BUFSIZ-1))+1;
 }

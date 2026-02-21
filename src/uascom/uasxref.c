@@ -145,7 +145,7 @@ symerge(VMADR a, VMADR b) {
 
 
 	sytab_t	*ap;
-	reg VMADR	pa;
+	VMADR	pa;
 	VMADR		r;
 	VMADR		t;
 #ifdef BIGMEM
@@ -216,12 +216,11 @@ symerge(VMADR a, VMADR b) {
  * lstsort - Sort a single symbol list 
  */
 
-VMADR
-lstsort( l ) reg VMADR l; {
+VMADR lstsort(VMADR l) {
 
 	sytab_t	*cp,
 			*bp;
-	reg VMADR	a,b,c,d;
+	VMADR	a,b,c,d;
 #ifdef BIGMEM
 	char		*str;
 #else
@@ -275,14 +274,13 @@ void sysort(){
  * xref - Adds a cross reference entry of the specified type for the
  * specified symbol.
  */
-
-void xref( sym, type ) VMADR sym; int type;{
+void xref(VMADR sym, int type) {
 
 
 	sytab_t	*syp;
 	xref_t	*nxp;
-	reg VMADR	nxr;
-	reg VMADR	oxr;
+	VMADR	nxr;
+	VMADR	oxr;
 	int		pl;
 
 	if( !(xflag && pass2) ) return;

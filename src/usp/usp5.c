@@ -121,7 +121,7 @@ char hx[] = "0123456789abcdef";
 
 intr(){ fprintf(stderr,"usp5 interrupt!\n"); rmfiles(1); }
 
-main( argc, argv ) int argc; char **argv;{
+main(int argc, char** argv) {
 
 	char	*fp;			/* for scanning flags */
 
@@ -186,8 +186,8 @@ main( argc, argv ) int argc; char **argv;{
 showrsem(){
 
 	int		ax;
-	reg LIST	*xp;
-	reg LIST	*top;
+	LIST	*xp;
+	LIST	*top;
 
 
 	ax = Ax(fact);
@@ -212,7 +212,7 @@ showrsem(){
    that entry to final form by adding to ptab, scantab, and semtab.
 */
 
-aconvert( abase ) AENT *abase;{
+aconvert(AENT* abase) {
 
 	LIST		*ap;
 	LIST		*aptop;
@@ -434,11 +434,10 @@ aconvert( abase ) AENT *abase;{
    separate semtab) and returns a pointer to the top of the result.
 */
 
-short *
-fconvert( base, top ) LIST *base,*top;{
+short* fconvert(LIST* base, LIST* top) {
 
 
-	reg LIST	*ap;
+	LIST	*ap;
 	short		*fp;
 	short		*semp;
 	short		f;
@@ -472,8 +471,8 @@ fconvert( base, top ) LIST *base,*top;{
 
 finddflts(){
 
-	reg LIST	*sp;	/* scan pointer				*/
-	reg LIST	*ap;	/* action pointer			*/
+	LIST	*sp;	/* scan pointer				*/
+	LIST	*ap;	/* action pointer			*/
 	LIST		*ntap;	/* table entry for current nonterminal	*/
 	LIST		*maxpt;	/* ptr to most frequent action for this nt */
 	short		nt;	/* nonterminal number			*/
@@ -536,12 +535,12 @@ grow(){
  * is a transition, add the state to the state index table.
  */
 
-inssx( pp ) short *pp;{
+inssx(short* pp) {
 
 
 	short	*sxp;
 	short	*mp;
-	reg		sp;
+	int		sp;
 
 	if( !(*pp & 0x8000) ) return; /* not a transition */
 	sp = *pp & 0x7fff;
@@ -578,7 +577,7 @@ listdflt(){
  * entry.  The entry may be from ptab or ntdflt.
  */
 
-listfa( fa ) int fa;{
+listfa(int fa) {
 
 
 	if( fa & 0x8000 )		/* transition entry */
@@ -629,10 +628,10 @@ listfinal(){
 
 /* listfl - lists one line of the final parse table.  */
 
-listfl( pp, sym, dbase ) short *pp;  DICTENT *dbase;{
+listfl(short* pp,  DICTENT* dbase) {
 
 
-	reg		px;
+	int		px;
 	char	*str;
 
 	px = pp - ptab;
@@ -644,10 +643,10 @@ listfl( pp, sym, dbase ) short *pp;  DICTENT *dbase;{
 
 /* listsv - lists a scan vector entry of the final tables.  */
 
-listsv( pp ) short	*pp;{
+listsv(short* pp) {
 
 
-	reg	px;
+	int	px;
 
 	px = pp - ptab;
 	if( !intoff ) px <<= 1;
@@ -662,7 +661,7 @@ listsv( pp ) short	*pp;{
 makedflt(){
 
 	short	*pp;
-	reg		sx;
+	int		sx;
 
 	ntdflt = (short *)ntact;
 	ntdtop = fconvert( ntact, ntatop );
@@ -755,7 +754,7 @@ putch( ch ){
 putdflt(){
 
 	short	*pp;
-	reg		n;
+	int		n;
 
 	putst( "\nshort ntdflt[] = {\n" );
 	n = 0;
@@ -771,10 +770,10 @@ putdflt(){
 
 /* puthex - output the specified number in hex, preceded by a 0.  */
 
-puthex( n ) short n;{
+puthex(short n) {
 
-	reg	i;
-	reg	j;
+	int	i;
+	int	j;
 
 	j = n & 0xffff;
 	putch( '0' );
@@ -803,8 +802,8 @@ putln(n){
 putptab(){
 
 	short	*pp;
-	reg	n;
-	reg	m;
+	int	n;
+	int	m;
 
 	putst( "\nshort ptab[] = {\n" );
 	n = 0;
@@ -829,7 +828,7 @@ putptab(){
    any double quotes or backslash characters are preceded by a backslash.
 */
 
-putqs( s ) char *s;{
+putqs(char* s) {
 
 
 	putch( '"' );
@@ -847,8 +846,8 @@ putqs( s ) char *s;{
 putscn(){
 
 	char	*sp;
-	reg		n;
-	reg		m;
+	int		n;
+	int		m;
 
 	putst( "\nchar scntab[] = {\n" );
 	n = 0;
@@ -875,8 +874,8 @@ putscn(){
 putsem(){
 
 	short	*sp;
-	reg		n;
-	reg		m;
+	int		n;
+	int		m;
 
 	putst( "\nshort semtab[] = {\n" );
 	n = 0;
@@ -898,7 +897,7 @@ putsem(){
 
 /* putst - output the specified string.  */
 
-putst( s ) char *s;{
+putst(char* s) {
 
 
 	while( *s ) putch( *s++ );
@@ -911,9 +910,9 @@ putst( s ) char *s;{
 
 putstrings(){
 
-	reg DICTENT	*dp;
+	DICTENT	*dp;
 	char	*sp;
-	reg		n;
+	int		n;
 
 	/* first output the terminals */
 
@@ -970,8 +969,7 @@ readatab(){
 	atop = (AENT *)memtop;
 }
 
-char *
-readblock( i ) int i;{
+char* readblock(int i) {
 
 
 	ushort		length;
@@ -1010,8 +1008,7 @@ readdict(){
    entry.
 */
 
-char *
-sclook( base, top ) char *base,*top;{
+char* sclook(char* base, char* top) {
 
 
 	char	*scp;
@@ -1036,7 +1033,7 @@ sclook( base, top ) char *base,*top;{
    returns true iff the strings are equal.
 */
 
-scmatch( a, b, len ) char *a,*b; len;{
+scmatch(char* a, char* b, int len) {
 
 
 	do if(*a++ != *b++ ) return 0; while( --len );
@@ -1049,11 +1046,10 @@ scmatch( a, b, len ) char *a,*b; len;{
    returns a pointer to the entry.
 */
 
-short *
-semlook( rp ) reg LIST *rp;{
+short* semlook(LIST* rp) {
 
 
-	reg ALTENT	*altp;
+	ALTENT	*altp;
 	short		*semp;
 	short		s0;
 	short		s1;
@@ -1086,7 +1082,7 @@ semlook( rp ) reg LIST *rp;{
 }
 
 /*VARARGS1*/
-fatal(s,a,b) char *s; {
+fatal(char* s, a, b) {
 
 	fprintf(stderr,"fatal error in usp5: ");
 	fprintf(stderr, s,a,b );
@@ -1106,9 +1102,9 @@ rmfiles(n){
 	exit(n);
 }
 
-opfile(s,n) char *s;{
+opfile(char* s, n) {
 
-	reg	i;
+	int	i;
 
 #ifdef msdos
 	_iomode = 1;		/* intermediate files are binary */

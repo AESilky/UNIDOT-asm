@@ -81,8 +81,7 @@ static ASIDE	*ashead = &aspool[0];
  */
 
 
-octab_t *
-oclook( s ) char *s;{
+octab_t* oclook(char* s) {
 
 
 	octab_t	*q;
@@ -129,7 +128,7 @@ oclook( s ) char *s;{
    uses, it must be called with the string already converted to lower
    case.
 */
-int opval( s ) char *s;{
+int opval(char* s) {
 
 
 	octab_t	*q;
@@ -158,8 +157,7 @@ void opcinsert(octab_t* o) {
  * hash - Given a string, computes a partial hashing function of the string,
  * and returns its value.  Same hash value in upper or lower case.
  */
-uns
-hash( s ) char *s;{
+uns hash(char* s) {
 
 
 	uns		h;
@@ -176,12 +174,11 @@ hash( s ) char *s;{
  */
 
 
-VMADR
-sylook( s ) char *s;{
+VMADR sylook(char* s) {
 
 
 #ifndef BIGMEM
-	reg ASIDE	*apt,
+	ASIDE	*apt,
 			**lpt;
 #endif
 	sytab_t	*qp,
@@ -277,8 +274,7 @@ sylook( s ) char *s;{
 #endif
 }
 
-VMADR
-numlab( n )unsigned n;{		/* find the relevant numeric label */
+VMADR numlab(unsigned n) {		/* find the relevant numeric label */
 
 	numlab_t	*nml;
 	VMADR		nnn;

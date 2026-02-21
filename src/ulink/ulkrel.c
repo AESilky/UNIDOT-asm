@@ -127,8 +127,7 @@ void getrelitem() {
  * section starts at 0.  During pass 2, the actual starting address is
  * used.								*/
 
-long
-rbase( reloc ) uns reloc;{
+long rbase(uns reloc) {
 
 
 	section_t	*sep;
@@ -155,8 +154,7 @@ rbase( reloc ) uns reloc;{
  * containing section.  If a member of a group, it returns the base address
  * of the group.  This is used only in pass2, and only for the 8086. */
 
-long
-sbase( reloc ) uns reloc;{
+long sbase(uns reloc) {
 
 	section_t	*sep;
 
@@ -227,8 +225,7 @@ int newrel() {
  * necessary.
  */
 
-section_t *
-selook( s ) char *s;{
+section_t* selook(char* s) {
 
 
 	section_t	*sep;
@@ -295,7 +292,7 @@ DEB(1,(" relocation(off %d, reloc %x)\n",itmoff,reloc));
 }
 
 #ifdef DEBUG
-xx(n,isp) reg IACC	*isp; {
+xx(int n, IACC* isp) {
 	if( debug > 2 ){
 		fprintf(stderr," [%x]",n&0xff);
 		for(;isp<&istk[ISTKSIZ];isp++)
@@ -308,7 +305,7 @@ xx(n,isp) reg IACC	*isp; {
 
 void interp(char* ip) {
 
-	reg IACC	*isp;
+	IACC	*isp;
 	int		i;
 	long	v;
 

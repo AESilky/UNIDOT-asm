@@ -65,13 +65,13 @@ static short	loclabskips;		/* useless .loclabs to skip	*/
  * dircom - Performs the assembler directives common to all versions.
  */
 
-void dircom( dirnum ) int dirnum;{
+void dircom(int dirnum) {
 
 
 	sytab_t	*syp;
 	char	*sp;
 	int		i;
-	reg VMADR	sym;
+	VMADR	sym;
 	int		j;
 	int		k;
 	long		l;
@@ -80,7 +80,7 @@ void dircom( dirnum ) int dirnum;{
 	int		dataln;
 	char		cond;
 	char		llsave;
-	reg VMADR	sym2;
+	VMADR	sym2;
 	mchain_t		*mchp;
 	grchain_t		*grpp;
 
@@ -668,7 +668,7 @@ void noopnd(){
 	skipeol();
 }
 
-int nonrelex(s) char *s;{
+int nonrelex(char* s) {
 
 	/* set up and get an operand that is not relocatable	*/
 
@@ -677,7 +677,7 @@ int nonrelex(s) char *s;{
 	return expression(s,NOSTR,NOREL);
 }
 
-int scanstr(s)char *s;{
+int scanstr(char* s) {
 
 	/* set up and get an operand that is supposed to be a string */
 
@@ -690,7 +690,7 @@ int scanstr(s)char *s;{
 	return 0;
 }
 
-void notexpr(s)char *s;{
+void notexpr(char* s) {
 	error("09 Operand not a valid %s expression",s);
 	skipeol();
 }
@@ -706,7 +706,7 @@ void nolabel(){
 }
 
 
-void notrel(s)char *s;{
+void notrel(char* s) {
 	error("12 Relocation not legal for %s expression",s);
 	skipeol();
 }
@@ -719,7 +719,7 @@ void notrel(s)char *s;{
  */
 
 
-int expression(s,strok,norel) char *s; int strok; int norel; {
+int expression(char* s, int strok, int norel) {
 
 	/* if strok != 0, a string is allowed			*/
 	/* if norel != 0, relocatables are not allowed		*/
@@ -755,7 +755,7 @@ int expression(s,strok,norel) char *s; int strok; int norel; {
  */
 
 
-void title( msg, s ) char *msg,*s;{
+void title(char* msg, char* s) {
 
 
 	if( !pass2 ) return;
@@ -767,7 +767,7 @@ void title( msg, s ) char *msg,*s;{
 	if( llfull ) llfull = linect = 0;
 }
 
-void stdequend(symtype)int symtype;{		/* finish of standard .equ processing */
+void stdequend(int symtype) {		/* finish of standard .equ processing */
 
 	int	i;
 	long	l;
@@ -841,7 +841,7 @@ int noextlab(){
 	return 0;
 }
 
-int usingreg(s)char *s; {
+int usingreg(char* s) {
 
 	VMADR		sym;
 	sytab_t	*syp;
