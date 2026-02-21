@@ -58,8 +58,8 @@ int	_iomode = 1;
 #include <string.h>
 #include <time.h>
 
-int argnum(reg char* s);
-void defsym(reg char* s);
+int argnum(char* s);
+void defsym(char* s);
 void usage(char* s, ...);
 
 char		objsuf[8] = "obj";	/* predef may change this */
@@ -100,9 +100,9 @@ void getdat(){
 }
 
 char *
-lastcomp(s) reg char *s;{	/* find last component of file name */
+lastcomp(char* s) {	/* find last component of file name */
 
-	reg char *q;
+	char *q;
 
 	/* following code works well for UNIX, MSDOS, and VMS */
 
@@ -114,18 +114,18 @@ lastcomp(s) reg char *s;{	/* find last component of file name */
 /*
  * init - Performs assembler initialization.
  */
-void init( argc, argv ) int argc; char *argv[];{
+void init(int argc, char* argv[]) {
 
 
-	reg char	**av;
-	reg char	*ap;
-	reg char	*ep;
-	reg char	*sp;
-	reg int		fd;
-	reg int		i;
-	reg int		argn;
-	reg int		j;
-	reg int		defx;
+	char		**av;
+	char		*ap;
+	char		*ep;
+	char		*sp;
+	int		fd;
+	int		i;
+	int		argn;
+	int		j;
+	int		defx;
 	short		nerrlim;
 	short		sufsiz;
 	char		*objname;
@@ -485,9 +485,9 @@ top:	while( argn < argc ){	/* read command line arguments */
 	}
 }
 
-int argnum(s) reg char *s; {
+int argnum(char* s) {
 
-	reg int	i;
+	int	i;
 
 	i = 0;
 	while( *s ){
@@ -497,11 +497,11 @@ int argnum(s) reg char *s; {
 	return i;
 }
 
-void defsym(s) reg char *s; {
+void defsym(char* s) {
 
-	reg char	*p;
-	reg SYTAB	*syp;
-	reg int		i;
+	char	*p;
+	sytab_t	*syp;
+	int		i;
 	VMADR		val;
 	char	defbuf[64];
 
@@ -517,7 +517,7 @@ void defsym(s) reg char *s; {
 	scanpt = s;
 	if( token() != TKCON ) usage("illegal define value");
 	val = sylook(defbuf);
-	syp = (SYTAB *)wfetch(val);
+	syp = (sytab_t *)wfetch(val);
 	if( syp->sy_typ != STUND ) usage("symbol %s previous defined",defbuf);
 	syp->sy_typ = STVAR;
 	syp->sy_val = SYVAL(tokval);
@@ -534,14 +534,14 @@ void defsym(s) reg char *s; {
  */
 
 #ifndef NOPD
-preget( typ ) int typ;{
+preget(int typ) {
 
 	if( token() != typ ) badpre();
 	return tokval;
 }
 #endif
 
-void copymsg(f)FILE* f; {
+void copymsg(FILE* f) {
 	fprintf(f, "UAS Macro Assembler Version 6.18 by Unidot Inc (c) Copyright 1982,1985,1987,1988\n");
 	fprintf(f, " Resurrected 2026, AESilky\n");
 }

@@ -49,7 +49,7 @@ static char rcsid[] =
  */
 void fillin(){
 
-	reg INPUT	*rinfp;
+	input_t	*rinfp;
 
 	rinfp = infp;
 	switch( rinfp->in_typ ){
@@ -78,11 +78,11 @@ case INRPT:	if( rinfp->in_rpt-- == 0 ) break;
  * include - Pushes the specified file into the input stream.  Returns -1
  * if the file cannot be opened, 0 otherwise.
  */
-int include( file ) reg char *file;{
-	reg int		fd;
-	reg int		i;
-	reg int		per;
-	reg char	*p;
+int include(char* file) {
+	int		fd;
+	int		i;
+	int		per;
+	char	*p;
 	char		filepath[128];
 	extern char	srcsuf[1];
 
@@ -161,7 +161,7 @@ void popin(){
  * pushc - Pushes the specified character onto the input stack.
  */
 
-void pushc( c ) char c;{
+void pushc(char c) {
 
 	if( insp > ((char *)instk)+INSIZ-1 ) iovck();
 	*insp++ = c;
@@ -172,12 +172,12 @@ void pushc( c ) char c;{
  * the new frame pointer.  Note that the global frame pointer infp is
  * not automatically adjusted.
  */
-INPUT * pushin(){
-	reg INPUT	*newfp;
-	reg int		i;
+input_t * pushin(){
+	input_t	*newfp;
+	int		i;
 
 	while( (int)insp & (ALIGN-1) ) insp++; /* force integer alignment */
-	newfp = (INPUT *)insp;
+	newfp = (input_t *)insp;
 	insp = &newfp->in_buf[0];
 	iovck();
 	newfp->in_ofp = infp;

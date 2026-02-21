@@ -1,4 +1,4 @@
-; @(#)$Header: uasz80.z,v 1.2 87/12/01 13:30:23 rmm Rel $
+; Test file for mktable and mkpdtab
 
 #table O S
 OCNULL			; no operand 
@@ -233,7 +233,7 @@ struct	format {		/* instruction format table entry */
 /*
  * Global variable declarations.
  */
-extern char		hlflg;		/* flag indicating reg hl was used */
+extern char		hlflg;		/* flag indicating hl was used */
 extern char		ixiy;		/* prefix for ix/iy instruction, or 0 */
 extern char		ixiyi;		/* flag indicating (ix+d) or (iy+d) */
 extern uns		ixiyr;		/* (ix+d) or (iy+d) offset relocation */

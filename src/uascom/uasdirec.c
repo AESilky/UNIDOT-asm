@@ -65,24 +65,24 @@ static short	loclabskips;		/* useless .loclabs to skip	*/
  * dircom - Performs the assembler directives common to all versions.
  */
 
-void dircom( dirnum ) int dirnum;{
+void dircom(int dirnum) {
 
 
-	reg SYTAB	*syp;
-	reg char	*sp;
-	reg int		i;
-	reg VMADR	sym;
-	reg int		j;
-	reg int		k;
+	sytab_t	*syp;
+	char	*sp;
+	int		i;
+	VMADR	sym;
+	int		j;
+	int		k;
 	long		l;
 	int		datbit;
 	uns		datrel;
 	int		dataln;
 	char		cond;
 	char		llsave;
-	reg VMADR	sym2;
-	MCH		*mchp;
-	GRP		*grpp;
+	VMADR	sym2;
+	mchain_t		*mchp;
+	grchain_t		*grpp;
 
 	if( label ) nopend();
 	switch( dirnum ){
@@ -162,7 +162,7 @@ void dircom( dirnum ) int dirnum;{
 		*/
 		skipeol();
 		if( pass2 ) break;
-		syp = (SYTAB *) wfetch( label );
+		syp = (sytab_t *) wfetch( label );
 		if( syp->sy_typ != STUND || syp->sy_val != 0 )
 			syp->sy_atr |= SAMUD;
 		syp->sy_atr |= SAGLO;
@@ -173,7 +173,7 @@ void dircom( dirnum ) int dirnum;{
 	case ADCOMMON:	/* .common */
 
 		if( noextlab() ) break;
-		syp = (SYTAB *) rfetch( label );
+		syp = (sytab_t *) rfetch( label );
 		if( syp->sy_typ == STSEC && (!pass2||syp->sy_atr&SADP2))
 			setsec( syp->sy_rel ); /* old section */
 		else	
@@ -200,7 +200,7 @@ void dircom( dirnum ) int dirnum;{
 
 		if( label ){
 			if( noextlab() ) break;
-			syp = (SYTAB *)rfetch(label);
+			syp = (sytab_t *)rfetch(label);
 			if( syp->sy_typ == STSEC &&
 			    (!pass2||syp->sy_atr&SADP2 )){
 				setsec( syp->sy_rel );	/* continue old sect */
@@ -284,7 +284,7 @@ void dircom( dirnum ) int dirnum;{
 		token();
 		while( toktyp == TKSYM ){
 			sym = sylook( tokstr );
-			syp = (SYTAB *) wfetch( sym );
+			syp = (sytab_t *) wfetch( sym );
 			syp->sy_atr |= SAGLO;
 			xref( sym, 0 );
 			token();
@@ -295,7 +295,7 @@ void dircom( dirnum ) int dirnum;{
 	case ADGROUP:	/* .group */
 
 		if( noextlab() ) break;
-		syp = (SYTAB *) wfetch( sym );
+		syp = (sytab_t *) wfetch( sym );
 		if( syp->sy_typ == STUND ) syp->sy_typ = STGRP;
 		if( syp->sy_typ != STGRP ){
 			error("38 Symbol can't be used for group, it's in use");
@@ -315,15 +315,15 @@ void dircom( dirnum ) int dirnum;{
 			if( (sym2 = grptab[i].gr_lnk) == 0 )
 				grpp = &grptab[i];
 			else for(;;){
-				grpp = (GRP *)wfetch(sym2);
+				grpp = (grchain_t *)wfetch(sym2);
 				if( grpp->gr_sym == sym || grpp->gr_lnk == 0 )
 					break;
 				sym2 = grpp->gr_lnk;
 			}
 			if( grpp->gr_sym != sym ){
 				valign();
-				grpp->gr_lnk = sym2 = VALN(sizeof(GRP));
-				grpp = (GRP *)wfetch(sym2);
+				grpp->gr_lnk = sym2 = VALN(sizeof(grchain_t));
+				grpp = (grchain_t *)wfetch(sym2);
 				grpp->gr_lnk = 0;
 				grpp->gr_sym = sym;
 			}
@@ -414,19 +414,19 @@ datscan:	lcalign( dataln );
 			if( pass2 ){
 				if( mchead == 0 )
 					fatal("68 MACRO chain err");
-				mchp = (MCH *)rfetch(mchead);
+				mchp = (mchain_t *)rfetch(mchead);
 				mchead = mchp->mc_lnk;
 				curdef->oc_val = mchp->mc_def;
 				curdef->oc_arg = mchp->mc_arg;
 			} else {
 				valign();
-				sym = VALN(sizeof(MCH));
+				sym = VALN(sizeof(mchain_t));
 				if( mchead )
-					((MCH *)wfetch(mctail))->mc_lnk = sym;
+					((mchain_t *)wfetch(mctail))->mc_lnk = sym;
 				else
 					mchead = sym;
 				mctail = sym;
-				mchp = (MCH *)wfetch(mctail);
+				mchp = (mchain_t *)wfetch(mctail);
 				mchp->mc_lnk = 0;
 				mchp->mc_def = curdef->oc_val = virtop;
 				curdef->oc_arg = 0;
@@ -498,7 +498,7 @@ datscan:	lcalign( dataln );
 	case ADSECT:	/* .sect */
 
 		if( noextlab() ) break;
-		syp = (SYTAB *) rfetch( label );
+		syp = (sytab_t *) rfetch( label );
 		if( syp->sy_typ == STSEC && (!pass2||syp->sy_atr&SADP2 ))
 			setsec( syp->sy_rel );	/* continue old section */
 		else
@@ -598,7 +598,7 @@ tryrwx:		if( toktyp == TKEOL ) break;
 	20 mar 88, RMM */
 
 			if( !i || curop.op_flg & OFFOR ){
-				error("85 Illegal USING expression");
+				error("85 Illegal using_t expression");
 				goto skip;
 			}
 			for( i=0; i<ulx && ulist[i].us_reg != k; i++ );
@@ -668,7 +668,7 @@ void noopnd(){
 	skipeol();
 }
 
-int nonrelex(s) char *s;{
+int nonrelex(char* s) {
 
 	/* set up and get an operand that is not relocatable	*/
 
@@ -677,7 +677,7 @@ int nonrelex(s) char *s;{
 	return expression(s,NOSTR,NOREL);
 }
 
-int scanstr(s)char *s;{
+int scanstr(char* s) {
 
 	/* set up and get an operand that is supposed to be a string */
 
@@ -690,14 +690,14 @@ int scanstr(s)char *s;{
 	return 0;
 }
 
-void notexpr(s)char *s;{
+void notexpr(char* s) {
 	error("09 Operand not a valid %s expression",s);
 	skipeol();
 }
 
 void nolabel(){
 
-	reg char	*toksv;
+	char	*toksv;
 
 	toksv = tokpt;
 	tokpt = sline;
@@ -706,7 +706,7 @@ void nolabel(){
 }
 
 
-void notrel(s)char *s;{
+void notrel(char* s) {
 	error("12 Relocation not legal for %s expression",s);
 	skipeol();
 }
@@ -719,7 +719,7 @@ void notrel(s)char *s;{
  */
 
 
-int expression(s,strok,norel) char *s; int strok; int norel; {
+int expression(char* s, int strok, int norel) {
 
 	/* if strok != 0, a string is allowed			*/
 	/* if norel != 0, relocatables are not allowed		*/
@@ -755,7 +755,7 @@ int expression(s,strok,norel) char *s; int strok; int norel; {
  */
 
 
-void title( msg, s ) char *msg,*s;{
+void title(char* msg, char* s) {
 
 
 	if( !pass2 ) return;
@@ -767,9 +767,9 @@ void title( msg, s ) char *msg,*s;{
 	if( llfull ) llfull = linect = 0;
 }
 
-void stdequend(symtype)int symtype;{		/* finish of standard .equ processing */
+void stdequend(int symtype) {		/* finish of standard .equ processing */
 
-	reg int	i;
+	int	i;
 	long	l;
 
 	if( eflg || uflg || llerx ) return;
@@ -820,7 +820,7 @@ void newloclabs(){
 		if( --loclabskips >= 0 ) return;
 	} else {
 		if( nchd == 0 ){ loclabskips++; return; }
-		nctl->nc_lnk = (NUMCHN *)palloc(sizeof(NUMCHN));
+		nctl->nc_lnk = (numchn_t *)palloc(sizeof(numchn_t));
 	}
 	nctl = nctl->nc_lnk;
 }
@@ -841,17 +841,17 @@ int noextlab(){
 	return 0;
 }
 
-int usingreg(s)char *s; {
+int usingreg(char* s) {
 
 	VMADR		sym;
-	reg SYTAB	*syp;
+	sytab_t	*syp;
 	int		k;
 
 	sym = sylook( s );
-	syp = (SYTAB *) rfetch( sym );
+	syp = (sytab_t *) rfetch( sym );
 	if( syp->sy_typ == STKEQ ){
 		xref( sym, 0 );
-		syp = (SYTAB *)rfetch(syp->sy_val);
+		syp = (sytab_t *)rfetch(syp->sy_val);
 	}
 	if( (k = regcheck(syp)) == -1 )
 		error("48 Symbol is not a suitable register");

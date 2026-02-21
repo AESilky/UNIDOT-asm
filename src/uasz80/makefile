@@ -38,13 +38,18 @@
 #    convert the Unidot authored virtual memory routines to compile (only
 #    a version without `USEVM` defined has been tested).
 #
+#  (ES, 2/2026) Having problems when not using the UNIDOT virtual memory,
+#    so now trying to get it working (but just with the BIGMEM flag). All
+#    occurrences of the UNIDOT 'valloc' were changed to 'uavalloc' to
+#    differentiate from the system 'valloc'.
+#
 
 # LAX_CC - Define to ease warnings on GCC
 LAX_CC=-Wno-pointer-to-int-cast
 # DEBUG_CC - Define to add debug symbols to executable
 DEBUG_CC=-g
 # GCC on 64-bit Linux defines (ES)
-CFLAGS=$(LAX_CC) $(DEBUG_CC) -DNOPD -DALIGN=4
+CFLAGS=$(LAX_CC) $(DEBUG_CC) -DNOPD -DALIGN=4 -DUSEVM -DBIGMEM
 #pdp-11 defines
 #CFLAGS=-DBIGMEM -DNOPD
 # 3b2 defines 
@@ -120,6 +125,15 @@ uaz80gr.c:
 	rm xxgram.c
 	@echo new uaz80 grammar tables now made
 
+# uasz80.h has been 'adjusted' to allow it to compile with the current
+# 	version of GCC, so the following build step has been removed to
+#	remove the risk of overwriting the adjusted version of the file.
+#	Since uasz80 was adjusted, the source for mktable has been
+#	acquired and has been 'adjusted' to compile. Therefore, it is
+#	possible that uasz80.h could actually be generated from uasz80.z
+#	but mktable probably needs to be updated somewhat to generate
+#	an output file that will compile correctly with current GCC.
+#
 #uasz80.h: uasz80.z
 #	mktable uasz80.z
 #	mkpdtab uz80s.pd >uz80pd.h

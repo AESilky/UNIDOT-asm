@@ -47,7 +47,7 @@ static char rcsid[] =
 #include <unistd.h> 		/* For 'close' and `sbrk` */
 
 void lineover();
-int oktobreak(reg int n);	/* is it ok to break a line after this character */
+int oktobreak(int n);	/* is it ok to break a line after this character */
 void prline(FILE* f);
 
 char	*immms1, *immms2;
@@ -64,7 +64,7 @@ char	*errfmt = "====> line %-4u         ";
  * replaces the normal exit() in libc.a, with its stdio stuff.
  */
 
-void quit( status ) int status;{
+void quit(int status) {
 
 
 #ifndef BIGMEM
@@ -94,12 +94,12 @@ void quit( status ) int status;{
 
 void ugetline(){
 
-	reg INPUT	*rinfp;
-	reg char	*slp;
-	reg int		ch;
-	reg char	*ap;
-	reg char	*apx;
-	reg char	**avp;
+	input_t	*rinfp;
+	char	*slp;
+	int		ch;
+	char	*ap;
+	char	*apx;
+	char	**avp;
 	static char	incfmt[8];
 
 	tokpt = tokpt2 = scanpt = slp = sline;
@@ -233,7 +233,7 @@ if(debug>5) printf( "%d	%s",curline,sline);
 
 		llfull = curlst && ( condlev <= truelev || condlst );
 		if( xsline )
-			curxpl = ((INPUT *)instk)->in_seq;
+			curxpl = ((input_t *)instk)->in_seq;
 		else {
 			curxpl = (pagect << 6) | (llpp-linect+1) ;
 			if( linect == 0 ) /* anticipate form feed */
@@ -243,7 +243,7 @@ if(debug>5) printf( "%d	%s",curline,sline);
 }
 
 
-int oktobreak(n)reg int n;{	/* is it ok to break a line after this character */
+int oktobreak(int n) {	/* is it ok to break a line after this character */
 
 	if( n == ',' || n == '(' || n == ')' ||
 	    n == '{' || n == '}' || n == ' ' ) return 1;
@@ -264,8 +264,7 @@ void lineover(){
  * headroom for interrupts and the like
  */
 
-char *
-xsbrk( size ) uns size; {
+char* xsbrk(uns size) {
 //	extern char	*sbrk();
 	char autoalloc[1000];		/* move stack down 1000 bytes */
 	autoalloc[0] = size;		/* in case of optimization */
@@ -273,12 +272,11 @@ xsbrk( size ) uns size; {
 }
 
 #ifdef USEVM
-char *
-palloc( size ) uns size;{
+char* palloc(uns size) {
 
 
 	static	char	*oldtop = 0;
-	reg char	*pt;
+	char	*pt;
 	unsigned int	n;
 
 	if( size & (ALIGN-1) ) size = (size | (ALIGN-1) ) + 1;
@@ -330,7 +328,7 @@ char* palloc(uns size) {
 
 void pgcheck(){
 
-	reg int	i;
+	int	i;
 
 	if( linect <= 0 ){ /* time for a new page */
 		fprintf( LIST,
@@ -385,9 +383,8 @@ void putline(){
 
 static char ernbuf[6];
 
-char *
-ernget(s) reg char *s;{
-	reg char *p;
+char* ernget(char* s) {
+	char *p;
 	p = ernbuf;
 	while( *s == ' ' ) s++;
 	while( *s >= '0' && *s <= '9' ) *p++ = *s++;
@@ -397,13 +394,13 @@ ernget(s) reg char *s;{
 	return s;
 }
 
-void prline(f)FILE *f;{
+void prline(FILE* f) {
 
-	reg int		i;
-	reg int		j;
-	reg char	*p;
-	reg int		k;
-	INPUT		*xinfp;
+	int		i;
+	int		j;
+	char	*p;
+	int		k;
+	input_t		*xinfp;
 
 	if( f == LIST ) pgcheck();
 	sprintf(llseq,llseqfmt,llseqval);
@@ -431,7 +428,7 @@ void prline(f)FILE *f;{
 			if( f == LIST ) pgcheck();
 			if( !xsline && f == LIST )
 				fprintf(f,"%2d ",llpp-linect);
-			fprintf(f,errfmt, ((INPUT *)instk)->in_seq);
+			fprintf(f,errfmt, ((input_t *)instk)->in_seq);
 			k = pgwd-24;
 			for( j=i=0; i<llerx; i++ ){
 				while( j < llerf[i].er_col && j < k )
@@ -443,7 +440,7 @@ void prline(f)FILE *f;{
 		for( i=0; i<llerx; i++ ){
 			if( f == LIST ) pgcheck();
 			if( !xsline && f == LIST )fprintf(f,"%2d ",llpp-linect);
-			fprintf(f,errfmt,((INPUT *)instk)->in_seq);
+			fprintf(f,errfmt,((input_t *)instk)->in_seq);
 			p = ernget( llerf[i].er_msg );
 			fprintf(f, llerf[i].er_flg == ER_WRN ?
 					"Warning " : "Error   ");
@@ -454,7 +451,7 @@ void prline(f)FILE *f;{
 			for(;;){
 				while( xinfp->in_typ != INFILE &&
 				       xinfp->in_ofp ) xinfp = xinfp->in_ofp;
-				if( xinfp == (INPUT *)instk ) break;
+				if( xinfp == (input_t *)instk ) break;
 				if( f == LIST ) pgcheck();
 				if( !xsline && f == LIST )
 					fprintf(f,"%2d ",llpp-linect);
@@ -466,7 +463,7 @@ void prline(f)FILE *f;{
 		if( immms1 ){
 			if( f == LIST ) pgcheck();
 			if( !xsline && f == LIST )fprintf(f,"%2d ",llpp-linect);
-			fprintf(f,errfmt,((INPUT *)instk)->in_seq);
+			fprintf(f,errfmt,((input_t *)instk)->in_seq);
 			fprintf(f,"%s%s\n",immms1,immms2);
 		}
 	}
@@ -478,7 +475,7 @@ void prline(f)FILE *f;{
  *	== 0, if a == b,
  *	< 0, if a < b.
  */
-int symcmp( a, b ) reg char *a, *b;{
+int symcmp(char* a, char* b) {
 
 
 	int 	i;
@@ -492,10 +489,10 @@ int symcmp( a, b ) reg char *a, *b;{
  * symcpy - Copies one symbol from source to destination.
  */
 
-void symcpy( d, s ) reg char *d, *s;{
+void symcpy(char* d, char* s) {
 
 
-	reg char	i;
+	char	i;
 
 	i = SYMSIZ;
 	do {
@@ -506,14 +503,14 @@ void symcpy( d, s ) reg char *d, *s;{
 /*
  * memcpy - Like str(n)cpy but does not stop at a null
  */
-//void memcpy( d, s, n ) reg char *d, *s; reg int n; {
+//void memcpy( d, s, n ) char *d, *s; int n; {
 //	while( --n >= 0 ) *d++ = *s++;
 //}
 
 
-void lcalign( n ) reg int n; {
+void lcalign(int n) {
 
-	reg int	i;
+	int	i;
 
 	if( pendbits ) nopend();		/* flush */
 	i = curloc % n;
@@ -521,18 +518,18 @@ void lcalign( n ) reg int n; {
 }
 
 
-void range( l, m, n ) long l; int m,n; {
+void range(long l, int m, int n) {
 
 	if( l < m || l > n ) error("13 Value not in range %d-%d",m,n);
 }
 
-void hexit( p, n, v ) reg char *p; reg int n; long v; {
+void hexit(char* p, int n, long v) {
 
 	/* in the low nibble of n is the field width, in the high nibble is
 	   the number of digits to print */
 
 	extern char *hextab;
-	reg int	i;
+	int	i;
 
 	i = n >> 4;
 	n &= 0xf;
@@ -551,9 +548,9 @@ void hexit( p, n, v ) reg char *p; reg int n; long v; {
 
 void error(char* s, ...) {
 
-	reg ERF		*ep;
-	reg char	*p;
-	reg int		col;
+	errframe_t		*ep;
+	char	*p;
+	int		col;
 
 	if( !pass2 ) return;
 	if( llerx >= LLERX ) llerx--;
@@ -586,17 +583,17 @@ void warn(char* s, ...) {
 
 void fatal(char* s, ...) {
 
-	reg char	*p;
-	reg int		i;
+	char	*p;
+	int		i;
 
 	va_list argptr;
 	va_start(argptr, s);
 
 	s = ernget( s );
-	if( ((INPUT *)instk)->in_seq ){
-		fprintf(ERRFIL,"line %d:\t",((INPUT *)instk)->in_seq);
+	if( ((input_t *)instk)->in_seq ){
+		fprintf(ERRFIL,"line %d:\t",((input_t *)instk)->in_seq);
 		if( LIST )
-			fprintf(LIST,"line %3d:\t\t",((INPUT *)instk)->in_seq);
+			fprintf(LIST,"line %3d:\t\t",((input_t *)instk)->in_seq);
 		p = sline;
 		while( i = *p++ ){
 			fputc( i, ERRFIL );
@@ -626,13 +623,13 @@ void fatal(char* s, ...) {
 #endif
 }
 
-void immmsg( s1, s2 ) char *s1; char *s2; {	/* immediate message */
+void immmsg(char* s1, char* s2) {	/* immediate message */
 
 	if( !pass2 ) return;
 	immms1 = s1;
 	immms2 = s2;
 }
 
-void filchk( f, s ) FILE *f; char *s; {
-	if( ferror(f) ) fatal("93write error on %s file",s);
+void filchk(FILE* f, char* s) {
+	if( ferror(f) ) fatal("93 write error on %s file",s);
 }

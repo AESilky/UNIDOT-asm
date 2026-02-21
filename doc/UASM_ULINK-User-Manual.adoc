@@ -30,6 +30,17 @@ The command line supports a number of options. (Examples from Windows).footnote:
 == Directives
 Within an assembly source file, *directives* are used to control aspects of the build process.
 
+== Limits
+Limits for various elements of the source file(s).
+
+[cols="1,1,1"]
+|===
+|Element|Max|Details|
+|label|32|Must end with ':'|
+|Sting|256||
+|Title|47||
+|===
+
 = ULINK
 
 == Command Line Options

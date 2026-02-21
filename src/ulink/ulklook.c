@@ -43,29 +43,26 @@ static char rcsid[]=
 
 
 /*		symbol table lookup			*/
-
-static SYTAB	**inspt;
+static sytab_t	**inspt;
 
 /*
  * sylook - Returns a pointer to the symbol table entry for the
  * specified symbol.  Creates a new entry in the symbol table if
  * necessary.
  */
-
-SYTAB *
-sylook( s ) reg char *s;{
+sytab_t* sylook(char* s) {
 
 
-	reg SYTAB	*syp;
+	sytab_t	*syp;
 
 	if( syp = sypeek( s )) return( syp ); /* found */
 
 	/* Add a new entry to the table.  */
 
 #ifdef STATS
-	syp = (SYTAB *) palloc( sizeof(SYTAB) + strlen(s) - 1, SYMUSE);
+	syp = (sytab_t *) palloc( sizeof(sytab_t) + strlen(s) - 1, SYMUSE);
 #else
-	syp = (SYTAB *) palloc( sizeof(SYTAB) + strlen(s) - 1);
+	syp = (sytab_t *) palloc( sizeof(sytab_t) + strlen(s) - 1);
 #endif
 	strcpy( syp->sy_str, s );
 	syp->sy_ovl = syp->sy_typ = syp->sy_atr = 0;
@@ -73,7 +70,7 @@ sylook( s ) reg char *s;{
 	syp->sy_ord = 0;
 	syp->sy_rel = 0;
 	syp->sy_lnk = *inspt;
-#ifdef XREF
+#ifdef xref_t
 	syp->sy_xref = 0;	/* null the cross reference chain */
 #endif
 	return *inspt = syp;
@@ -82,13 +79,11 @@ sylook( s ) reg char *s;{
  * symerge - Merges the two specified symbol table hash chains, and
  * returns a pointer to the resulting chain.
  */
-
-SYTAB *
-symerge( a, b ) reg SYTAB *a, *b;{
+sytab_t* symerge(sytab_t* a, sytab_t* b) {
 
 
-	reg SYTAB	**re;		/* ptr to last link field in chain */
-	SYTAB	*r;			/* resulting chain */
+	sytab_t	**re;		/* ptr to last link field in chain */
+	sytab_t	*r;			/* resulting chain */
 
 	re = &r;
 	if( numorder )
@@ -124,16 +119,14 @@ symerge( a, b ) reg SYTAB *a, *b;{
  * Otherwise, sets up inspt to point to the spot where the new entry
  * should be linked in, and returns 0.
  */
-
-SYTAB *
-sypeek( s ) char *s;{
+sytab_t* sypeek(char* s) {
 
 
-	reg SYTAB	*p,
+	sytab_t	*p,
 			*q;
-	reg uns		h;
-	reg int		cmp;
-	reg char	*r;
+	uns		h;
+	int		cmp;
+	char	*r;
 
 	h = 0;
 	r = s;
@@ -153,10 +146,8 @@ sypeek( s ) char *s;{
 /*
  * numsort sorts a list by value with an insertion sort
  */
-
-SYTAB *
-numsort( s ) SYTAB *s; {
-	SYTAB *a,*b,*c;
+sytab_t* numsort(sytab_t* s) {
+	sytab_t *a,*b,*c;
 	if( s == NULL ) return s;
 	b = s->sy_lnk;
 	a = s;
@@ -184,7 +175,7 @@ numsort( s ) SYTAB *s; {
 
 void sysort(){
 
-	reg uns		halfi,
+	uns		halfi,
 			i,
 			j;
 

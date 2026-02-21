@@ -50,7 +50,7 @@ static char rcsid[] =
 /* Definitions (Local) */
 
 void afmtstt();
-void allocseg(reg SECTION* sep, SECTION* lsep);
+void allocseg(section_t* sep, section_t* lsep);
 void asgncom();
 void asgnsec();
 void asgnsym();
@@ -58,7 +58,7 @@ void grpcheck(GROUP* gp);
 void grpout(GROUP* gp);
 void ovrlapch();
 void splitinit();
-void symtoaout(SECTION* csep);
+void symtoaout(section_t* csep);
 void symtoobj();
 void ufmtstt();
 
@@ -66,7 +66,7 @@ void ufmtstt();
 
 static long		dtop;		/* data top if split		*/
 static long		ctop;		/* code top if split		*/
-static SECTION		*csep;		/* section ptr for common	*/
+static section_t		*csep;		/* section ptr for common	*/
 static short		csect;		/* section number for common	*/
 static short		codsec;		/* section number for code out	*/
 static short		datsec;		/* section number for data out	*/
@@ -80,9 +80,9 @@ long			secfsize();
 
 void interlude(){
 
-	reg SECTION	*sep;
-	reg SYTAB	*syp;
-	reg int		i;
+	section_t	*sep;
+	sytab_t	*syp;
+	int		i;
 	uns		h;
 	long		l;
 	long		base;
@@ -157,9 +157,9 @@ DEB(0,("INTERLUDE end\n"));
 
 void afmtstt() {
 
-	reg SECTION	*sep;
-	reg int		i;
-	reg long	l;
+	section_t	*sep;
+	int		i;
+	long	l;
 
 	/* start off the aformat output file		*/
 
@@ -196,9 +196,9 @@ void afmtstt() {
 
 void ufmtstt() {
 
-	reg SECTION	*sep;
-	reg int		i;
-	reg uns		h;
+	section_t	*sep;
+	int		i;
+	uns		h;
 
 	/* start off a u.obj format output file	*/
 
@@ -293,10 +293,9 @@ void ufmtstt() {
 	oflush();
 }
 
-long
-secfsize( sep ) reg SECTION *sep; {
+long secfsize(section_t* sep) {
 
-	reg int	i;
+	int	i;
 	long	l;
 
 	/* returns the section length in bytes (file length) and inserts
@@ -322,10 +321,10 @@ secfsize( sep ) reg SECTION *sep; {
 
 void grpout(GROUP* gp) {
 
-	reg GROUP 	*gl;
-	reg char	*p;
-	reg char	*p2;
-	reg int		n;
+	GROUP 	*gl;
+	char	*p;
+	char	*p2;
+	int		n;
 
 	objblk.ob_type = UOBGRP;
 	oputs( p = gp->gr_sym->sy_str );
@@ -344,11 +343,11 @@ void grpout(GROUP* gp) {
 
 void grpcheck(GROUP* gp) {	/* check for group consistency		*/
 
-	reg SECTION 	*sep;
-	reg GROUP 	*gl;
-	reg int		n;
-	reg int		at;
-	reg int		adu;
+	section_t 	*sep;
+	GROUP 	*gl;
+	int		n;
+	int		at;
+	int		adu;
 
 	at = 0;
 	adu = 0;
@@ -374,9 +373,9 @@ void grpcheck(GROUP* gp) {	/* check for group consistency		*/
 
 void asgncom() {		/* assign addresses to common variables	*/
 
-	reg SECTION	*sep;
-	reg SYTAB	*syp;
-	reg int		i;
+	section_t	*sep;
+	sytab_t	*syp;
+	int		i;
 	uns		h;
 	long		l;
 
@@ -439,11 +438,11 @@ void asgncom() {		/* assign addresses to common variables	*/
 void splitinit(){		/* called immediately after init	*/
 
 #ifdef STATS
-	codsep = (SECTION *)zpalloc(sizeof(SECTION),SECUSE);
-	datsep = (SECTION *)zpalloc(sizeof(SECTION),SECUSE);
+	codsep = (section_t *)zpalloc(sizeof(section_t),SECUSE);
+	datsep = (section_t *)zpalloc(sizeof(section_t),SECUSE);
 #else
-	codsep = (SECTION *)zpalloc(sizeof(SECTION));
-	datsep = (SECTION *)zpalloc(sizeof(SECTION));
+	codsep = (section_t *)zpalloc(sizeof(section_t));
+	datsep = (section_t *)zpalloc(sizeof(section_t));
 #endif
 	codsep->se_adu = codadu;
 	datsep->se_adu = datadu;
@@ -459,12 +458,12 @@ void splitinit(){		/* called immediately after init	*/
 
 void asgnsec() {		/* assign addresses to sections		*/
 
-	reg SECTION	*sep;
-	reg GROUP	*gl;
-	reg int		i;
-	reg int		n;
-	reg GROUP	*grp;
-	reg SECTION	*lsep;
+	section_t	*sep;
+	GROUP	*gl;
+	int		i;
+	int		n;
+	GROUP	*grp;
+	section_t	*lsep;
 
 	lsep = 0;
 	for( i = URBSEC; i<stct; i++ ){
@@ -498,14 +497,14 @@ void asgnsec() {		/* assign addresses to sections		*/
 	}
 }
 
-void allocseg(reg SECTION* sep, SECTION* lsep) {
+void allocseg(section_t* sep, section_t* lsep) {
 
-	reg int		i;
-	reg long	base;		/* general location counter	*/
-	reg long	cbase;		/* code loc counter if split	*/
-	reg long	xbase;
-	reg long	top;		/* top of section		*/
-	reg long	l;
+	int		i;
+	long	base;		/* general location counter	*/
+	long	cbase;		/* code loc counter if split	*/
+	long	xbase;
+	long	top;		/* top of section		*/
+	long	l;
 
 tiptop:
 
@@ -590,10 +589,10 @@ error("47 Location for sect %s does not meet alignment/extent constraints",
 
 void ovrlapch() {
 
-	reg SECTION	*sep;
-	reg SECTION	*xsep;
-	reg int		i;
-	reg int		j;
+	section_t	*sep;
+	section_t	*xsep;
+	int		i;
+	int		j;
 	long		base;
 	long		top;
 	long		xbase;
@@ -636,10 +635,10 @@ void ovrlapch() {
 
 void asgnsym() {		/* assign addresses to symbols		*/
 
-	reg SECTION	*sep;
-	reg SYTAB	*syp;
-	reg uns		h;
-	reg int		i;
+	section_t	*sep;
+	sytab_t	*syp;
+	uns		h;
+	int		i;
 
 	for( h = 0; h < 1 << HSHLOG; h++ ){
 		for( syp = syhtab[h]; syp; syp = syp->sy_lnk ){
@@ -655,9 +654,9 @@ void asgnsym() {		/* assign addresses to symbols		*/
 
 void symtoobj() {		/* output symbols */
 
-	reg SYTAB	*syp;
-	reg uns		h;
-	reg int		i;
+	sytab_t	*syp;
+	uns		h;
+	int		i;
 
 	objblk.ob_type = UOBGLO;
 	for( h = 0; h < 1 << HSHLOG; h++ ){
@@ -691,13 +690,13 @@ void symtoobj() {		/* output symbols */
 }
 
 
-void symtoaout(SECTION* csep) {
+void symtoaout(section_t* csep) {
 
 	/* output common symbols to a.out */
 
-	reg SYTAB	*syp;
-	reg uns		h;
-	reg char	csrel;
+	sytab_t	*syp;
+	uns		h;
+	char	csrel;
 
 	csrel = csep->se_sym->sy_rel;
 	for( h = 0; h < 1 << HSHLOG; h++ ){

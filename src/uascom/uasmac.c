@@ -52,11 +52,11 @@ static char rcsid[]=
 
 void def1(){
 
-	reg char	*p;
-	reg char	*q;
-	reg VMADR	v;
-	reg int		c;
-	reg int		argno;
+	char	*p;
+	char	*q;
+	VMADR	v;
+	int		c;
+	int		argno;
 	char		opbuf[18];
 
 	/*	Check for an ADMAC or ADENDM directive.		*/
@@ -96,7 +96,7 @@ fixlev:	if( argno == ADMAC ) deflev++; else
 	if( deflev <= 0 ){		/* end of definition		*/
 		v = VAL1;
 		*((char*)(wfetch(v))) = '\0';
-		((MCH *)wfetch(mctail))->mc_arg = curdef->oc_arg;
+		((mchain_t *)wfetch(mctail))->mc_arg = curdef->oc_arg;
 endy:		do scanc(); while( ch != '\n' );
 		goto endx;
 	}
@@ -145,15 +145,15 @@ endx:	toktyp = TKEOL;
 
 
 
-void macro( vp ) VMADR vp;{
+void macro(VMADR vp) {
 
 
-	reg INPUT	*newfp;
-	reg int		i;
-	reg char	*sp;
-	reg char	**avp;
-	reg int		ocarg;
-	reg int		brlev;
+	input_t	*newfp;
+	int		i;
+	char	*sp;
+	char	**avp;
+	int		ocarg;
+	int		brlev;
 	char		nbuf[6];
 
 	/*
@@ -181,7 +181,7 @@ void macro( vp ) VMADR vp;{
 	 * at the beginning of the variable area.
 	 */
 
-	newfp = (INPUT *) pushin();
+	newfp = (input_t *) pushin();
 	avp = (char **) insp;
 	insp += (ocarg+3) * sizeof(char *);
 	iovck();
@@ -261,9 +261,9 @@ void macro( vp ) VMADR vp;{
 
 void rpt1(){
 
-	reg INPUT	*newfp;
-	reg VMADR	vp;
-	reg char	rch;
+	input_t	*newfp;
+	VMADR	vp;
+	char	rch;
 
 	mexprint();
 	laboc();
@@ -313,7 +313,7 @@ void rpt1(){
  */
 void skip1(){
 
-	reg int	i;
+	int	i;
 
 	mexprint();
 	laboc();

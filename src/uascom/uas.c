@@ -55,7 +55,7 @@ static char rcsid[]=
 void assem1();
 void listsec();
 void lotoken();
-void secprint(reg int rel, int n);
+void secprint(int rel, int n);
 void setlabel();
 
 
@@ -66,10 +66,10 @@ void intr(){
 
 /* the assembler starts here		*/
 
-void main( argc, argv, env ) int argc; char *argv[]; char *env[];{
+void main(int argc, char* argv[], char* env[]) {
 
-	reg int		i;
-	reg OCTAB	*oc;
+	int		i;
+	octab_t	*oc;
 	char		*ocstt;
 	short		xcodaln;
 	short		xwrdaln;
@@ -187,9 +187,9 @@ void main( argc, argv, env ) int argc; char *argv[]; char *env[];{
 
 void listsec() {
 
-	reg SYTAB	*syp;
-	reg int		rel;
-	reg long	l;
+	sytab_t	*syp;
+	int		rel;
+	long	l;
 
 	rel = URBSEC;
 	if( defadu != 8 ) rel++;
@@ -212,13 +212,13 @@ void listsec() {
 	}
 }
 
-void secprint( rel, n ) reg int rel; int n;{
+void secprint(int rel, int n) {
 
-	reg SYTAB	*syp;
-	reg long	l;
+	sytab_t	*syp;
+	long	l;
 
 	pgcheck();
-	syp = (SYTAB *) rfetch( sectab[rel].se_sym );
+	syp = (sytab_t *) rfetch( sectab[rel].se_sym );
 	l = sectab[rel].se_loc/sectab[rel].se_adu;
 	fprintf(LIST,"%-31.31s%2d  %8lx\n", syp->sy_str, n, l);
 }
@@ -333,11 +333,11 @@ BDEB(0,("%d expanding: %s, (%d)  stack depth is %d\n",
  * It also records a cross reference entry.
  */
 
-void assign( typ, val, rel ) uns typ; long val; uns rel;{
+void assign(uns typ, long val, uns rel) {
 
 
-	reg SYTAB	*syp;
-	reg NUMLAB	*nml;
+	sytab_t	*syp;
+	numlab_t	*nml;
 	VMADR		vnml;
 	char		*tokpt1;
 
@@ -349,7 +349,7 @@ void assign( typ, val, rel ) uns typ; long val; uns rel;{
 			rel = 0;
 	if( typ == STNLAB ){		/* label is numeric	*/
 		vnml = numlab(labval);
-		nml = (NUMLAB *)wfetch(vnml);
+		nml = (numlab_t *)wfetch(vnml);
 		if( pass2 ){
 			nml->nm_atr |= SADP2;
 			if( nml->nm_atr & SAMUD )
@@ -372,7 +372,7 @@ void assign( typ, val, rel ) uns typ; long val; uns rel;{
 		xref( label, XRDEF );
 		tokpt = tokpt1;
 	}
-	syp = (SYTAB *) wfetch( label );
+	syp = (sytab_t *) wfetch( label );
 	BDEB(1,("assign( %d, %lx, %d ): %s\n",typ,val,rel,syp->sy_str));
 	if( syp->sy_typ == STKEY || syp->sy_typ == STKEQ ){
 		if( typ != STKEY )
@@ -439,14 +439,14 @@ void setlabel(){		/* establish the label virtual address */
  */
 void interlude(){
 
-	reg SYTAB	*syp;
-	reg VMADR	p;
-	reg uns		h;
-	reg uns		rel;
-	reg uns		r;
-	reg char	*pp;
-	reg char	*pp2;
-	reg VMADR	p2;
+	sytab_t	*syp;
+	VMADR	p;
+	uns		h;
+	uns		rel;
+	uns		r;
+	char	*pp;
+	char	*pp2;
+	VMADR	p2;
 	char		type;
 	extern char	*lastcomp();
 
@@ -480,7 +480,7 @@ void interlude(){
 			objtyp = UOBSEC;
 		}
 		sectab[rel].se_atr &= ~SEATRSEG;
-		syp = (SYTAB *) rfetch( sectab[rel].se_sym );
+		syp = (sytab_t *) rfetch( sectab[rel].se_sym );
 		oputb( sectab[rel].se_aln );
 		oputb( sectab[rel].se_ext );
 		oputb( sectab[rel].se_atr | USEMOR );
@@ -497,7 +497,7 @@ void interlude(){
 	rel = URBEXT;
 	for( h = 0; h < (1 << SHSHLOG); h++ ){
 		for( p = syhtab[h]; p; p = p2 ){
-			syp = (SYTAB *) rfetch( p );
+			syp = (sytab_t *) rfetch( p );
 			p2 = syp->sy_lnk;
 			if( syp->sy_typ == STKEY ||
 			    syp->sy_typ == STKEQ ||
@@ -513,7 +513,7 @@ void interlude(){
 				 * symbol table fields for the benefit of
 				 * the xref lister.  */
 
-				syp = (SYTAB *) wfetch( p );
+				syp = (sytab_t *) wfetch( p );
 				syp->sy_typ = STLAB;
 				syp->sy_val = 0;
 				syp->sy_rel = URBEXT;
@@ -532,7 +532,7 @@ void interlude(){
 				if( syp->sy_atr&SAGLO || uext ){
 					if( rel >= URBMSK )
 			fatal("78 Too many externals (limit is 1792)");
-					syp = (SYTAB *) wfetch( p );
+					syp = (sytab_t *) wfetch( p );
 					syp->sy_typ = STLAB;
 					syp->sy_atr |= SAGLO;
 					syp->sy_val = 0;
@@ -557,9 +557,9 @@ void interlude(){
 
 void laboc(){
 
-	reg int		col1;
-	reg int		colfound;
-	reg char	*scansv;
+	int		col1;
+	int		colfound;
+	char	*scansv;
 
 	/* the syntax of an opcode line depends upon whether the colreqd
 	   flag is set:  if it is then we allow:
@@ -671,7 +671,7 @@ void lotoken() {
 
 void newsec(int f) {	/* f is 0 for normal sections, 1 for dummy sections */
 
-	reg int	se;
+	int	se;
 
 	/* for ordinary sections, we start from the bottom
 	   0 is the absolute section
@@ -737,9 +737,9 @@ void setorg() {
  * setsec - Changes to the specified section for code generation.
  */
 
-void setsec( sec ) uns sec;{
+void setsec(uns sec) {
 
-	reg SECTION	*sep;
+	section_t	*sep;
 
 	if( sec == cursec ) return;
 	lcalign(curadu);
@@ -758,7 +758,7 @@ void setsec( sec ) uns sec;{
 }
 
 /*
-dmpblk(p) char *p; {
+dmpblk(char *p) {
 	char *p2;
 	p2 = p + 16;
 	while( p < p2 ){ if( *p ) break; p++; }

@@ -89,13 +89,13 @@ static	char	vmfn[] = "/tmp/vmaXXXXX";
  */
 
 VMTAB *
-vmgbuf( adr ) VMADR adr;{
+vmgbuf(VMADR adr) {
 
-	reg char	*bufptr;
-	reg VMTAB	*vmp;
-	reg int		i;
-	reg int		blk;
-	reg ushort	j;
+	char	*bufptr;
+	VMTAB	*vmp;
+	int		i;
+	int		blk;
+	ushort	j;
 
 #ifdef	STATS
 	vmgct++;
@@ -198,11 +198,10 @@ readin:
  */
 
 
-char *
-vmrfetch( adr ) VMADR adr;{
+char* vmrfetch(VMADR adr) {
 
-	reg char	*p;
-	reg VMTAB	*vmp;
+	char	*p;
+	VMTAB	*vmp;
 	p = (vmp = vmgbuf(adr))->vm_buf + (adr & (BUFSIZ-1));
 	return p;
 }
@@ -212,11 +211,10 @@ vmrfetch( adr ) VMADR adr;{
  * a pointer to the in-core copy of the address.
  */
 
-char *
-vmwfetch( adr ) VMADR adr;{
+char* vmwfetch(VMADR adr) {
 
-	reg VMTAB	*vmp;
-	reg char	*p;
+	VMTAB	*vmp;
+	char	*p;
 
 	vmp = vmgbuf( adr );
 	vmp->vm_flg |= VMDIR;
@@ -332,21 +330,21 @@ int vmballoc(){		/* allocate a block - on ramdisk if possible
 #endif			/* of virtual memory stuff */
 
 /*
- * valloc - Allocates a region of virtual memory of the specified size,
+ * uavalloc - Allocates a region of virtual memory of the specified size,
  * and returns the vm address of it.  The region is guaranteed to reside
  * entirely within a single block.
  */
-VMADR valloc( size ) uns size;{
-	reg VMADR	base;
+VMADR uavalloc( uns size ) {
+	VMADR	base;
 
 #ifdef BIGMEM
-	reg int		n;
+	int		n;
 	if( virtop + size > blklim ){
 		virtop = blklim;
 		blklim += BUFSIZ;
 		if( blklim < virtop ) fatal("56 Vm overflow");
 		if( blklim > blkend ){
-			n = blkend >> blklog;
+			n = (uint)blkend >> blklog;
 			if( n >= PHNUM ) fatal("81 Too many virtual blocks");
 			phyp[n] = palloc(BUFSIZ);
 			blkend += BUFSIZ;
@@ -368,7 +366,7 @@ void valign(){		/* align the virtual pointer */
 	virtop = virtop;
 }
 
-void setvirtop(v) VMADR v; {		/* reset the virtop and blklim pointers */
+void setvirtop(VMADR v) {		/* reset the virtop and blklim pointers */
 	virtop = v;
 	blklim = (virtop + (BUFSIZ-1))+1;
 }

@@ -50,7 +50,7 @@ static char rcsid[] =
 
 /* Definitions (Local) */
 
-void fixabs(SECTION* sep);
+void fixabs(section_t* sep);
 void obbsz();
 void obloc();
 void obpro();
@@ -66,11 +66,11 @@ void odump();
 
 void obglo(){
 
-	reg SYTAB	*syp;
-	reg uns		rel;
-	reg long	val;
-	reg int		i;
-	reg int		j;
+	sytab_t	*syp;
+	uns		rel;
+	long	val;
+	int		i;
+	int		j;
 
 	DEB(0,("\tOBGLO pass %d \n",pass2+1));
 	while( objblk.ob_ptr < objblk.ob_top ){
@@ -158,11 +158,11 @@ void obglo(){
 
 void obgrp(){
 
-	reg SYTAB	*syp;
-	reg GROUP	*grp;
-	reg GROUP	*gl;
-	reg int		grno;
-	reg int		i;
+	sytab_t	*syp;
+	GROUP	*grp;
+	GROUP	*gl;
+	int		grno;
+	int		i;
 
 	DEB(0,("\tOBGRP pass %d \n",pass2+1));
 	if( pass2 ) return;
@@ -219,7 +219,7 @@ void obgrp(){
 
 void object() {
 
-	SECTION*	sep;
+	section_t*	sep;
 	int		i;
 
 	DEB(0,("Object file '%s'\n",curfile));
@@ -293,10 +293,10 @@ void object() {
 
 void obloc() {
 
-	reg char	*rpt,
+	char	*rpt,
 			*vpt;
-	reg uns		rel;
-	reg long	val;
+	uns		rel;
+	long	val;
 
 	if( !pass2 || sflag && !nflag ) return;
 	DEB(0,("\tOBLOC pass %d\n",pass2 + 1));
@@ -328,18 +328,18 @@ void obloc() {
 
 void obsec() {
 
-	reg SECTION	*sep;
-	reg SYTAB	*syp;
-	reg int		i;
-	reg int		aln;
-	reg int		ext;
-	reg int		atr;
-	reg int		adu;
-	reg int		atr2;
-	reg int		within;
-	reg long	slen;
-	reg long	mask;
-	reg int		osec;
+	section_t	*sep;
+	sytab_t	*syp;
+	int		i;
+	int		aln;
+	int		ext;
+	int		atr;
+	int		adu;
+	int		atr2;
+	int		within;
+	long	slen;
+	long	mask;
+	int		osec;
 	long		ltmp;
 
 	DEB(0,("\tOBSEC pass %d\n",pass2+1));
@@ -410,14 +410,14 @@ wthchk:		ltmp = sep->se_cum + slen;
 error("F17 sect bigger than allowed (%lx)",slen);
 				if( rflag ) error("F17 can't relink overflowed sects");
 				if( !pass2 ){
-					SECTION *sep2;
+					section_t *sep2;
 					if( stct >= SECSIZ )
 						error("F21 Too many sections");
 					sectab[stct] = sep2 = 
 #ifdef STATS
-				    (SECTION *)zpalloc(sizeof(SECTION),SECUSE);
+				    (section_t *)zpalloc(sizeof(section_t),SECUSE);
 #else
-					(SECTION *)zpalloc(sizeof(SECTION));
+					(section_t *)zpalloc(sizeof(section_t));
 #endif
 					sep2->se_sym = sep->se_sym;
 					sep2->se_adu = sep->se_adu;
@@ -457,7 +457,7 @@ DEB(0,("sect %s is output section %d, atr is %x\n",
 	}
 }
 
-void fixabs(SECTION* sep) {
+void fixabs(section_t* sep) {
 
 	if( sep->se_atr & USEFIX ){
 		error("W55 Absolute sections (%s) cannot be placed",
@@ -485,13 +485,13 @@ void obtra() {
 
 void obtxt() {
 
-	reg SECTION	*sep;
-	reg int		count;
-	reg long	top;
-	reg int		gi;
-	reg long	l;
-	reg char	*s;
-	reg char	*r;
+	section_t	*sep;
+	int		count;
+	long	top;
+	int		gi;
+	long	l;
+	char	*s;
+	char	*r;
 
 	curoff = ogetl(&objblk );		/* in address units	*/
 	cursec = ogetb(&objblk );		/* section number	*/
@@ -555,11 +555,11 @@ DEB(0,("obtxt: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
 
 void obbsz() {		/* init bss section to zeroes		*/
 
-	reg SECTION	*sep;
-	reg int		count;
-	reg long	top;
-	reg int		gi;
-	reg long	l;
+	section_t	*sep;
+	int		count;
+	long	top;
+	int		gi;
+	long	l;
 
 	curoff = ogetl(&objblk );		/* in address units	*/
 	cursec = ogetb(&objblk );		/* section number	*/
@@ -640,7 +640,7 @@ void obpro() {
 
 void odump() {
 
-	reg char	*optsave;
+	char	*optsave;
 
 	optsave = objblk.ob_ptr;
 	objblk.ob_ptr = objblk.ob_buf;

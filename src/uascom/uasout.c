@@ -109,7 +109,7 @@ void nopend(){			/* clear the pending stuff		*/
 
 /* the following routine actually puts out the code or data	*/
 
-void emitau( value, reloc, bits ) long value; uns reloc; int bits;{
+void emitau(long value, uns reloc, int bits) {
 
 	/* routine is now called only during pass2	*/
 
@@ -192,9 +192,7 @@ void emitau( value, reloc, bits ) long value; uns reloc; int bits;{
 /*
  * emitstr - Emits a string
  */
-
-
-void emitstr( s, n ) char *s; int n; {
+void emitstr(char* s, int n) {
 
 	int	i;
 	int	m;
@@ -208,7 +206,7 @@ void emitstr( s, n ) char *s; int n; {
 	while( --n >= 0 ) emitv( (long)(*s++ & msk), 0, bytbit );
 }
 
-void emitv( value, reloc, bits ) long value; uns reloc; int bits; {
+void emitv(long value, uns reloc, int bits) {
 
 	int	i;
 	long	mask;
@@ -411,7 +409,7 @@ void oputl(long l) {
 /*
  * oputs - Puts a symbol into the object buffer.
  */
-void oputs( s ) char *s;{
+void oputs(char* s) {
 
 
 	int	i;
@@ -429,7 +427,7 @@ void oputs( s ) char *s;{
  * oputw - Puts a word into the object buffer.
  */
 
-void oputw( w ) uns w;{
+void oputw(uns w) {
 
 	oputb( w );
 	oputb( w >> 8 );
