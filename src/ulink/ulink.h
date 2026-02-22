@@ -111,9 +111,9 @@
 #define IX(X)
 #endif
 #ifdef DEBUG
-#define DEB(n,a)	if(debug>n)printf a
+#define DEBOUT(n,a)	if(debug>n)printf a
 #else
-#define DEB(n,a)
+#define DEBOUT(n,a)
 #endif
 
 

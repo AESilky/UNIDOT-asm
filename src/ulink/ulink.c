@@ -41,10 +41,12 @@ static char rcsid[] =
 #define LNKCNT	200		/* max number of files to link		*/
 
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+//#include <libexplain/mkstemp.h>
 #ifdef vms
 #include "[-.incl]uobj.h"
 #endif
@@ -60,9 +62,9 @@ int	_iomode = 1;
 #include "ulink.h"
 #include "funcdefs.h"		/* Forward defines for GCC */
 
-char	*symfname;
-char	*relfname;
-char	*locfname;
+char	symfname[] = "usyXXXXXX";	/* last 6 chars must be 'X' for `mkstemp` */
+char	relfname[] = "urlXXXXXX";	/* last 6 chars must be 'X' for `mkstemp` */
+char	locfname[] = "ulcXXXXXX";	/* last 6 chars must be 'X' for `mkstemp` */
 short	filex;
 short	singlecol;
 short	nsc;			/* National Semiconductor Corp. flag ('NLINK') */
@@ -161,11 +163,9 @@ void main(int argc, char* argv[], char* env[]) {
 		setbuf( LIST, palloc(BUFSIZ));
 #endif
 		if( nflag ){
-			locfname = "ulcXXXXX";
-			mktemp(locfname);
-			LOCFILE = fopen( locfname, "w" );
-			if( LOCFILE == NULL )
-				nocreat( "local symbol file" );
+			int f = mkstemp(locfname);
+			if( f < 0 ) nocreat( "local symbol file" );
+			LOCFILE = fdopen(f, "w");
 #ifdef msdos
 			setmode(fileno(LOCFILE),"text");
 #endif
@@ -174,16 +174,16 @@ void main(int argc, char* argv[], char* env[]) {
 		nflag = 0;
 	if( afmt ){
 		if( !sflag ){
-			symfname = "usyXXXXX";
-			mktemp(symfname);
-			SYMFILE = fopen( symfname, "w" );
-			if( SYMFILE == NULL ) nocreat("symbol file");
+			int f = mkstemp(symfname);
+			if( f < 0 ) {
+				nocreat("symbol file");
+			}
+			SYMFILE = fdopen(f, "w");
 		}
 		if( rflag ){
-			relfname = "urlXXXXX";
-			mktemp(relfname);
-			RELFILE = fopen( relfname, "w" );
-			if( RELFILE == NULL ) nocreat("relocation file");
+			int f = mkstemp(relfname);
+			if( f < 0 ) nocreat("relocation file");
+			RELFILE = fdopen(f, "w");
 		}
 	}
 	if( ovlfile ){		/* building an overlay */
@@ -689,7 +689,7 @@ void afinish(){		/* clean up the a.out format module */
 
 	int		i;
 
-DEB(0,("afin fpos = %ld, relsize = %ld, symsize = %ld\n",fpos,relsize,symsize));
+DEBOUT(0,("afin fpos = %ld, relsize = %ld, symsize = %ld\n",fpos,relsize,symsize));
 	fseek( OBJOUT, fpos, 0 );	/* move to end of file */
 	fclean( fpos, 0 );
 	if( rflag ){			/* copy the relocation items */
@@ -697,14 +697,14 @@ DEB(0,("afin fpos = %ld, relsize = %ld, symsize = %ld\n",fpos,relsize,symsize));
 		RELFILE = fopen( relfname, "r" );
 		if( RELFILE == NULL ) noread("relocation file");
 		while( (i = getc(RELFILE)) != EOF ) putc( i, OBJOUT );
-		fclose( RELFILE ); RELFILE=(FILE*)0;
+		fclose( RELFILE ); // RELFILE=(FILE*)0;
 	}
 	if( !sflag ){			/* copy the symbols */
 		flushclos( SYMFILE ); SYMFILE=(FILE*)0;
 		SYMFILE = fopen( symfname, "r" );
 		if( SYMFILE == NULL ) noread("symbol file");
 		while( (i = getc(SYMFILE)) != EOF ) putc( i, OBJOUT );
-		fclose( SYMFILE ); SYMFILE=(FILE*)0;
+		fclose( SYMFILE ); // SYMFILE=(FILE*)0;
 	}
 	if( relsize || symsize || tranad ){
 		fseek( OBJOUT, 4L, 0 );
@@ -727,7 +727,7 @@ void fclean(long pos, int length) {
 	}
 	if( pos + length > hiwater ){
 		hiwater = pos + length;
-		DEB(0,("fclean: %ld + %d = %ld\n",pos,length,hiwater));
+		DEBOUT(0,("fclean: %ld + %d = %ld\n",pos,length,hiwater));
 	}
 }
 /*
@@ -772,11 +772,21 @@ void quit(int n){
 
 	if( mflag && LIST ) {fclose( LIST ); LIST=(FILE*)0;}
 	if (OBJOUT) { fclose(OBJOUT); OBJOUT = (FILE*)0; }
-	if( LOCFILE ) {fclose( LOCFILE ); LOCFILE=(FILE*)0;}
+	if( LOCFILE ) {
+		fclose( LOCFILE ); 
+		LOCFILE=(FILE*)0;
+		unlink(locfname); 
+		locfname[0] = 0;
+	}
 	fclose( stdout );
-	if( symfname ) {unlink( symfname ); symfname=(char*)0;}
-	if( relfname ) {unlink( relfname ); relfname=(char*)0;}
-	if( locfname ) {unlink( locfname ); locfname=(char*)0;}
+	if (SYMFILE) {
+		unlink(symfname);
+		symfname[0] = 0;
+	}
+	if (RELFILE) {
+		unlink(relfname);
+		relfname[0] = 0;
+	}
 	if( (n == BADEXIT || n == FATEXIT) && objfile ){
 		if( verbose ) printf("removing %s\n",objfile);
 		unlink( objfile );

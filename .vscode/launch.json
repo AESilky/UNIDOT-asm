@@ -49,6 +49,18 @@
 		"preLaunchTask": "Build ULINK"
 	},
 	{
+		"name": "ulink ZED Minimal",
+		"type": "cppdbg",
+		"request": "launch",
+		"cwd": "${env:PROJ_ROOT}/sd-zmb/fw/minimum",
+		"program": "${workspaceFolder}/src/ulink/ulink",
+		"args": [
+			"-fminimum.lnk",
+		],
+		"miDebuggerPath": "/usr/bin/gdb",
+		"preLaunchTask": "Build ULINK"
+	},
+	{
 		"name": "mkpdtab",
 		"type": "cppdbg",
 		"request": "launch",

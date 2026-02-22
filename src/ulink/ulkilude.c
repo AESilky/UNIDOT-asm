@@ -90,7 +90,7 @@ void interlude(){
 
 	/* Find any global symbols which are still undefined.  */
 
-DEB(0,("INTERLUDE\n"));
+DEBOUT(0,("INTERLUDE\n"));
 
 	if( proctype[0] && strcmp(proctype,"nscbcp") == 0 )
 		codadu = absadu = 16, datadu = 8;
@@ -152,14 +152,14 @@ DEB(0,("INTERLUDE\n"));
 		sep->se_cum = 0;	/* reset size of this section	*/
 		sep->se_mod = 0;	/* reset size of this section	*/
 	}
-DEB(0,("INTERLUDE end\n"));
+DEBOUT(0,("INTERLUDE end\n"));
 }
 
 void afmtstt() {
 
 	section_t	*sep;
 	int		i;
-	long	l;
+	long		l;
 
 	/* start off the aformat output file		*/
 
@@ -188,7 +188,7 @@ void afmtstt() {
 		}
 		along( l, OBJOUT );		/* size of section	*/
 		along( sep->se_val, OBJOUT );	/* loc of sect		*/
-	DEB(0,("Section: %2d %8lx %8lx %8lx %s (%d)\n",
+	DEBOUT(0,("Section: %2d %8lx %8lx %8lx %s (%d)\n",
 		i,sep->se_fpos,sep->se_val,l,sep->se_sym->sy_str,
 		sep->se_sym->sy_rel & 0xff));
 	}
@@ -524,7 +524,7 @@ tiptop:
 
 	/* Take care of alignment and extent constraints.  */
 
-	DEB(0,("%d Section('%s') base is %lx\n",
+	DEBOUT(0,("%d Section('%s') base is %lx\n",
 		sep->se_sym->sy_rel & 0xff, sep->se_sym->sy_str, base));
 
 	i = sep->se_ext;
@@ -558,7 +558,7 @@ tiptop:
 		top = base + sep->se_cum;
 	}
 	if( split && !(sep->se_atr & USENOX) ) ctop = top; else dtop = top;
-	DEB(0,("ctop is %lx, dtop is %lx\n",ctop,dtop));
+	DEBOUT(0,("ctop is %lx, dtop is %lx\n",ctop,dtop));
 	if( sep->se_val == xbase && xbase != base )
 error("47 Location for sect %s does not meet alignment/extent constraints",
 			sep->se_sym->sy_str);
@@ -576,7 +576,7 @@ error("47 Location for sect %s does not meet alignment/extent constraints",
 	if( rflag && !afmt )	sep->se_val = 0; /* start at zero */
 		else		sep->se_atr |= USEFIX;
 
-	DEB(0,("\tInterlude SEC base %lx cum %lx\n",base,sep->se_cum));
+	DEBOUT(0,("\tInterlude SEC base %lx cum %lx\n",base,sep->se_cum));
 	if( sep->se_atr & USEXTD1 ){
 		lsep = sep;
 		sep = sectab[sep->se_xtd & 0xff];

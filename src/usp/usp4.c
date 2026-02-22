@@ -111,14 +111,14 @@ long	lseek();
 int	_iomode = 0;
 #endif
 
-/*DEB*/char *sy(fl,sym){
+/*DEBOUT*/char *sy(fl,sym){
 static char sem[8];
 sym &= 0xff;
 if( fl & SEM ){ sprintf(sem,"#%d",sym & 0xff); return sem; }
 if( fl & NT ) return dict[sym].dstring+string;
 return termtop[sym].dstring+string;
 }
-/*DEB end*/
+/*DEBOUT end*/
 
 intr(){ fprintf(stderr,"usp4 interrupt\n"); rmfiles(); }
 

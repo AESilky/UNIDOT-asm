@@ -301,7 +301,7 @@ void main(int argc, char** argv) {
 	nilst->st_stg[0] = 0;		/* make it really nil	*/
 	nest = allocst( "1" );		/* make up one st	*/
 	nest->st_stg[0] = 0;		/* make it really nil	*/
-/*DEB*/if(debug>1){
+/*DEBOUT*/if(debug>1){
 	fprintf(stderr,"nilst = %o st = <%s>",nilst,nilst->st_stg);
 	fprintf(stderr,"nest = %o st = <%s>",nest,nest->st_stg);
 }
@@ -412,7 +412,7 @@ void gettable() {
 		}
 	}
 	format[fx] = 0;
-/*DEB*/if(debug)fprintf(stderr,"format for %c is %s\n",tabchar+'A',format);
+/*DEBOUT*/if(debug)fprintf(stderr,"format for %c is %s\n",tabchar+'A',format);
 	for(;;){
 		if( !getaline() )goto done;
 		if( line[0] == 0 ) continue;
@@ -430,8 +430,8 @@ void gettable() {
 			curfld++;
 		}
 		if( curfld ){
-/*DEB*/if(debug>1)fprintf(stderr,"line %d, ord %d has %d fields\n",
-/*DEB*/		lineno,(int)ordinal,curfld);
+/*DEBOUT*/if(debug>1)fprintf(stderr,"line %d, ord %d has %d fields\n",
+/*DEBOUT*/		lineno,(int)ordinal,curfld);
 			lnp = (LN *)malloc(sizeof(LN)+(curfld-1)*sizeof(ST *));
 			lnp->ln_cnt = curfld;
 			for( i=0; i<curfld; i++ )
@@ -455,8 +455,8 @@ void gettable() {
 		}
 	}
 done:	at[tabchar].at_lcnt = olp - olps;
-/*DEB*/if(debug)fprintf(stderr,"table %c: %d lines\n",
-/*DEB*/		tabchar+'A',at[tabchar].at_lcnt);
+/*DEBOUT*/if(debug)fprintf(stderr,"table %c: %d lines\n",
+/*DEBOUT*/		tabchar+'A',at[tabchar].at_lcnt);
 	lnp = (LN *)malloc(sizeof(LN)-sizeof(ST *));
 	lnp->ln_cnt = -1;
 	olp->ol_ln = lnp;
@@ -605,7 +605,7 @@ char* resolveid(char* s, LN* thisln, int gflg) {
 	int	i;
 	int	j;
 
-/*DEB*/if(debug>4)fprintf(stderr,"resolveid( %s, %n )\n",s,thisln);
+/*DEBOUT*/if(debug>4)fprintf(stderr,"resolveid( %s, %n )\n",s,thisln);
 	globst = nest;
 	for(;;){
 
@@ -877,7 +877,7 @@ char *xlate(char *s, LN *thisln ) {
 
 	int	i;
 
-/*DEB*/if(debug>5)fprintf(stderr,"xlate( %s, - )\n",s);
+/*DEBOUT*/if(debug>5)fprintf(stderr,"xlate( %s, - )\n",s);
 	switch( i = *s++ ){
 case 'c':	s = expr( s, thisln, 0 );
 		i = exprval & 0xff;
@@ -1094,7 +1094,7 @@ trail:	*fp = 0;
 		/* note: preceding is to distinguish between fields not
 		  on line and those explicitly null */
 
-/*DEB*/if(debug > 4)fprintf(stderr,"field returns: <%s>\n",field);
+/*DEBOUT*/if(debug > 4)fprintf(stderr,"field returns: <%s>\n",field);
 
 	if( field[0] == '-' && field[1] == 0 ){
 		if( f == 'E' ||
@@ -1151,7 +1151,7 @@ int getaline() {
 		*p++ = i;
 	}
 	*p = 0;
-/*DEB*/if(debug>3)fprintf(stderr,"%d	%s\n",lineno,line);
+/*DEBOUT*/if(debug>3)fprintf(stderr,"%d	%s\n",lineno,line);
 	if( line[0] == ';' ) line[0] = 0;
 	return 1;
 }
