@@ -319,7 +319,7 @@ void szyient( ushort inc, ushort rel, long val ) {
 	szp->szincsect = rel;
 	szp->szincloc = val;
 	szyix++;
-/*DEB*/	for( szp = szyitab; szp < &szyitab[szyix-1]; szp++ ){
+/*DEBOUT*/	for( szp = szyitab; szp < &szyitab[szyix-1]; szp++ ){
 		if( szp[0].szincsect > szp[1].szincsect ||
 		    szp[0].szincsect == szp[1].szincsect &&
 		    szp[0].szincloc > szp[1].szincloc ){
@@ -333,7 +333,7 @@ int szbump(ushort rel, long val) {
 #ifdef BIGDEBUG
 	int n;
 	n = xszbump(rel,val);
-/*DEB*/if(debug>0)printf("szbump( %d, %lx ) returns %d\n",rel,val,n);
+/*DEBOUT*/if(debug>0)printf("szbump( %d, %lx ) returns %d\n",rel,val,n);
 	return n;
 }
 xszbump(ushort rel, long val) {

@@ -72,14 +72,14 @@ void obglo(){
 	int		i;
 	int		j;
 
-	DEB(0,("\tOBGLO pass %d \n",pass2+1));
+	DEBOUT(0,("\tOBGLO pass %d \n",pass2+1));
 	while( objblk.ob_ptr < objblk.ob_top ){
 		val = ogetl(&objblk );
 		rel = ogetb(&objblk );
 		syp = sylook( ogets(&objblk ));
 
 		if( rel == URBUND ){			/* external symbol */
-			DEB(0,("\t\tExternal ('%s')\n",syp->sy_str));
+			DEBOUT(0,("\t\tExternal ('%s')\n",syp->sy_str));
 			if( evct >= EXTSIZ ) error("F12 Too many externals" );	
 			extvec[evct++] = syp;
 			if( pass2 ){
@@ -123,7 +123,7 @@ void obglo(){
 			continue;
 		}
 	
-		DEB(0,("\t\tGlobal ('%s')\n",syp->sy_str));
+		DEBOUT(0,("\t\tGlobal ('%s')\n",syp->sy_str));
 
 		/* entry symbol */
 
@@ -164,7 +164,7 @@ void obgrp(){
 	int		grno;
 	int		i;
 
-	DEB(0,("\tOBGRP pass %d \n",pass2+1));
+	DEBOUT(0,("\tOBGRP pass %d \n",pass2+1));
 	if( pass2 ) return;
 
 	syp = sylook( ogets(&objblk ));
@@ -222,7 +222,7 @@ void object() {
 	section_t*	sep;
 	int		i;
 
-	DEB(0,("Object file '%s'\n",curfile));
+	DEBOUT(0,("Object file '%s'\n",curfile));
 	if( verbose ) printf("processing %s\n",curfile);
 	if( pass2 && LOCFILE )
 		fprintf(LOCFILE,"========== %s ============\n\n",curfile);
@@ -270,7 +270,7 @@ void object() {
 		fputc( '\n', LOCFILE );
 		nflag = 1;
 	}
-	DEB(0,("\tSizes of sections for %s\n   mod	   cum\n",curfile));
+	DEBOUT(0,("\tSizes of sections for %s\n   mod	   cum\n",curfile));
 	for( i = URBSEC; i<stct; i++ ){
 		sep = sectab[i];
 		if( sep->se_atr & USEABS ) continue;	/* absolute section */
@@ -285,7 +285,7 @@ void object() {
 				sep->se_cum = sep->se_mod;
 		} else
 			sep->se_cum += sep->se_mod;	/* normal section */
-		DEB(0,("%6lx\t%6lx\n",sep->se_mod,sep->se_cum));
+		DEBOUT(0,("%6lx\t%6lx\n",sep->se_mod,sep->se_cum));
 		sep->se_mod = 0L;
 	}
 }
@@ -299,7 +299,7 @@ void obloc() {
 	long	val;
 
 	if( !pass2 || sflag && !nflag ) return;
-	DEB(0,("\tOBLOC pass %d\n",pass2 + 1));
+	DEBOUT(0,("\tOBLOC pass %d\n",pass2 + 1));
 	while( objblk.ob_ptr < objblk.ob_top ){
 		vpt = objblk.ob_ptr;
 		val = ogetl(&objblk );
@@ -342,7 +342,7 @@ void obsec() {
 	int		osec;
 	long		ltmp;
 
-	DEB(0,("\tOBSEC pass %d\n",pass2+1));
+	DEBOUT(0,("\tOBSEC pass %d\n",pass2+1));
 	while( objblk.ob_ptr < objblk.ob_top ){
 		if( svct >= SECSIZ ) error("F14 Too many sections" );
 		aln = ogetb(&objblk );
@@ -435,7 +435,7 @@ error("F17 sect bigger than allowed (%lx)",slen);
 			}
 		}
 		if( !pass2 ) sep->se_fpos = slen;
-		DEB(0,("\t\tSECT '%s'\n",syp->sy_str));
+		DEBOUT(0,("\t\tSECT '%s'\n",syp->sy_str));
 		if( aln ){
 			if( aln > sep->se_aln ) sep->se_aln = aln;
 			i = (1 << aln) - 1;
@@ -452,7 +452,7 @@ error("F17 sect bigger than allowed (%lx)",slen);
 		    error("52 Mix of relocatable and absolute sections in %s",
 			syp->sy_str);
 		secvec[svct++] = osec;		/* move to keep count right */
-DEB(0,("sect %s is output section %d, atr is %x\n",
+DEBOUT(0,("sect %s is output section %d, atr is %x\n",
 	syp->sy_str,osec,sep->se_atr&0xffff));
 	}
 }
@@ -469,7 +469,7 @@ void fixabs(section_t* sep) {
 
 void obtra() {
 
-	DEB(0,("\tOBTRA pass %d\n",pass2 + 1));
+	DEBOUT(0,("\tOBTRA pass %d\n",pass2 + 1));
 	if( pass2 && !traflg ){
 		tranad = olodl(objblk.ob_buf) + rbase(olodw(objblk.ob_buf+4));
 		traflg = 1;
@@ -496,7 +496,7 @@ void obtxt() {
 	curoff = ogetl(&objblk );		/* in address units	*/
 	cursec = ogetb(&objblk );		/* section number	*/
 	count = ogetb(&objblk );		/* maybe more needed	*/
-	DEB(0,("\tOBTXT  (%lx, %x, %x) \n",curoff,cursec,count));
+	DEBOUT(0,("\tOBTXT  (%lx, %x, %x) \n",curoff,cursec,count));
 	if( cursec >= svct ) error("F30 Specified section not valid");
 	outsec = secvec[cursec];
 	sep = sectab[outsec];
@@ -513,7 +513,7 @@ void obtxt() {
 		sep->se_mod = top;
 		if( count ) sep->se_atr |= USEINIT; /* has been written into */
 	}
-	DEB(1,("obtxt: [%d] mod: %lx\n",outsec, sep->se_mod));
+	DEBOUT(1,("obtxt: [%d] mod: %lx\n",outsec, sep->se_mod));
 	if( !pass2 ) return;			/* no more work		*/
 	if( !count && !rflag ) return;		/* no more work		*/
 
@@ -531,7 +531,7 @@ void obtxt() {
 	ostob( gi, objblk.ob_buf+4 );
 	treloc();
 	if( afmt ){
-DEB(0,("obtxt: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
+DEBOUT(0,("obtxt: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
 	curoff,sep->se_fpos,sep->se_cum));
 		if( sep->se_atr & USEABS )
 			curoff -= sep->se_val;
@@ -565,7 +565,7 @@ void obbsz() {		/* init bss section to zeroes		*/
 	cursec = ogetb(&objblk );		/* section number	*/
 	count = ogetb(&objblk );		/* get count of adu's	*/
 	count = (count << 8) | ogetb(&objblk);
-	DEB(0,("\tOBBSZ  (%lx, %x, %x) \n",curoff,cursec,count));
+	DEBOUT(0,("\tOBBSZ  (%lx, %x, %x) \n",curoff,cursec,count));
 	if( cursec >= svct ) error("F30 Specified section not valid");
 	outsec = secvec[cursec];
 	sep = sectab[outsec];
@@ -578,7 +578,7 @@ void obbsz() {		/* init bss section to zeroes		*/
 		if( curoff < sep->se_val ) sep->se_val = curoff;
 	}
 	if( top > sep->se_mod ) sep->se_mod = top;
-	DEB(1,("bsz: [%d] mod: %lx\n",outsec, sep->se_mod));
+	DEBOUT(1,("bsz: [%d] mod: %lx\n",outsec, sep->se_mod));
 
 	if( !pass2 ) return;
 	if( curadu != 8 ) count = curadu > 8 ?
@@ -592,7 +592,7 @@ void obbsz() {		/* init bss section to zeroes		*/
 	if( sep->se_grp ) gi = grptab[sep->se_grp-1]->gr_lnk->gr_sym->sy_rel;
 	ostob( gi, objblk.ob_buf+4 );
 	if( afmt ){
-DEB(0,("obbsz: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
+DEBOUT(0,("obbsz: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
 	curoff,sep->se_fpos,sep->se_cum));
 		if( cursec == URBABS )
 			curoff -= sep->se_val;

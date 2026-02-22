@@ -225,7 +225,7 @@ char* vmwfetch(VMADR adr) {
 #ifdef VMDEBUG
 char* rfetch(n)VMADR n;{
 	char *vmr;
-/*DEB*/if(n==0)debug=9;
+/*DEBOUT*/if(n==0)debug=9;
 	if(debug)printf("rfetch( %x ) ",(unsigned int)n);
 	if( (vmr = vmtab[n>>blklog].vm_buf) == 0){
 		if(debug) printf("NOT in mem\n");
@@ -239,7 +239,7 @@ char* rfetch(n)VMADR n;{
 }
 char* wfetch(n)VMADR n;{
 	char *vmr;
-/*DEB*/if(n==0)debug=9;
+/*DEBOUT*/if(n==0)debug=9;
 	if(debug)printf("wfetch( %x ) ",(unsigned int)n);
 	if( (vmr = vmtab[n>>blklog].vm_buf) == 0){
 		if(debug) printf("NOT in mem\n");

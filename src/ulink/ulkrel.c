@@ -144,7 +144,7 @@ long rbase(uns reloc) {
 	}
 	if( URBEXT <= reloc && reloc < URBEXT+evct )		/* external */
 		return extvec[reloc-URBEXT]->sy_val;		/* JDP 06/86 */
-	DEB(0,(" Error rbase %x URBSEC %x URBEXT %x svct %x evct %x\n",
+	DEBOUT(0,(" Error rbase %x URBSEC %x URBEXT %x svct %x evct %x\n",
 		reloc, URBSEC, URBEXT, svct, evct));
 	error( "F28 Rbase relocation error, relocation key = %d",reloc);
 	return 0;
@@ -267,7 +267,7 @@ void treloc() {
 		txtstt++;			/* point to data start */
 	while( objblk.ob_ptr < objblk.ob_top ){
 		getrelitem();
-DEB(1,(" relocation(off %d, reloc %x)\n",itmoff,reloc));
+DEBOUT(1,(" relocation(off %d, reloc %x)\n",itmoff,reloc));
 		ip = relact[(reloc >> UR_SHF) & 31];
 		if( rflag ){
 			nrel = newrel();
