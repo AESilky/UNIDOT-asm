@@ -29,3 +29,5 @@ To get it to compile a few changes have been made. They are mostly around the fo
 Build the assembler from the 'uasz80' directory (it builds the common and the z80 specific part).
 Build the linker from the 'ulink' directory.
 
+2026: Added Binary (ROM) output option to ulink to directly generate a ROM image file so an additional loader
+isn't required.
