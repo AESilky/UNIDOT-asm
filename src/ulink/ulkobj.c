@@ -45,12 +45,13 @@ static char rcsid[] =
 #endif
 #include "funcdefs.h"
 
+#include <stdio.h>
 #include <string.h>
 
 
 /* Definitions (Local) */
 
-void fixabs(section_t* sep);
+void fixabs(section_t* secp);
 void obbsz();
 void obloc();
 void obpro();
@@ -72,14 +73,14 @@ void obglo(){
 	int		i;
 	int		j;
 
-	DEBOUT(0,("\tOBGLO pass %d \n",pass2+1));
+	DEBOUT(pass2 + 1, ("\tOBGLO pass %d \n", pass2 + 1));
 	while( objblk.ob_ptr < objblk.ob_top ){
 		val = ogetl(&objblk );
 		rel = ogetb(&objblk );
 		syp = sylook( ogets(&objblk ));
 
 		if( rel == URBUND ){			/* external symbol */
-			DEBOUT(0,("\t\tExternal ('%s')\n",syp->sy_str));
+			DEBOUT(pass2 + 1, ("\t\tExternal ('%s')\n", syp->sy_str));
 			if( evct >= EXTSIZ ) error("F12 Too many externals" );	
 			extvec[evct++] = syp;
 			if( pass2 ){
@@ -123,7 +124,7 @@ void obglo(){
 			continue;
 		}
 	
-		DEBOUT(0,("\t\tGlobal ('%s')\n",syp->sy_str));
+		DEBOUT(pass2 + 1, ("\t\tGlobal ('%s')\n", syp->sy_str));
 
 		/* entry symbol */
 
@@ -159,8 +160,8 @@ void obglo(){
 void obgrp(){
 
 	sytab_t	*syp;
-	GROUP	*grp;
-	GROUP	*gl;
+	group_t	*grp;
+	group_t	*gl;
 	int		grno;
 	int		i;
 
@@ -171,9 +172,9 @@ void obgrp(){
 	if( syp->sy_typ == STUND ){		/* undefined	*/
 		syp->sy_typ = STGRP;
 #ifdef STATS
-		grptab[grpx] = (GROUP *)zpalloc( sizeof(GROUP), GRPUSE );
+		grptab[grpx] = (group_t *)zpalloc( sizeof(group_t), GRPUSE );
 #else
-		grptab[grpx] = (GROUP *)zpalloc( sizeof(GROUP) );
+		grptab[grpx] = (group_t *)zpalloc( sizeof(group_t) );
 #endif
 		grptab[grpx]->gr_sym = syp;
 		syp->sy_rel = ++grpx;		/* set the group number */
@@ -195,16 +196,16 @@ void obgrp(){
 		}
 		if( grp->gr_lnk == 0 ){
 #ifdef STATS
-			grp->gr_lnk = gl=(GROUP *)zpalloc(sizeof(GROUP),GRPUSE);
+			grp->gr_lnk = gl=(group_t *)zpalloc(sizeof(group_t),GRPUSE);
 #else
-			grp->gr_lnk = gl = (GROUP *)zpalloc( sizeof(GROUP) );
+			grp->gr_lnk = gl = (group_t *)zpalloc( sizeof(group_t) );
 #endif
 		} else {
 			for( gl = grp->gr_lnk; gl->gr_lnk; gl = gl->gr_lnk );
 #ifdef STATS
-			gl->gr_lnk = (GROUP *)zpalloc( sizeof(GROUP), GRPUSE );
+			gl->gr_lnk = (group_t *)zpalloc( sizeof(group_t), GRPUSE );
 #else
-			gl->gr_lnk = (GROUP *)zpalloc( sizeof(GROUP) );
+			gl->gr_lnk = (group_t *)zpalloc( sizeof(group_t) );
 #endif
 			gl = gl->gr_lnk;
 		}
@@ -219,7 +220,7 @@ void obgrp(){
 
 void object() {
 
-	section_t*	sep;
+	section_t*	secp;
 	int		i;
 
 	DEBOUT(0,("Object file '%s'\n",curfile));
@@ -272,21 +273,21 @@ void object() {
 	}
 	DEBOUT(0,("\tSizes of sections for %s\n   mod	   cum\n",curfile));
 	for( i = URBSEC; i<stct; i++ ){
-		sep = sectab[i];
-		if( sep->se_atr & USEABS ) continue;	/* absolute section */
-		if( !pass2 && sep->se_fpos ){
-			if( sep->se_fpos != sep->se_mod)
+		secp = sectab[i];
+		if( secp->se_atr & USEABS ) continue;	/* absolute section */
+		if( !pass2 && secp->se_fpos ){
+			if( secp->se_fpos != secp->se_mod)
 	error("W48 Section '%s' length supposed to be 0x%lx, was 0x%lx",
-		sep->se_sym->sy_str,sep->se_fpos, sep->se_mod );
-			sep->se_fpos = 0;
+		secp->se_sym->sy_str,secp->se_fpos, secp->se_mod );
+			secp->se_fpos = 0;
 		}
-		if( sep->se_atr & USECOM ){		/* common section */
-			if( sep->se_mod > sep->se_cum )
-				sep->se_cum = sep->se_mod;
+		if( secp->se_atr & USECOM ){		/* common section */
+			if( secp->se_mod > secp->se_cum )
+				secp->se_cum = secp->se_mod;
 		} else
-			sep->se_cum += sep->se_mod;	/* normal section */
-		DEBOUT(0,("%6lx\t%6lx\n",sep->se_mod,sep->se_cum));
-		sep->se_mod = 0L;
+			secp->se_cum += secp->se_mod;	/* normal section */
+		DEBOUT(0,("%6lx\t%6lx\n",secp->se_mod,secp->se_cum));
+		secp->se_mod = 0L;
 	}
 }
 /* obloc - Processes a local symbols block.  */
@@ -294,8 +295,8 @@ void object() {
 void obloc() {
 
 	char	*rpt,
-			*vpt;
-	uns		rel;
+		*vpt;
+	uns	rel;
 	long	val;
 
 	if( !pass2 || sflag && !nflag ) return;
@@ -328,7 +329,7 @@ void obloc() {
 
 void obsec() {
 
-	section_t	*sep;
+	section_t	*secp;
 	sytab_t	*syp;
 	int		i;
 	int		aln;
@@ -357,48 +358,50 @@ void obsec() {
 		if( atr2 & USMWTH ) within = ogetb( &objblk );
 		if( atr2 & USMLEN ) slen = ogetl( &objblk );
 		if( atr & USENOX ){		/* data section		*/
+			if (debug > 1 && pass2 && *syp->sy_str) printf("\t\tsect %s is a DATA section\n", syp->sy_str);
 			if( datadu == 0 ) datadu = adu;
 			i = adu - datadu;
 		} else {			/* code section		*/
+			if (debug > 1 && pass2 && *syp->sy_str) printf("\t\tsect %s is a CODE section\n", syp->sy_str);
 			if( codadu == 0 ) codadu = adu;
 			i = adu - codadu;
 		}
-		sep = selook( ogets(&objblk) );
-		syp = sep->se_sym;
+		secp = selook( ogets(&objblk) );
+		syp = secp->se_sym;
 		if( i ) error( "F15 Mix of address units, sect %s",syp->sy_str);
-		if( sep->se_adu == 0 ){
-			sep->se_adu = adu;
+		if( secp->se_adu == 0 ){
+			secp->se_adu = adu;
 			if( atr & USEFIX ){
-				fixabs( sep );
-				sep->se_atr = USEABS;
+				fixabs( secp );
+				secp->se_atr = USEABS;
 			}
 		}
-		if( absadu == 0 ) absadu = sep->se_adu;
-		if( sep->se_adu != adu )
+		if( absadu == 0 ) absadu = secp->se_adu;
+		if( secp->se_adu != adu )
 		     error( "16 Section %s has different address units",
 			    syp->sy_str);
 		if( within >= 32 ) within = 0;
-		if( sep->se_wth == 0 ) sep->se_wth = within;
-		if( within && sep->se_wth != within )
+		if( secp->se_wth == 0 ) secp->se_wth = within;
+		if( within && secp->se_wth != within )
 			error("W50 Within conflict in sect %s",syp->sy_str);
 		osec = syp->sy_rel & 0xff;
-		i = sep->se_wth;
+		i = secp->se_wth;
 		mask = (1L << i) - 1;
-wthchk:		ltmp = sep->se_cum + slen;
-		if( i && (sep->se_cum ^ ltmp) & ~mask){
+wthchk:		ltmp = secp->se_cum + slen;
+		if( i && (secp->se_cum ^ ltmp) & ~mask){
 
 			/* here the contribution of this module would
 			   cause up to span a 2**within boundary so we
 			   need to round up the current se_cum to be
 			   on a proper boundary */
 
-			if( sep->se_atr & USEXTD1 ){
-				osec = sep->se_xtd & 0xff;
-				sep = sectab[osec];
+			if( secp->se_atr & USEXTD1 ){
+				osec = secp->se_xtd & 0xff;
+				secp = sectab[osec];
 				goto wthchk;
 			}
 			if( strcmp(proctype,"z8000") )
-				sep->se_cum = (sep->se_cum | mask) + 1;
+				secp->se_cum = (secp->se_cum | mask) + 1;
 			else {
 				/* here the contribution of this module to
 				   this section will violate the within
@@ -419,50 +422,50 @@ error("F17 sect bigger than allowed (%lx)",slen);
 #else
 					(section_t *)zpalloc(sizeof(section_t));
 #endif
-					sep2->se_sym = sep->se_sym;
-					sep2->se_adu = sep->se_adu;
-					sep2->se_atr = sep->se_atr;
-					sep2->se_atr2 = sep->se_atr2;
-					sep2->se_ext = sep->se_ext;
-					sep2->se_grp = sep->se_grp;
-					sep2->se_wth = sep->se_wth;
+					sep2->se_sym = secp->se_sym;
+					sep2->se_adu = secp->se_adu;
+					sep2->se_atr = secp->se_atr;
+					sep2->se_atr2 = secp->se_atr2;
+					sep2->se_ext = secp->se_ext;
+					sep2->se_grp = secp->se_grp;
+					sep2->se_wth = secp->se_wth;
 					sep2->se_atr &= ~(USEFIX|USEABS);
-					sep->se_atr |= USEXTD1;
-					sep->se_xtd = osec = stct++;
-					sep = sep2;
-					sep->se_mod = sep->se_cum = 0;
+					secp->se_atr |= USEXTD1;
+					secp->se_xtd = osec = stct++;
+					secp = sep2;
+					secp->se_mod = secp->se_cum = 0;
 				}
 			}
 		}
-		if( !pass2 ) sep->se_fpos = slen;
+		if( !pass2 ) secp->se_fpos = slen;
 		DEBOUT(0,("\t\tSECT '%s'\n",syp->sy_str));
 		if( aln ){
-			if( aln > sep->se_aln ) sep->se_aln = aln;
+			if( aln > secp->se_aln ) secp->se_aln = aln;
 			i = (1 << aln) - 1;
-			if( sep->se_cum & i ) sep->se_cum = (sep->se_cum|i) + 1;
+			if( secp->se_cum & i ) secp->se_cum = (secp->se_cum|i) + 1;
 		}
-		if( ext < sep->se_ext ) sep->se_ext = ext;
-		sep->se_atr |= atr & (USENOX|USENOR|USENOW|USECOM);
-		sep->se_atr |= USEREF;		/* actually referenced	*/
+		if( ext < secp->se_ext ) secp->se_ext = ext;
+		secp->se_atr |= atr & (USENOX|USENOR|USENOW|USECOM);
+		secp->se_atr |= USEREF;		/* actually referenced	*/
 		if( atr &= USEFIX ){
 			atr = USEABS;
-			fixabs( sep );
+			fixabs( secp );
 		}
-		if( (sep->se_atr ^ atr) & USEABS )
+		if( (secp->se_atr ^ atr) & USEABS )
 		    error("52 Mix of relocatable and absolute sections in %s",
 			syp->sy_str);
 		secvec[svct++] = osec;		/* move to keep count right */
-DEBOUT(0,("sect %s is output section %d, atr is %x\n",
-	syp->sy_str,osec,sep->se_atr&0xffff));
+DEBOUT(0,("\t\tsect %s is output section %d, atr is %x\n",
+	syp->sy_str,osec,secp->se_atr&0xffff));
 	}
 }
 
-void fixabs(section_t* sep) {
+void fixabs(section_t* secp) {
 
-	if( sep->se_atr & USEFIX ){
+	if( secp->se_atr & USEFIX ){
 		error("W55 Absolute sections (%s) cannot be placed",
-			sep->se_sym->sy_str);
-		sep->se_atr &= ~USEFIX;
+			secp->se_sym->sy_str);
+		secp->se_atr &= ~USEFIX;
 	}
 }
 /* obtra - Processes a transfer address block.  */
@@ -485,35 +488,35 @@ void obtra() {
 
 void obtxt() {
 
-	section_t	*sep;
+	section_t	*secp;
 	int		count;
-	long	top;
+	long		top;
 	int		gi;
-	long	l;
-	char	*s;
-	char	*r;
+	long		l;
+	char		*s;
+	char		*r;
 
 	curoff = ogetl(&objblk );		/* in address units	*/
 	cursec = ogetb(&objblk );		/* section number	*/
 	count = ogetb(&objblk );		/* maybe more needed	*/
-	DEBOUT(0,("\tOBTXT  (%lx, %x, %x) \n",curoff,cursec,count));
+	DEBOUT(0,("\tOBTXT  (curoff:%lx, cursec:%x, count:%x) \n",curoff,cursec,count));
 	if( cursec >= svct ) error("F30 Specified section not valid");
 	outsec = secvec[cursec];
-	sep = sectab[outsec];
-	curadu = sep->se_adu;			/* the the address unit	*/
-	if( curadu == 0 ) sep->se_adu = curadu = 8;
+	secp = sectab[outsec];
+	curadu = secp->se_adu;			/* the address unit	*/
+	if( curadu == 0 ) secp->se_adu = curadu = 8;
 	if( curadu < 8 && count & 0x80 )
 		count = ((count & 0x7f) << 8 ) | ogetb(&objblk);
 	top = curoff+count;			/* new end of data	*/
-	if( sep->se_atr & USEABS ){
-		if( sep->se_mod == 0 ) sep->se_val = curoff;
-		if( curoff < sep->se_val ) sep->se_val = curoff;
+	if( secp->se_atr & USEABS ){
+		if( secp->se_mod == 0 ) secp->se_val = curoff;
+		if( curoff < secp->se_val ) secp->se_val = curoff;
 	}
-	if( top > sep->se_mod ){
-		sep->se_mod = top;
-		if( count ) sep->se_atr |= USEINIT; /* has been written into */
+	if( top > secp->se_mod ){
+		secp->se_mod = top;
+		if( count ) secp->se_atr |= USEINIT; /* has been written into */
 	}
-	DEBOUT(1,("obtxt: [%d] mod: %lx\n",outsec, sep->se_mod));
+	DEBOUT(1,("\t\tobtxt(P%d): outsec:%d mod:%lx\n", pass2+1, outsec, secp->se_mod));
 	if( !pass2 ) return;			/* no more work		*/
 	if( !count && !rflag ) return;		/* no more work		*/
 
@@ -526,25 +529,25 @@ void obtxt() {
 	ostol( l + curoff, objblk.ob_buf );
 	gi = URBABS;
 	if( rflag || kflag ) gi = outsec; else
-	if( split ) gi = sep->se_atr & USENOX ? 2 : 1; else
-	if( sep->se_grp ) gi = grptab[sep->se_grp-1]->gr_lnk->gr_sym->sy_rel;
+	if( split ) gi = secp->se_atr & USENOX ? 2 : 1; else
+	if( secp->se_grp ) gi = grptab[secp->se_grp-1]->gr_lnk->gr_sym->sy_rel;
 	ostob( gi, objblk.ob_buf+4 );
 	treloc();
 	if( afmt ){
-DEBOUT(0,("obtxt: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
-	curoff,sep->se_fpos,sep->se_cum));
-		if( sep->se_atr & USEABS )
-			curoff -= sep->se_val;
+DEBOUT(0,("obtxt-afmt: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
+	curoff,secp->se_fpos,secp->se_cum));
+		if( secp->se_atr & USEABS )
+			curoff -= secp->se_val;
 		else
-			curoff += sep->se_cum;
+			curoff += secp->se_cum;
 		if( curadu < 8 ){
 			curoff *= curadu;
 			if( curoff & 7 )
 				error("F32 Afmt write not byte aligned");
 		} else
 			curoff *= (curadu+7) & ~7;
-		l = sep->se_fpos + (curoff >> 3);
-		fseek( OBJOUT, l, 0 );
+		l = secp->se_fpos + (curoff >> 3);
+		fseek(OBJOUT, l, SEEK_SET);
 		fclean( l, r-s );
 		while( s < r ) putc( *s, OBJOUT ), s++;
 	} else {
@@ -555,7 +558,7 @@ DEBOUT(0,("obtxt: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
 
 void obbsz() {		/* init bss section to zeroes		*/
 
-	section_t	*sep;
+	section_t	*secp;
 	int		count;
 	long	top;
 	int		gi;
@@ -568,17 +571,17 @@ void obbsz() {		/* init bss section to zeroes		*/
 	DEBOUT(0,("\tOBBSZ  (%lx, %x, %x) \n",curoff,cursec,count));
 	if( cursec >= svct ) error("F30 Specified section not valid");
 	outsec = secvec[cursec];
-	sep = sectab[outsec];
-	curadu = sep->se_adu;			/* the the address unit	*/
+	secp = sectab[outsec];
+	curadu = secp->se_adu;			/* the the address unit	*/
 	top = curoff+count;			/* new end of data	*/
 	if( !count ) return;			/* empty		*/
-	sep->se_atr |= USEINIT;			/* has been written into */
-	if( sep->se_atr & USEABS ){
-		if( sep->se_mod == 0 ) sep->se_val = curoff;
-		if( curoff < sep->se_val ) sep->se_val = curoff;
+	secp->se_atr |= USEINIT;			/* has been written into */
+	if( secp->se_atr & USEABS ){
+		if( secp->se_mod == 0 ) secp->se_val = curoff;
+		if( curoff < secp->se_val ) secp->se_val = curoff;
 	}
-	if( top > sep->se_mod ) sep->se_mod = top;
-	DEBOUT(1,("bsz: [%d] mod: %lx\n",outsec, sep->se_mod));
+	if( top > secp->se_mod ) secp->se_mod = top;
+	DEBOUT(1,("bsz: [%d] mod: %lx\n",outsec, secp->se_mod));
 
 	if( !pass2 ) return;
 	if( curadu != 8 ) count = curadu > 8 ?
@@ -588,24 +591,24 @@ void obbsz() {		/* init bss section to zeroes		*/
 	ostol( l + curoff, objblk.ob_buf );
 	gi = URBABS;
 	if( rflag ) gi = outsec; else
-	if( split ) gi = sep->se_atr & USENOX ? 2 : 1; else
-	if( sep->se_grp ) gi = grptab[sep->se_grp-1]->gr_lnk->gr_sym->sy_rel;
+	if( split ) gi = secp->se_atr & USENOX ? 2 : 1; else
+	if( secp->se_grp ) gi = grptab[secp->se_grp-1]->gr_lnk->gr_sym->sy_rel;
 	ostob( gi, objblk.ob_buf+4 );
 	if( afmt ){
 DEBOUT(0,("obbsz: curadu = %d curoff = %ld, fpos = %ld cum = %ld\n",curadu,
-	curoff,sep->se_fpos,sep->se_cum));
+	curoff,secp->se_fpos,secp->se_cum));
 		if( cursec == URBABS )
-			curoff -= sep->se_val;
+			curoff -= secp->se_val;
 		else
-			curoff += sep->se_cum;
+			curoff += secp->se_cum;
 		if( curadu < 8 ){
 			curoff *= curadu;
 			if( curoff & 7 )
 				error("F32 Afmt write not byte aligned");
 		} else
 			curoff *= (curadu+7) & ~7;
-		l = sep->se_fpos + (curoff >> 3);
-		fseek( OBJOUT, l, 0 );
+		l = secp->se_fpos + (curoff >> 3);
+		fseek(OBJOUT, l, SEEK_SET);
 		fclean( l, count );
 		while( --count >= 0 ) putc( 0, OBJOUT );
 	} else {

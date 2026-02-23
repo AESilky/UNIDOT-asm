@@ -1,4 +1,4 @@
-struct format fmt[] = {
+format_t fmt[] = {
 /*  0*/	0x5, 0x55, 0x88, 0x0,
 	0x5, 0x61, 0xce, 0x0,
 	0xf, 0x29, 0x4a, 0x16,
@@ -111,7 +111,7 @@ struct format fmt[] = {
 	0x61, 0x0, 0xee, 0x10,
  0};
 
-struct octab opctab[] = {
+struct octab_ opctab[] = {
 	0, (void*)0x0, 1, 0, "adc",
 	0, (void*)0x3, 1, 0, "add",
 	0, (void*)0x6, 1, 0, "and",
@@ -212,7 +212,7 @@ struct octab opctab[] = {
 	0, (void*)0x21, 2, 0, ".warn",
  0,0,0,0,0};
 
-struct resw { short rw_val; char *rw_str; } rsw[] = {
+struct resw_ { short rw_val; char *rw_str; } rsw[] = {
 	0x100, "$",
 	0xe00, "b",
 	0xe00, "B",

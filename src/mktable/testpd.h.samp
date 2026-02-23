@@ -117,7 +117,7 @@ format_t fmt[] = {
 	0x61, 0x0, 0xee, 0x10,
  0};
 
-struct octab opctab[] = {
+struct octab_ opctab[] = {
 	{0, OCVAL(0x0), 1, 0, "adc"},
 	{0, OCVAL(0x3), 1, 0, "add"},
 	{0, OCVAL(0x6), 1, 0, "and"},
@@ -218,7 +218,7 @@ struct octab opctab[] = {
 	{0, OCVAL(0x21), 2, 0, ".warn"},
  {0,OCVAL(0),0,0,0 }};
 
-struct resw { short rw_val; char *rw_str; } rsw[] = {
+struct resw_ { short rw_val; char *rw_str; } rsw[] = {
 	0x100, "$",
 	0xe00, "b",
 	0xe00, "B",

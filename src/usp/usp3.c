@@ -65,20 +65,20 @@ char	*memtop;		/* top of occupied memory		*/
 char	*memlim;		/* end of acquired memory		*/
 char	obuf[BUFSIZ];		/* output buffer			*/
 
-PRODENT	*prod;			/* base of productions			*/
-PRODENT	*prodtop;		/* top of productions			*/
+prodent_t	*prod;			/* base of productions			*/
+prodent_t	*prodtop;		/* top of productions			*/
 
-SET	*hs;			/* base of headsets			*/
-SET	*hstop;			/* top of headsets			*/
+set_t	*hs;			/* base of headsets			*/
+set_t	*hstop;			/* top of headsets			*/
 
-STATE	*stab;			/* base of states			*/
+state_t	*stab;			/* base of states			*/
 #define ST(a)	((STATE *)(a))	/* cast to a state pointer	*/
 #define st(a)	((STATE *)((a) + (short *)stab))	/* stab ptr */
 #define Sx(a)	((short *)(a) - (short *)(stab))	/* stab index */
-STATE	*cstate;		/* current state being expanded		*/
-STATE	*fstate;		/* first state in list			*/
-STATE	*lstate;		/* last state in list			*/
-STATE	*stop;			/* top of states			*/
+state_t	*cstate;		/* current state being expanded		*/
+state_t	*fstate;		/* first state in list			*/
+state_t	*lstate;		/* last state in list			*/
+state_t	*stop;			/* top of states			*/
 
 int	dfile;
 int	pfile;
@@ -91,8 +91,8 @@ short	debug;			/* debug flag				*/
 short	Zflag;			/* no execl flag			*/
 short	slist;			/* stab listing flag			*/
 
-CGRP	*closure();
-CGRP	*statemove();
+cgrp_t	*closure();
+cgrp_t	*statemove();
 #ifdef msdos
 int	_iomode = 0;
 #endif
@@ -100,12 +100,12 @@ int	_iomode = 0;
 /*
    Internal function declarations. (ES)
 */
-STATE* bfs();
+state_t* bfs();
 void bsuccs(STATE* s);
 void buildhs();
 void buildstab();
-LIST* bxl(CGRP** xtab, CGRP** xtop);
-CGRP** bxs(STATE* xlp, CGRP** xtp, CGRP** xtop);
+list_t* bxl(CGRP** xtab, CGRP** xtop);
+cgrp_t** bxs(STATE* xlp, CGRP** xtp, CGRP** xtop);
 int compatible(STATE* s, STATE* t);
 void fatal(char* s, ...);
 void fhs(int nt);
@@ -123,7 +123,7 @@ void readdict();
 void readprods();
 void rmfiles();
 void scontext(CGRP* cgp, SET* csp);
-CGRP* statemove(short* a, short* b, short* lim);
+cgrp_t* statemove(short* a, short* b, short* lim);
 void writeblock(int i, char* first, char* limit);
 void writehs();
 void writestab();
@@ -196,13 +196,13 @@ case 'Z':	Zflag = 1; continue;
    pointers, as are all states.
 */
 
-STATE* bfs(){
+state_t* bfs(){
 
-	CGRP	*cgp;	/* scanning pointer			*/
-	STATE	*base;	/* pointer to the state			*/
+	cgrp_t	*cgp;	/* scanning pointer			*/
+	state_t	*base;	/* pointer to the state			*/
 	DICTENT	*dp;	/* dictionary ptr for scanning goal syms */
-	CGRP	*bot;	/* bottom config-group			*/
-	CGRP	*top;	/* top of config-groups			*/
+	cgrp_t	*bot;	/* bottom config-group			*/
+	cgrp_t	*top;	/* top of config-groups			*/
 	short		px;	/* relative productions pointer		*/
 
 	base = (STATE *) memtop;
@@ -243,15 +243,15 @@ STATE* bfs(){
 void bsuccs(STATE* s) {
 
 
-	CGRP	*cgp;	/* for scanning state			*/
-	LIST	*xlp;	/* pointer for walking through xlist	*/
-	CGRP		*ctop;	/* top of closure (in clo)		*/
-	CGRP		**xtop;	/* top of xtab				*/
-	CGRP		**xtp;	/* scan pointer for xtab		*/
-	CGRP		**rtop;	/* top of rtab				*/
-	LIST		*xlbase; /* pointer to base of transition list	*/
-	CGRP		*xtab[XSIZE];	/* transition table		*/
-	CGRP		*rtab[RSIZE];	/* reduction table		*/
+	cgrp_t	*cgp;	/* for scanning state			*/
+	list_t	*xlp;	/* pointer for walking through xlist	*/
+	cgrp_t		*ctop;	/* top of closure (in clo)		*/
+	cgrp_t		**xtop;	/* top of xtab				*/
+	cgrp_t		**xtp;	/* scan pointer for xtab		*/
+	cgrp_t		**rtop;	/* top of rtab				*/
+	list_t		*xlbase; /* pointer to base of transition list	*/
+	cgrp_t		*xtab[XSIZE];	/* transition table		*/
+	cgrp_t		*rtab[RSIZE];	/* reduction table		*/
 
 	extern		xcomp(); /* transition comparison routine	*/
 
@@ -340,12 +340,12 @@ void buildstab() {
    the skeleton has everything filled in except the xsuc field.
 */
 
-LIST* bxl(CGRP** xtab, CGRP** xtop) {
+list_t* bxl(CGRP** xtab, CGRP** xtop) {
 
 
-	LIST	*xlp;
-	PRODENT	*pp;
-	LIST	*xbase;
+	list_t	*xlp;
+	prodent_t	*pp;
+	list_t	*xbase;
 	short		f;
 	short		s;
 
@@ -378,13 +378,13 @@ LIST* bxl(CGRP** xtab, CGRP** xtop) {
    successor starts.
 */
 
-CGRP** bxs(STATE* xlp, CGRP** xtp, CGRP** xtop) {
+cgrp_t** bxs(STATE* xlp, CGRP** xtp, CGRP** xtop) {
 
 
-	CGRP	*bot;		/* bottom cgrp of new state */
-	CGRP	*top;		/* top of new state */
-	STATE	*base;		/* base of new state being built */
-	STATE	*nstate;	/* ptr to new state after possible merging */
+	cgrp_t	*bot;		/* bottom cgrp of new state */
+	cgrp_t	*top;		/* top of new state */
+	state_t	*base;		/* base of new state being built */
+	state_t	*nstate;	/* ptr to new state after possible merging */
 	short	f;		/* flags */
 	short	s;		/* transition symbol */
 	short	px;		/* index in productions */
@@ -442,10 +442,10 @@ CGRP** bxs(STATE* xlp, CGRP** xtp, CGRP** xtop) {
 int compatible(STATE* s, STATE* t) {
 
 
-	SET	*siset;
-	SET	*tiset;
-	SET	*sjset;
-	SET	*tjset;
+	set_t	*siset;
+	set_t	*tiset;
+	set_t	*sjset;
+	set_t	*tjset;
 	short	i;
 	short	j;
 	short	size;
@@ -479,7 +479,7 @@ void fhs(int nt) {
 
 
 	DICTENT	*dp;
-	PRODENT	*pp;
+	prodent_t	*pp;
 	short		px;
 	short		el;
 
@@ -527,8 +527,8 @@ void grow(){
 void listcg(CGRP* cgp) {
 
 	DICTENT	*dp;
-	PRODENT	*pp;
-	PRODENT	*dot;
+	prodent_t	*pp;
+	prodent_t	*dot;
 
 	/* first list the dotted production.  */
 
@@ -583,7 +583,7 @@ void listset(SET* s) {
 void liststate(STATE* s, CGRP* top) {
 
 
-	CGRP	*cgp;
+	cgrp_t	*cgp;
 
 	for( cgp = &s->scg[0]; cgp < top; cgp++ ) listcg( cgp );
 }
@@ -615,17 +615,17 @@ void listxl(LIST* xlp) {
 void merge(STATE* a, STATE* b) {
 
 
-	CGRP	*bp;	 /* for walking through b */
-	CGRP	*cp;	 /* for walking through c */
+	cgrp_t	*bp;	 /* for walking through b */
+	cgrp_t	*cp;	 /* for walking through c */
 	short		*c;	 /* pointer to closure area for new contexts */
-	CGRP 		*ctop;	 /* top of c */
+	cgrp_t 		*ctop;	 /* top of c */
 	short		*nct;	 /* pointer to successor new contexts */
 	short		*suc;	 /* current successor being considered */
 	short		*suctop; /* top of suc */
-	CGRP		*nctp;	 /* for walking through nct */
-	CGRP		*ncttop; /* top of nct */
+	cgrp_t		*nctp;	 /* for walking through nct */
+	cgrp_t		*ncttop; /* top of nct */
 	short		*sucp;	 /* for walking through suc */
-	LIST		*xlp;	 /* for walking through xlist */
+	list_t		*xlp;	 /* for walking through xlist */
 	short		propsym; /* special "terminal" for tracing contexts */
 	short		hflag;	 /* set iff some context was enlarged by merge*/
 
@@ -774,8 +774,8 @@ void readdict() {
 void readprods() {
 
 	lseek( pfile, 0L, 0 );
-	prod = (PRODENT *)readblock( pfile );		/* productions */
-	prodtop = (PRODENT *)memtop;		/* top of productions */
+	prod = (prodent_t *)readblock( pfile );		/* productions */
+	prodtop = (prodent_t *)memtop;		/* top of productions */
 }
 
 /*
@@ -787,7 +787,7 @@ void readprods() {
 void scontext(CGRP* cgp, SET* csp) {
 
 
-	PRODENT	*pp;
+	prodent_t	*pp;
 	int		el;
 
 	clearset( csp );
@@ -815,7 +815,7 @@ void scontext(CGRP* cgp, SET* csp) {
    statemove - moves a state nucleus from one place to another.
 */
 
-CGRP* statemove(short* a, short* b, short* lim) {
+cgrp_t* statemove(short* a, short* b, short* lim) {
 
 
 	short	*top;
@@ -874,8 +874,8 @@ void writestab() {
 void xcomp(CGRP** a, CGRP** b) {
 
 
-	PRODENT	*app;
-	PRODENT	*bpp;
+	prodent_t	*app;
+	prodent_t	*bpp;
 	int		r;
 
 	app = &prod[(*a)->cpp];

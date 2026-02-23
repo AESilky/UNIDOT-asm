@@ -173,7 +173,7 @@ void gettab() {
 		val = fx;
 		if( toktyp != TKEOL ) fatal("optab");
 	}
-	if( toktyp != TKEOL ) fatal("optab sep");
+	if( toktyp != TKEOL ) fatal("optab secp");
 	while( token() == TKCON ){		/* read assembler directives */
 		val = v;
 		while( token() == TKSPC ){	/* read directive mnemonics */
@@ -186,7 +186,7 @@ void gettab() {
 		}
 		if( toktyp != TKEOL ) fatal("dir");
 	}
-	if( toktyp != TKEOL ) fatal("dir sep");
+	if( toktyp != TKEOL ) fatal("dir secp");
 	while( token() == TKCON ){		/* read predefined symbols */
 		val = v;
 		while( token() == TKSPC ){	/* read symbol mnemonics */
@@ -232,7 +232,7 @@ void puttab() {
 	int	j;
 	unsigned v;
 
-	printf("struct format fmt[] = {\n");
+	printf("struct format_ fmt[] = {\n");
 	for( i=0; i<fx; i++ ){
 		if( i%10 == 0 ) printf("/*%3d*/",i);
 		for( j=0; j<fn; j++ ){
@@ -246,7 +246,7 @@ void puttab() {
 
 	/* now output the opcode table */
 
-	printf("struct octab opctab[] = {\n");
+	printf("struct octab_ opctab[] = {\n");
 	for( i=1; i<ox; i++ )
 		printf("	0, 0x%x, %d, 0, \"%s\",\n",
 			o[i].op_v,o[i].op_t,o[i].op_s);
@@ -254,7 +254,7 @@ void puttab() {
 
 	/* now print the reserved words */
 
-	printf("struct resw { short rw_val; char *rw_str; } rsw[] = {\n");
+	printf("struct resw_ { short rw_val; char *rw_str; } rsw[] = {\n");
 	for( i=0; i<sx; i++ )
 		printf("	0x%x, \"%s\",\n",s[i].sy_v,s[i].sy_s);
 	printf("0,0};\n");

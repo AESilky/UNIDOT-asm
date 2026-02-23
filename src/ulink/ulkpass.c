@@ -67,7 +67,7 @@ void dopass(int filex, char** files) {
 
 	if( OVLYFILE ){		/* building an overlay */
 		ovlnum = 0;
-		fseek( OVLYFILE, 0L, 0 );
+		fseek(OVLYFILE, 0L, SEEK_SET);
 		for(;;){
 			sp = line;
 			while( (i = getc(OVLYFILE)) != '\n' ){
@@ -122,7 +122,7 @@ void ovlctl(char* s) {
 
 	int		i;
 	char	*p;
-	section_t	*sep;
+	section_t	*secp;
 	int		j;
 
 	if( afmt ) error("F18 no overlay in a.out format");
@@ -140,12 +140,12 @@ void ovlctl(char* s) {
 		while( *s == ' ' ) s++;
 		if( *s == 0 ){
 			if( i && pass2 ){		/* new overlay */
-				sep = selook( "text" );	/* KLUDGE */
+				secp = selook( "text" );	/* KLUDGE */
 				objblk.ob_type = 0;
 				oflush();
 				objblk.ob_type = UOBOVL;
 				oputb( i );
-				oputl( sep->se_val );
+				oputl( secp->se_val );
 				oflush();
 			}
 			return;
@@ -176,7 +176,7 @@ void library() {		/* simply reads OBJIN - RMM */
 
 	do {
 		changed = 0;
-		fseek( OBJIN, 0L, 0 );	/* M000 didn't have third field */
+		fseek(OBJIN, 0L, SEEK_SET);	/* M000 didn't have third field */
 		/* first read library start block */
 		if( ofill(&libblk, OBJIN ) != UOBLST )
 			error("F19 Bad library read");
@@ -191,11 +191,11 @@ void library() {		/* simply reads OBJIN - RMM */
 				    stp->sy_atr & SAUP2 :
 				    stp->sy_typ == STUND)){
 					libpos = ftell( OBJIN );
-					fseek( OBJIN, off, 0 );
+					fseek(OBJIN, off, SEEK_SET);
 					ofill(&objblk, OBJIN );
 					object();
 					changed = 1;
-					fseek( OBJIN, libpos, 0 );
+					fseek(OBJIN, libpos, SEEK_SET);
 					break;
 				}
 			}

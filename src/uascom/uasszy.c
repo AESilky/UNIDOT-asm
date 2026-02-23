@@ -78,7 +78,7 @@ static vlsiz_t	**szevlpt;
 */
 
 #define SZISIZ	32
-static struct szyincrs {
+static struct szyincrs_ {
 	ushort	szincval;
 	ushort	szincsect;
 	long	szincloc;
@@ -127,7 +127,7 @@ static short	szyix;
 
 void szyinit(vlsiz_t** vltp) {
 	szevlpt = vltp;
-	BDEB(1,("szyinit: %o %o %o %o %o\n",
+	DEBOUT(1,("szyinit: %o %o %o %o %o\n",
 		vltp,vltp[0],vltp[1],vltp[2],vltp[3]));
 }
 
@@ -146,7 +146,7 @@ void szyentry( sdirel, sdilc, tgt, vltabx, vldefined )
 	szytab_t		*szyp;
 	szyent_t		*szep;
 
-	BDEB(1,("szentry( %d, %ld, %ld, %d, %d )\n",sdirel,
+	DEBOUT(1,("szentry( %d, %ld, %ld, %d, %d )\n",sdirel,
 		(long)sdilc,(long)tgt,vltabx,vldefined));
 	if( szyhead == 0 ) szyhead = szycur = (szytab_t *)palloc( BUFSIZ );
 	szyp = szycur;
@@ -164,6 +164,7 @@ void szyentry( sdirel, sdilc, tgt, vltabx, vldefined )
 	szep->sze_tgt = tgt;
 }
 
+uns xsznext(); // for DEBUG
 uns szynext(){
 #ifdef BIGDEBUG
 	int	i;
@@ -173,7 +174,7 @@ uns szynext(){
 	printf(" returns %d\n",i);
 	return i;
 }
-xsznext(){
+uns xsznext(){
 #endif
 
 	szytab_t		*szyp;
@@ -192,7 +193,7 @@ xsznext(){
 		szyp = szycur;
 	}
 	szep = &szyp->szy_sze[szenxt++];
-	BDEB(1,(" flg %x lc %d tgt %d\n",szep->sze_flg,
+	DEBOUT(1,(" flg %x lc %d tgt %d\n",szep->sze_flg,
 		(int)szep->sze_lc, (int)szep->sze_tgt));
 	return (szep->sze_flg >> 12) & 0x7;
 }
@@ -221,9 +222,9 @@ void szyprocess(){
 
 top:	again = 0;
 	cx = 0;
-	BDEB(0,("szprocess\n"));
+	DEBOUT(0,("szprocess\n"));
 	for( szycur = szyhead; szycur; szycur = szyp->szy_lnk ){
-	BDEB(0,("	szprocess szycur = %x\n",szycur));
+	DEBOUT(0,("	szprocess szycur = %x\n",szycur));
 		szyp = szycur;
 		for( i=0; i<szyp->szy_cnt; i++ ){
 			szep = &szyp->szy_sze[i];
@@ -248,11 +249,12 @@ top:	again = 0;
 		}
 	}
 	if( szyix ) szesyinc();
-	BDEB(0,("szprocess end: again = %d\n",again));
+	DEBOUT(0,("szprocess end: again = %d\n",again));
 	if( again ) goto top;
 	szycur = 0;
 }
 
+int xszecheck(szyent_t* szep); // for DEBUG
 int szecheck(szyent_t* szep) {
 #ifdef BIGDEBUG
 
@@ -263,7 +265,7 @@ int szecheck(szyent_t* szep) {
 			(long)szep->sze_tgt, i );
 	return i;
 }
-xszecheck(szyent_t* szep) {
+int xszecheck(szyent_t* szep) {
 #endif
 
 	/* determine proper response to an sze entry, return 0 if
@@ -302,7 +304,7 @@ xszecheck(szyent_t* szep) {
 
 void szyient( ushort inc, ushort rel, long val ) {
 
-	struct szyincrs *szp;
+	struct szyincrs_ *szp;
 
 	/* this maintains the table in sorted order */
 	for( szp = &szyitab[szyix-1]; szp >= szyitab; szp-- ){
@@ -329,6 +331,7 @@ void szyient( ushort inc, ushort rel, long val ) {
 }
 
 
+int xszbump(ushort rel, long val); // for DEBUG
 int szbump(ushort rel, long val) {
 #ifdef BIGDEBUG
 	int n;
@@ -336,10 +339,10 @@ int szbump(ushort rel, long val) {
 /*DEBOUT*/if(debug>0)printf("szbump( %d, %lx ) returns %d\n",rel,val,n);
 	return n;
 }
-xszbump(ushort rel, long val) {
+int xszbump(ushort rel, long val) {
 #endif
-	struct szyincrs *szp;
-	struct szyincrs *szp2;
+	struct szyincrs_ *szp;
+	struct szyincrs_ *szp2;
 	long	val2;
 
 	szp2 = &szyitab[szyix];
@@ -365,11 +368,11 @@ void szesyinc(){
 	VMADR	p2;
 	numchn_t	*nmc;
 
-	BDEB(5,("szesyinc() %d entries\n",szyix));
+	DEBOUT(5,("szesyinc() %d entries\n",szyix));
 
 	/* convert the increments into absolute deltas */
 	for( h = 0; h < (1 << SHSHLOG); h++ ){
-	BDEB(0,("szesyinc() h = %d\n",h));
+	DEBOUT(0,("szesyinc() h = %d\n",h));
 		for( p = syhtab[h]; p; p = p2 ){
 			syp = (sytab_t *) rfetch( p );
 			p2 = syp->sy_lnk;
@@ -383,7 +386,7 @@ void szesyinc(){
 			n = szbump( syp->sy_rel, (long)syp->sy_val );
 			if( n == 0 ) continue;
 			syp = (sytab_t *) wfetch( p );
-BDEB(1,("symbol %s value increase from %ld to %ld\n",syp->sy_str,
+DEBOUT(1,("symbol %s value increase from %ld to %ld\n",syp->sy_str,
 	syp->sy_val, syp->sy_val+n));
 			syp->sy_val += n;
 		}

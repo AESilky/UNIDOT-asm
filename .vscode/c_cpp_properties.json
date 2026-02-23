@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**"
             ],
             "defines": [
-		"DEBUG","USEVM","BIGMEM"
+		"ALIGN=4","DEBUG","BIGDEBUG",
+		"BIGMEM","NOPD"
 	    ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",

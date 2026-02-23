@@ -88,9 +88,9 @@ DICTENT	*nontermtop = dict;		/* top of nonterminals		*/
 DICTENT	*dictop = dict;			/* top of dictionary		*/
 DICTENT	*dictlim = &dict[DICTSIZE];	/* end of dictionary		*/
 
-PRODENT	*prod;		/* pointer to base of productions data structure */
-PRODENT	*prodtop;	/* top of productions area			*/
-PRODENT	*prodlim;	/* limit of memory				*/
+prodent_t	*prod;		/* pointer to base of productions data structure */
+prodent_t	*prodtop;	/* top of productions area			*/
+prodent_t	*prodlim;	/* limit of memory				*/
 
 char	*cwtab[] ={
 	 "*end",
@@ -239,7 +239,7 @@ next:;
 
 	fprintf( stderr, "usp:\t%s \tinput is %s\n",oname,iname );
 
-	prod = prodtop = prodlim = (PRODENT *) sbrk( 0 );
+	prod = prodtop = prodlim = (prodent_t *) sbrk( 0 );
 	prodtop++;		/* avoid relative links of zero */
 	strcpy( sttop, "_|_" );
 	dlook();
@@ -366,7 +366,7 @@ int dmt( int nt ) {
 
 
 	DICTENT	*dp;
-	PRODENT	*pp;
+	prodent_t	*pp;
 	int		px;
 
 	dp = nt + termtop;		/* pointer to dictionary entry */
@@ -472,15 +472,15 @@ void markempties(){
    more.
 */
 
-PRODENT *
+prodent_t *
 newp(){
 
-	PRODENT	*pp;
+	prodent_t	*pp;
 
 	if( prodtop >= prodlim ){ /* we need more memory */
 		if( sbrk( 2048 ) == (char *)-1 )
 			fatal( "out of memory" );
-		prodlim = (PRODENT *) sbrk( 0 );
+		prodlim = (prodent_t *) sbrk( 0 );
 	}
 	pp = prodtop;
 	prodtop = pp+1;
@@ -494,7 +494,7 @@ newp(){
 void newgs(DICTENT* dp, int pos) {
 
 
-	PRODENT	*pp;
+	prodent_t	*pp;
 
 	pp = newp();
 	pp->pflags = pos;
@@ -512,7 +512,7 @@ void newgs(DICTENT* dp, int pos) {
 
 void newsem(int semno, int pos) {
 
-	PRODENT	*pp;
+	prodent_t	*pp;
 
 	pp = newp();
 	pp->pflags = pos | SEM;
@@ -807,7 +807,7 @@ void readprods(){
 void setpels(){
 
 	int		px;	/* index in prod */
-	PRODENT	*pp;	/* pointer into prod */
+	prodent_t	*pp;	/* pointer into prod */
 	DICTENT	*dp;	/* pointer into dict */
 
 	for( dp = dict; dp < termtop; dp++ ) /* first the terminals */

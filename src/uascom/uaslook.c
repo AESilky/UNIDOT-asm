@@ -46,13 +46,13 @@ static char rcsid[] =
 #endif
 
 #ifndef BIGMEM
-#define ASIDE struct aside
-ASIDE {			/* symbol lookaside table entry */
-	ASIDE	*as_lnk;		/* lru chain link */
+typedef struct aside_ aside_t;		/* ASIDE */
+struct aside_ {			/* symbol lookaside table entry */
+	aside_t	*as_lnk;		/* lru chain link */
 	VMADR	as_sym;			/* symbol table entry pointer */
 	char	as_str[SYMSIZ];		/* symbol */
 };
-static ASIDE	aspool[] = {
+static aside_t	aspool[] = {
 	{ &aspool[1] },{ &aspool[2] },{ &aspool[3] },
 	{ &aspool[4] },{ &aspool[5] },{ &aspool[6] },
 	{ &aspool[7] },{ &aspool[8] },{ &aspool[9] },
@@ -63,7 +63,7 @@ static ASIDE	aspool[] = {
 	{ &aspool[22] },{ &aspool[23] },{ &aspool[24] },
 	{ &aspool[25] },{ &aspool[26] },{ &aspool[27] },
 	{ &aspool[28] },{ &aspool[29] },{ 0 } };
-static ASIDE	*ashead = &aspool[0];
+static aside_t	*ashead = &aspool[0];
 #endif
 /*
  * oclook - Returns a pointer to the operation table entry for the
@@ -178,7 +178,7 @@ VMADR sylook(char* s) {
 
 
 #ifndef BIGMEM
-	ASIDE	*apt,
+	aside_t	*apt,
 			**lpt;
 #endif
 	sytab_t	*qp,

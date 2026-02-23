@@ -36,8 +36,8 @@ OBJ = uas.o uasdirec.o uasinit.o uasinput.o \
 
 # LAX_CC - Define to ease warnings on GCC
 LAX_CC=-Wno-pointer-to-int-cast
-# DEBUG_CC - Define to add debug symbols to executable
-DEBUG_CC=-g
+# DEBUG_CC - Define to add debug symbols to executable and enable debug output
+DEBUG_CC=-g -DBIGDEBUG
 # GCC on 64-bit Linux defines (ES)
 CFLAGS=$(LAX_CC) $(DEBUG_CC) -DNOPD -DALIGN=4 -DUSEVM -DBIGMEM
 #CFLAGS= -DNOPD -DBIGDEBUG -DDEBUG -DONECASE

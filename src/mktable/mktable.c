@@ -165,7 +165,7 @@ static char rcsid[] =
 
 	then we output the table with the form:
 
-	struct rgt rgtab[] = {
+	struct rgt_ rgtab[] = {
 	*A	%d($.1), %d($.2), %d($.3), %x($.5), %d($.4),
 		0,0,0,0,0 };
 
@@ -179,10 +179,10 @@ static char rcsid[] =
 */
 
 
-#define AT	struct at
-#define OL	struct ol
-#define LN	struct ln
-#define ST	struct st
+#define AT	struct at_
+#define OL	struct ol_
+#define LN	struct ln_
+#define ST	struct st_
 #define ORD	short		/* may be long if needed	*/
 #define OLSIZ	1024
 #define HASHSIZ	128		/* must be power of two		*/

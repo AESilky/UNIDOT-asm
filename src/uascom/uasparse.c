@@ -102,17 +102,17 @@ fatal("75 String table overflow (limit is %d characters)",STRSIZ-2);
 			return -1;
 		}
 
-BDEB(5,("push: sym=%d, val0 = %lx, val1 = %x\n",
+DEBOUT(5,("push: sym=%d, val0 = %lx, val1 = %x\n",
 			sym,iipsp->ps_val0,liipsp->ps_val1));
 
 		/* Scan the tables to determine the next action. */
 
 		scp2 = scp = scntab + *pp;
-BDEB(5,("terminal scan for %d %d ",sym,*scp & 0xff));
+DEBOUT(5,("terminal scan for %d %d ",sym,*scp & 0xff));
 		while( (i = (*scp&0xff)) != sym && i < IIESYM ) scp++;
 		if( i == IIESYM ) return -1;
 		i = pp[scp-scp2+1];
-BDEB(5,("-> %d taction yields %x\n",*scp & 0xff,i));
+DEBOUT(5,("-> %d taction yields %x\n",*scp & 0xff,i));
 
 		/* Perform a transition or start a reduction loop, depending
 		 * upon the action just found.			*/
@@ -134,11 +134,11 @@ BDEB(5,("-> %d taction yields %x\n",*scp & 0xff,i));
 			iilset = (i & IIAFLG) ? *(smp+1) : 0100000;
 #endif
 			if( (i &= 0xff) != 0 ){	/* semnum is non zero */
-BDEB(2,("semantic # %d\n",i));
+DEBOUT(2,("semantic # %d\n",i));
 				if( i >= 51 )	sem51( i );
 					else	sem01( i );
 				if( parsing == 0 ){
-BDEB(5,("iiparse returns %d\n",iilexeme.ps_sym == TKEOF ? 0 : -1));
+DEBOUT(5,("iiparse returns %d\n",iilexeme.ps_sym == TKEOF ? 0 : -1));
 					if( iilexeme.ps_sym == TKEOF )
 						return 0;
 					return -1;
@@ -149,12 +149,12 @@ BDEB(5,("iiparse returns %d\n",iilexeme.ps_sym == TKEOF ? 0 : -1));
 #endif
 			}
 			pp = liipsp->ps_state - 1;
-BDEB(5,("non terminal scan for %d ",sym));
+DEBOUT(5,("non terminal scan for %d ",sym));
 			scp2 = scp = scntab - 1 + *pp;
 			do scp++; while( (i=(*scp&0xff)) != sym && i != IIDSYM);
 			if( i == IIDSYM )	pp = ntdflt + sym;
 				else		pp -= scp - scp2;
-BDEB(5,("-> %d ntaction returns %x\n",*scp & 0xff,*pp));
+DEBOUT(5,("-> %d ntaction returns %x\n",*scp & 0xff,*pp));
 			i = *pp;
 		} while( !(i & IIXFLG) );
 	}

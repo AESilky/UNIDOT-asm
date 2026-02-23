@@ -184,7 +184,7 @@ numlabscn:
 				if( c < 0 || c >= radix ) goto badcon;
 				tokval = tokval * radix + c;
 			}
-			BDEB(5,("token found con <%lx>\n",tokval));
+			DEBOUT(5,("token found con <%lx>\n",tokval));
 			return toktyp;
 badcon:			if( !notokerr ) error("83 illegal constant");
 			goto reterr;
@@ -215,7 +215,7 @@ badcon:			if( !notokerr ) error("83 illegal constant");
 					strp[-1] = ch + 'A' - 'a';
 		}
 #endif
-		BDEB(5,("token found SYM <%s>\n",tokstr));
+		DEBOUT(5,("token found SYM <%s>\n",tokstr));
 		return toktyp = TKSYM;
 	}
 	switch( ch ){
@@ -270,7 +270,7 @@ case '"':					/* quoted string	*/
 		*strp = '\0';
 		tokval = strp-tokstr;
 		tokpt = scanpt-1;
-	BDEB(0,("string: <%s>",tokstr));
+	DEBOUT(0,("token: string: <%s>",tokstr));
 		return toktyp = TKSTR;
 
 case '<':			/* <, <<, or <= */

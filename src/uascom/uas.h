@@ -110,9 +110,9 @@ extern int xscanc();
 #endif // VARS
 
 #ifdef BIGDEBUG
-#define BDEB(x,y) if(debug>x)printf y
+#define DEBOUT(x,y) if(debug>x)printf y
 #else
-#define BDEB(x,y)
+#define DEBOUT(x,y)
 #endif // BIGDEBUG
 
 	/* The following items are MACHINE SPECIFIC!!!		*/
@@ -131,10 +131,10 @@ extern int xscanc();
 #define PHNUM		128		/* number of BUFSIZ block allowed */
 #else
 #define VALN(n)		uavalloc(n)
-#define VMTAB struct vmtab
+typedef struct vmtab_ vmtab_t;		/* VMTAB */
 #define VMNUM		10		/* number of in-core buffers	*/
 #define VMCNT		256		/* number of out-core buffers	*/
-VMTAB {
+struct vmtab_ {
 	ushort	vm_flg;		/* high two bits have flags, low block # */
 	ushort	vm_lru;		/* lru indicator			*/
 	char	*vm_buf;	/* real mem ptr if not zero		*/
@@ -162,7 +162,7 @@ extern char	*wfetch();
 #ifdef BIGMEM
 GLOBL char* phyp[PHNUM] IZ;	/* in core pointers		*/
 #else
-GLOBL VMTAB	vmtab[VMCNT] IZ;	/* in core headers		*/
+GLOBL vmtab_t	vmtab[VMCNT] IZ;	/* in core headers		*/
 #endif // BIGMEM
 #else
 #define PHNUM		128		/* number of BUFSIZ block allowed */
@@ -378,58 +378,58 @@ GLOBL FILE	*ERRFIL	IZ;	/* error file				*/
 
 	/* Structure declarations & type definitions */
 
-typedef	struct chent chent_t;
-typedef struct errframe errframe_t;
-typedef struct grchain grchain_t;
-typedef struct input input_t;
-typedef struct mchain mchain_t;
-typedef struct numchn numchn_t;
-typedef struct numlab numlab_t;
-typedef	struct octab octab_t;
-typedef struct operand operand_t;
-typedef struct psframe psframe_t;
-typedef struct section section_t;
-typedef	struct sytab sytab_t;
-typedef struct szyentry szyent_t;
-typedef struct szytab szytab_t;
-typedef struct using using_t;
-typedef struct varinstr vlsiz_t;
-typedef struct xref xref_t;
+typedef	struct chent_ chent_t;
+typedef struct errframe_ errframe_t;
+typedef struct grchain_ grchain_t;
+typedef struct input_ input_t;
+typedef struct mchain_ mchain_t;
+typedef struct numchn_ numchn_t;
+typedef struct numlab_ numlab_t;
+typedef	struct octab_ octab_t;
+typedef struct operand_ operand_t;
+typedef struct psframe_ psframe_t;
+typedef struct section_ section_t;
+typedef	struct sytab_ sytab_t;
+typedef struct szyentry_ szyent_t;
+typedef struct szytab_ szytab_t;
+typedef struct using_ using_t;
+typedef struct varinstr_ vlsiz_t;
+typedef struct xref_ xref_t;
 
 	/* Structure definitions */
 
-struct grchain {
+struct grchain_ {
 	VMADR	gr_lnk;			/* next item in group list	*/
 	VMADR	gr_sym;			/* ptr to symbol		*/
 };
 
-struct mchain {
+struct mchain_ {
 	VMADR	mc_lnk;			/* link to next macro def	*/
 	VMADR	mc_def;			/* pass 1 definition		*/
 	short	mc_arg;			/* number of arguments		*/
 };
 
-struct szyentry {			/* one szymanski entry				*/
+struct szyentry_ {			/* one szymanski entry				*/
 	long	sze_lc;			/* location of vli		*/
 	uns	sze_flg;		/* flag bits			*/
 	VMADR	sze_tgt;		/* symbol table for tgt		*/
 };
 
-#define SZENO	((BUFSIZ-sizeof(szytab_t *)-sizeof(short))/sizeof(szyent_t))
+#define SZENO	((BUFSIZ-sizeof(szytab_t *)-sizeof(short))/sizeof(struct szyentry_))
 
-struct szytab {			/* table for szymanski work			*/
-	szytab_t	*szy_lnk;		/* link to next table		*/
-	short	szy_cnt;		/* number of entries		*/
-	szyent_t	szy_sze[SZENO];		/* entries			*/
+struct szytab_ {				/* table for szymanski work	*/
+	szytab_t	*szy_lnk;	/* link to next table		*/
+	short		szy_cnt;	/* number of entries		*/
+	szyent_t	szy_sze[SZENO];	/* entries			*/
 };
 
-struct using {
+struct using_ {
 	uns	us_reg;			/* symbol entry for reg		*/
 	uns	us_sect;		/* section number		*/
 	long	us_off;			/* possible offset in sect	*/
 };
 
-struct errframe {				/* save for structures			*/
+struct errframe_ {				/* save for structures			*/
 	char	*er_msg;		/* message string		*/
 	int	er_par[2];		/* message parameters		*/
 	char	er_flg;			/* warning or hard error flag	*/
@@ -438,19 +438,19 @@ struct errframe {				/* save for structures			*/
 
 #define	ER_WRN	1		/* used in er_flg to make it a warning	*/
 
-struct varinstr {			/* table for variable length instructions	*/
+struct varinstr_ {			/* table for variable length instructions	*/
 	short	vl_inc;			/* increment for this choice	*/
 	short	vl_neg;			/* negative reach (in adu's)	*/
 	short	vl_pos;			/* positive reach (in adu's)	*/
 };
 
-struct chent {			/* single-character token table entry		*/
+struct chent_ {			/* single-character token table entry		*/
 	char	ch_chr;			/* character			*/
 	char	ch_typ;			/* token type			*/
 	char	ch_val;			/* token value			*/
 };
 
-struct input {			/* input stack frame				*/
+struct input_ {			/* input stack frame				*/
 	input_t	*in_ofp;		/* pointer to previous frame	*/
 	char	in_typ;			/* frame type			*/
 	char	in_rpt;			/* repeat count			*/
@@ -473,7 +473,7 @@ struct input {			/* input stack frame				*/
 #define in_cnt in_yy.in_xx.ix_ct
 #define in_vmp in_yy.ix_vmp
 
-struct octab {			/* opcode table entry				*/
+struct octab_ {			/* opcode table entry				*/
 	octab_t	*oc_lnk;		/* link to next entry in hash chain */
 	VMADR	oc_val;			/* value of opcode		*/
 	char	oc_typ;			/* type of opcode		*/
@@ -481,7 +481,7 @@ struct octab {			/* opcode table entry				*/
 	char	oc_str[SYMSIZ];		/* opcode mnemonic string	*/
 };
 
-struct operand {		/* operand descriptor				*/
+struct operand_ {		/* operand descriptor				*/
 	long	op_cls;			/* set of classes (bit vector)	*/
 	long	op_val;			/* value of operand		*/
 	uns	op_rel;			/* relocation of operand	*/
@@ -489,7 +489,7 @@ struct operand {		/* operand descriptor				*/
 	char	*op_ptr;		/* for error messages		*/
 };
 
-struct psframe {		/* parse stack frame				*/
+struct psframe_ {		/* parse stack frame				*/
 	short	*ps_state;		/* parse state			*/
 	int	ps_sym;			/* lookahead symbol		*/
 	long	ps_val0;		/* usually subexpression value	*/
@@ -497,7 +497,7 @@ struct psframe {		/* parse stack frame				*/
 	int	ps_flg;			/* flags			*/
 };
 
-struct section {		/* section table entry				*/
+struct section_ {		/* section table entry				*/
 	VMADR	se_sym;			/* symbol table pointer		*/
 	long	se_loc;			/* location counter		*/
 	char	se_aln;			/* alignment			*/
@@ -519,7 +519,7 @@ struct section {		/* section table entry				*/
 #define SEATWITH (USMWTH<<8)		/* within byte			*/
 #define SEATSLEN (USMLEN<<8)		/* section length present	*/
 
-struct sytab {				/* symbol table entry			*/
+struct sytab_ {				/* symbol table entry			*/
 	VMADR	sy_lnk;			/* link to next hash entry	*/
 	VMADR	sy_xlk;			/* link to rear of xref chain	*/
 	VMADR	sy_val;			/* value of symbol		*/
@@ -529,7 +529,7 @@ struct sytab {				/* symbol table entry			*/
 	char	sy_str[SYMSIZ];		/* symbol mnemonic string	*/
 };
 
-struct numlab {			/* numeric label entry			*/
+struct numlab_ {			/* numeric label entry			*/
 	VMADR	nm_lnk;			/* link to next entry		*/
 	uns	nm_lab;			/* this numeric entry		*/
 	long	nm_val;			/* value of symbol		*/
@@ -539,12 +539,12 @@ struct numlab {			/* numeric label entry			*/
 	/* NOTE this structure MUST be laid out like sytab_t */
 };
 
-struct numchn {			/* chain of entries this local level	*/
+struct numchn_ {			/* chain of entries this local level	*/
 	numchn_t	*nc_lnk;		/* link to next chain		*/
 	VMADR	nc_nm[NMCCNT];		/* chains at this level		*/
 };
 
-struct xref {			/* cross reference entry			*/
+struct xref_ {			/* cross reference entry			*/
 	VMADR	xr_lnk;			/* circular link to next entry	*/
 	int	xr_pl;			/* page and line number		*/
 };
@@ -721,7 +721,7 @@ GLOBL VMADR	virtop IX((VMADR)4);		/* first unused vm location	*/
 #ifndef BIGMEM
 GLOBL int	vmfd IZ;		/* virtual memory file descriptor */
 GLOBL char	*vmr IZ;		/* vm read pointer		*/
-GLOBL VMTAB	*vmw IZ;		/* vm write pointer		*/
+GLOBL vmtab_t	*vmw IZ;		/* vm write pointer		*/
 GLOBL ushort	vmlrux IZ;		/* vm lru marker		*/
 #endif // BIGMEM
 GLOBL char	vmrq IZ;		/* vm memory request		*/

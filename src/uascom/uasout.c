@@ -130,7 +130,7 @@ void emitau(long value, uns reloc, int bits) {
 
 	/* Output to the object file without breaking up a relocatable item.  */
 
-	BDEB(1,("emitau(0x%lx,0x%x,%d)\n",value,reloc,bits));
+	DEBOUT(1,("emitau(0x%lx,0x%x,%d)\n",value,reloc,bits));
 	if( bits < 32 ) value &= (1L << bits) - 1;
 	if( !(curatr & SEATDUMY) ){
 		i = (curadu+7) >> 3;
@@ -222,7 +222,7 @@ void emitv(long value, uns reloc, int bits) {
 	    i < URBUND && sectab[i].se_atr & (USEFIX|SEATDUMY) )
 		reloc = 0;
 
-BDEB(1,("emitv(0x%lx,0x%x,%d)pv:%lx,pb:%d\n",value,reloc,bits,pendv,pendbits));
+DEBOUT(1,("emitv(0x%lx,0x%x,%d)pv:%lx,pb:%d\n",value,reloc,bits,pendv,pendbits));
 	ca = curadu;
 	if( ca < 8 ) ca = 8;
 	mca = 32 - ca;

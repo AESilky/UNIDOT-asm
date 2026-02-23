@@ -68,12 +68,12 @@
  * Structure declarations.
  */
 
-struct	format {		/* instruction format table entry */
+struct	format_ {		/* instruction format table entry */
 	char	fm_op[OPMAX];		/* operand descriptions */
 	char	fm_skel;		/* opcode skeleton word */
 	char	fm_flg;			/* flags */
 };
-typedef struct format format_t;
+typedef struct format_ format_t;
 
 /*
  * Global variable declarations.

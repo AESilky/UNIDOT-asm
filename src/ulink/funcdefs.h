@@ -31,11 +31,11 @@ extern void object();
 
 extern void obrlt();
 
-extern char ofill(OBLOCK* obp, FILE* fp);
+extern char ofill(oblock_t* obp, FILE* fp);
 
 extern void oflush();
 
-extern byte ogetb(OBLOCK* obp);
+extern byte ogetb(oblock_t* obp);
 
 extern long olodl(char* p);
 

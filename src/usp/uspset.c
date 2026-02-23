@@ -58,7 +58,7 @@ berr(char* s, int b) { fatal("%s(%d)", s, b); }
 
 /* The following declarations are required by closure */
 extern DICTENT *termtop;	/* top of terminals in dictionary */
-extern PRODENT *prod;		/* base of productions */
+extern prodent_t *prod;		/* base of productions */
 
 
 /* clearbit - clears the specified bit in the specified set.  */
@@ -88,16 +88,16 @@ clearset(short* s) {
    needs to grow beyond lim, it stops and returns 0.
 */
 
-CGRP* closure(STATE* s, short* lim) {
+cgrp_t* closure(STATE* s, short* lim) {
 
 
-	CGRP	*bot;	/* first config-group of state			*/
-	CGRP	*cur;	/* config-group currently being expanded	*/
-	CGRP	*nxt;	/* next config-group to be expanded		*/
-	CGRP	*top;	/* top of the state				*/
-	CGRP	*cgp;	/* config-group being added			*/
-	SET	sct;	/* context set of immediate successors of cur	*/
-	PRODENT	*pp;	/* for walking through productions		*/
+	cgrp_t	*bot;	/* first config-group of state			*/
+	cgrp_t	*cur;	/* config-group currently being expanded	*/
+	cgrp_t	*nxt;	/* next config-group to be expanded		*/
+	cgrp_t	*top;	/* top of the state				*/
+	cgrp_t	*cgp;	/* config-group being added			*/
+	set_t	sct;	/* context set of immediate successors of cur	*/
+	prodent_t	*pp;	/* for walking through productions		*/
 	int	px;	/* relative productions pointer			*/
 
 	bot = &s->scg[0];

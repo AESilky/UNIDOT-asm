@@ -60,16 +60,16 @@ char	*sttop;		/* top of strings			*/
 char	*oname;		/* input name				*/
 
 #define LI(a)	((LIST *)(a))
-PRODENT	*prod;		/* base of productions			*/
-PRODENT	*prodtop;	/* top of productions			*/
+prodent_t	*prod;		/* base of productions			*/
+prodent_t	*prodtop;	/* top of productions			*/
 
-STATE	*stab;		/* base of state table			*/
+state_t	*stab;		/* base of state table			*/
 #define ST(a)	((STATE *)(a))	/* cast to a state pointer	*/
 #define st(a)	((STATE *)((a) + (short *)stab))	/* stab ptr */
 #define sx(a)	((short *)(a) - (short *)(stab))	/* stab index */
-STATE	*cstate;	/* pointer to current state		*/
-STATE	*fstate;	/* pointer to first state		*/
-STATE	*stop;		/* top of state table			*/
+state_t	*cstate;	/* pointer to current state		*/
+state_t	*fstate;	/* pointer to first state		*/
+state_t	*stop;		/* top of state table			*/
 
 AENT	*atab;		/* base of action table			*/
 #define AT(a)	((AENT *)(a))	/* cast to a action tbl ptr	*/
@@ -87,8 +87,8 @@ int	hfile;		/* head sets file			*/
 int	afile;		/* actions file				*/
 int	xfile;		/* alternates file			*/
 
-SET	*hs;		/* base of headsets			*/
-SET	*hstop;		/* top of headsets			*/
+set_t	*hs;		/* base of headsets			*/
+set_t	*hstop;		/* top of headsets			*/
 
 ALTENT	alttab[ALTSIZE]; /* for recording alternate sem. uses	*/
 ALTENT	*alttop;	/* top of alttab			*/
@@ -105,7 +105,7 @@ short	Zflag;		/* noexecl flag				*/
 short	debug;		/* debug flag				*/
 short	ocol;		/* output column position		*/
 
-CGRP	*closure();	/* external declaration			*/
+cgrp_t	*closure();	/* external declaration			*/
 long	lseek();
 #ifdef msdos
 int	_iomode = 0;
@@ -221,8 +221,8 @@ acomp(LIST* a, LIST* b) {
 showrsem(){
 
 	int		ax;
-	LIST	*xp;
-	LIST 	*top;
+	list_t	*xp;
+	list_t 	*top;
 
 	printf( "rsem list***************************\n" );
 
@@ -281,12 +281,12 @@ adjalts(){
 
 buildatab(){
 
-	LIST	*xp;		/* walks thru action table entries */
+	list_t	*xp;		/* walks thru action table entries */
 	AENT	*base;		/* base of current entry	*/
 	AENT	*top;		/* top of the entry		*/
 	short		csx;		/* relative state pointer	*/
 	long		fpos;		/* file position		*/
-	CGRP		*ctop;		/* pointer to top of closure	*/
+	cgrp_t		*ctop;		/* pointer to top of closure	*/
 	short		blkcnt;		/* number of blocks written	*/
 	short		clo[CLOSIZE];	/* area for closing states	*/
 
@@ -342,13 +342,13 @@ buildatab(){
 fixamb(STATE* c, CGRP* ctop) {
 
 
-	LIST	*xlp;	/* for walking through xlist		*/
-	LIST	*mp;	/* for moving xlist entries		*/
-	PRODENT	*rpp;	/* reduction production pointer		*/
-	PRODENT	*xpp;	/* transition production pointer	*/
+	list_t	*xlp;	/* for walking through xlist		*/
+	list_t	*mp;	/* for moving xlist entries		*/
+	prodent_t	*rpp;	/* reduction production pointer		*/
+	prodent_t	*xpp;	/* transition production pointer	*/
 	DICTENT	*dp;	/* for looking dictionary entries	*/
-	CGRP	*rp;	/* for scanning for reductions		*/
-	CGRP	*xp;	/* for scanning for transitions		*/
+	cgrp_t	*rp;	/* for scanning for reductions		*/
+	cgrp_t	*xp;	/* for scanning for transitions		*/
 	short		rprec;	/* precedence associated with reduce	*/
 	short		xprec;	/* precedence associated with shift	*/
 	char		sym;	/* the troublesome terminal symbol	*/
@@ -484,8 +484,8 @@ listalts(){
 listatab(){
 
 	DICTENT	*dp;
-	LIST	*xp;
-	LIST	*top;
+	list_t	*xp;
+	list_t	*top;
 	int		ax;
 
 	printf( "\naction table list:\n\n" );
@@ -522,8 +522,8 @@ listcg(CGRP* cgp) {
 
 
 	DICTENT	*dp;
-	PRODENT	*pp;
-	PRODENT	*dot;
+	prodent_t	*pp;
+	prodent_t	*dot;
 
 	/* first list the dotted production.  */
 
@@ -578,7 +578,7 @@ listset(SET* s) {
 liststate(STATE* s, CGRP* top) {
 
 
-	CGRP	*cgp;
+	cgrp_t	*cgp;
 
 	for( cgp = &s->scg[0]; cgp < top; cgp++ ) listcg( cgp );
 }
@@ -592,10 +592,10 @@ liststate(STATE* s, CGRP* top) {
 makeact(STATE* c, STATE* ctop) {
 
 
-	PRODENT	*rpp;
-	LIST	*xlp;
-	LIST	*top;
-	CGRP	*rp;
+	prodent_t	*rpp;
+	list_t	*xlp;
+	list_t	*top;
+	cgrp_t	*rp;
 	AENT		*base;
 	short		*next;
 	short		sym;
@@ -668,8 +668,8 @@ makeact(STATE* c, STATE* ctop) {
 
 mkreach(){
 
-	LIST	*xp;
-	LIST	*xtop;
+	list_t	*xp;
+	list_t	*xtop;
 	int		ax;
 
 	fact->nr = BM; /* first state is reachable */
@@ -692,10 +692,10 @@ mkreach(){
 otheralts(){
 
 	ALTENT	*newalt;
-	LIST	*rp;
+	list_t	*rp;
 	ALTENT		*oldtop;
 	ALTENT		*altp;
-	LIST		*rtop;
+	list_t		*rtop;
 	short		ax;
 	char		sem;
 
@@ -792,8 +792,8 @@ readhs(){
 readprods(){
 
 	lseek( pfile, 0L, 0 );
-	prod = (PRODENT *)readblock( pfile );		/* productions */
-	prodtop = (PRODENT *)memtop;			/* top of productions */
+	prod = (prodent_t *)readblock( pfile );		/* productions */
+	prodtop = (prodent_t *)memtop;			/* top of productions */
 }
 
 readstab(){
@@ -811,11 +811,11 @@ readstab(){
 
 recalts(){
 
-	LIST	*rp;
-	LIST	*sp;
+	list_t	*rp;
+	list_t	*sp;
 	int		ax;
 	int		dlp;
-	LIST		*rtop;
+	list_t		*rtop;
 	char		lp;
 	char		sem;
 	char		spanerr;
@@ -874,11 +874,11 @@ recalts(){
 
 rmchain(){
 
-	LIST	*rp;
-	LIST	*xp;
+	list_t	*rp;
+	list_t	*xp;
 			ax;
-	LIST		*base;
-	LIST		*top;
+	list_t		*base;
+	list_t		*top;
 
 	ax = Ax(fact);
 	do {
@@ -913,12 +913,12 @@ rmchain(){
 
 rmdupr(){
 
-	LIST	*rp;
-	LIST	*sp;
-	LIST	*mp;
+	list_t	*rp;
+	list_t	*sp;
+	list_t	*mp;
 	int		ax;
-	LIST		*rtop;
-	LIST		*top;
+	list_t		*rtop;
+	list_t		*top;
 	char		sym;
 	char		sem;
 
@@ -963,12 +963,12 @@ rmdupr(){
 
 rmlr0(){
 
-	LIST	*xp;
-	LIST	*rp;
+	list_t	*xp;
+	list_t	*rp;
 	int		ax;
 	AENT		*suc;
-	LIST		*xtop;
-	LIST		*rtop;
+	list_t		*xtop;
+	list_t		*rtop;
 	char		f;
 	char		lp;
 	char		sem;
@@ -1006,7 +1006,7 @@ rmlr0(){
 scontext(CGRP* cgp, SET* csp) {
 
 
-	PRODENT	*pp;
+	prodent_t	*pp;
 	int		el;
 
 	clearset( csp );

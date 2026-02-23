@@ -48,7 +48,7 @@ static char rcsid[]=
 
 unsigned m_addr;
 
-char ofill(OBLOCK* obp, FILE* fp) {
+char ofill(oblock_t* obp, FILE* fp) {
 
 
 	obp->ob_type = (char) getc( fp );
@@ -58,9 +58,10 @@ char ofill(OBLOCK* obp, FILE* fp) {
 		*obp->ob_ptr = (char) getc( fp );
 	obp->ob_ptr = obp->ob_buf;
 
-if( debug )
-printf("%x: type %d size %x\n",m_addr,obp->ob_type,obp->ob_top - obp->ob_buf);
-	m_addr += (obp->ob_top - obp->ob_buf + 2);
+if( debug > 2 ) {
+	printf("ofill: %x: type %d size %x\n",m_addr,obp->ob_type,obp->ob_top - obp->ob_buf);
+		m_addr += (obp->ob_top - obp->ob_buf + 2);
+	}
 	return obp->ob_type;
 }
 
@@ -83,14 +84,14 @@ void oflush(){
 	objblk.ob_type = 0;
 }
 /* ogetb - Returns the next byte from the specified object buffer.  */
-byte ogetb(OBLOCK* obp) {
+byte ogetb(oblock_t* obp) {
 
 
 	return olodb(obp->ob_ptr++);
 }
 
 /* ogetl - Returns the next long word from the specified object buffer.  */
-long ogetl(OBLOCK* obp) {
+long ogetl(oblock_t* obp) {
 
 	long	l;
 
@@ -100,7 +101,7 @@ long ogetl(OBLOCK* obp) {
 }
 
 /* ogets - Returns a ptr to the next string in the specified object buffer.  */
-char* ogets(OBLOCK* obp) {
+char* ogets(oblock_t* obp) {
 
 	char	*s;
 

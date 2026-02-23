@@ -121,10 +121,10 @@ typedef unsigned short	ushort;
  * entries.  there is one entry for each grammar symbol.
 */
 
-#define DICTENT	struct dictent
+#define DICTENT	struct dictent_
 
 DICTENT {
-	short	dlink;		/* index into PRODENT table		*/
+	short	dlink;		/* index into prodent_t table		*/
 	short	dstring;	/* index into string table		*/
 	char	dbprec;		/* precedence of binary op or 0		*/
 	char	duprec;		/* precedence of unary op or 0		*/
@@ -149,8 +149,8 @@ DICTENT {
    for each use of a grammar symbol or semantic number in a production.
 */
 
-#define PRODENT struct prodent
-PRODENT {
+typedef struct prodent_ prodent_t;		/* PRODENT */
+struct prodent_ {
 	short	plink;	/* index link into PRODENT table		*/
 	char	pel;	/* dictionary index or semantic number		*/
 	char	pflags;	/* flags and position in production		*/
@@ -164,42 +164,42 @@ PRODENT {
 
 /* set - context set, stored as a bit vector */
 
-#define SET struct set
+typedef struct set_ set_t;		/* SET */
 
-SET {
+struct set_ {
 	short	sword[SETSIZE/16];
 };
 
 /* cgrp - configuration group.  consists of a pointer into a production
    and a context set */
 
-#define CGRP struct cgrp
-CGRP {
+typedef struct cgrp_ cgrp_t;		/* CGRP */
+struct cgrp_ {
 	short	cpp;		/* pointer into production */
-	SET	cset;		/* context set */
+	set_t	cset;		/* context set */
 };
 
 /* state - a header followed by one or more configuration groups */
 
-#define STATE struct state
-STATE {
+typedef struct state_ state_t;		/* STATE */
+struct state_ {
 	short	slink;		/* index into state table		*/
 	short	xlink;		/* pointer to transition list		*/
 	short	ssize;		/* number of config-groups in nucleus	*/
-	CGRP	scg[1];		/* configuration groups			*/
+	cgrp_t	scg[1];		/* configuration groups			*/
 };
 
-#define LIST union list
-#define XLIST struct xlist
-#define RLIST struct rlist
+typedef union list_ list_t;		/* LIST  */
+typedef struct xlist_ xlist_t;		/* XLIST */
+typedef struct rlist_ rlist_t;		/* RLIST */
 
-LIST {
-	XLIST {				/* xlist - transition list entry.   */
+union list_ {
+	struct xlist_ {			/* xlist - transition list entry.   */
 		char	xxsym;		/* transition symbol element number */
 		char	xxflags;	/* flags			    */
 		short	xxsuc;		/* successor state pointer	    */
 	} xxx;
-	RLIST {				/* rlist - reduction list entry.    */
+	struct rlist_ {			/* rlist - reduction list entry.    */
 		char	rrsym;		/* symbol to match		    */
 		char	rrflags;	/* flags (same as xflags)	    */
 		char	rrsem;		/* semantic routine number	    */
@@ -226,18 +226,18 @@ LIST {
 /* aent - action table entry.  a header followed by a variable number of
    xlist and rlist entries  */
 
-#define AENT struct aent
+typedef struct aent_ aent_t;		/* AENT */
 AENT {
 	short	alink;		/* linear list link */
 	char	nr;		/* number of rlist entries */
 	char	nall;		/* total number of xlist + rlist entries */
-	LIST	act[1];		/* rlist / xlist entries */
+	list_t	act[1];		/* rlist / xlist entries */
 };
 
 /* altent - alternate semantic routine use entry.  specifies a semantic
    number, its minimum left part, and a bit string of legal left parts.  */
 
-#define ALTENT struct altent
+typedef struct altent_ altent_t;		/* ALTENT */
 ALTENT {
 	char	asem;		/* semantic routine number */
 	char	alp;		/* lowest legal left part */
