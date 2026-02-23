@@ -58,7 +58,7 @@ static char rcsid[]=
 
 /* Definitions (local) */
 
-int opmatch(struct format* fmp);
+int opmatch(format_t* fmp);
 
 
 /*
@@ -83,7 +83,7 @@ char chclass[128] ={		/* Character class table */
 	I,	I,	I,	I,	I,	I,	I,	I,
 	I,	I,	I,	0,	0,	0,	0,	0,
 };
-struct	chent	chtab[] ={	/* table of single-character tokens */
+chent_t	chtab[] ={	/* table of single-character tokens */
 	{ '~', TKUNOP },{ '*', TKMULOP, TVMUL },
 	{ '/', TKMULOP, TVDIV },{ '%', TKMULOP, TVMOD },
 	{ '+', TKADDOP, TVADD },{ '-', TKADDOP, TVSUB },
@@ -101,7 +101,7 @@ char		ixiyi = 0;
 uns		ixiyr = 0;
 long		ixiyv = 0;
 
-struct	operand	optab[OPMAX] = {NULLCA};
+operand_t	optab[OPMAX] = {NULLCA};
 /*
  * direc - Processes assembler directives which are special to this
  * assembler.  Calls dircom to process other directives.
@@ -173,7 +173,7 @@ int iilex(){
  */
 
 void inops(){
-	struct operand	*opp;
+	struct operand_	*opp;
 
 	if( toktyp == TKSPC ) iilex();
 	for( opp = optab; opp < optab+OPMAX; opp++ )
@@ -199,7 +199,7 @@ void instr(VMADR fmpa) {
 	uns		r;
 	int		i;
 	char		skel;
-	struct format*	fmp = (struct format*)fmpa;
+	struct format_*	fmp = (struct format_*)fmpa;
 
 	label = *labstr ? sylook( labstr ): 0;
 	lcassign();
@@ -307,7 +307,7 @@ void instr(VMADR fmpa) {
  * in optab, 0 otherwise.
  */
 
-int opmatch(struct format* fmp) {
+int opmatch(struct format_* fmp) {
 	int	i;
 
 	for( i = 0; i < OPMAX; i++ )
@@ -321,9 +321,9 @@ int opmatch(struct format* fmp) {
 
 void predef(){
 
-	struct	format	*fmp;
-	struct	octab	*ocp;
-	struct	sytab	*syp;
+	format_t	*fmp;
+	octab_t		*ocp;
+	sytab_t		*syp;
 	int		i;
 	VMADR	val;
 	extern char	objsuf[], lstsuf[];
@@ -341,7 +341,7 @@ void predef(){
 		val = (int) phytop;
 		for(;;){			/* read format table entries */
 
-			fmp = (struct format *)palloc(sizeof(struct format));
+			fmp = (struct format_ *)palloc(sizeof(struct format_));
 			for( i = 0; i < OPMAX; i++ ){ /* operand descriptors */
 				fmp->fm_op[i] = tokval;
 				preget( TKSPC );
@@ -431,9 +431,9 @@ void predef(){
 void sem51(int sem) {
 
 
-	struct psframe	*p,
+	struct psframe_	*p,
 			*pl;
-	struct sytab	*syp;
+	struct sytab_	*syp;
 
 	p = iipsp;
 	pl = iipspl;

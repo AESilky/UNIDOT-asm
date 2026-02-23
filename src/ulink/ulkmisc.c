@@ -95,9 +95,9 @@ void noread(char* s) {		/* cannot read file */
 
 #ifdef USEVM
 #ifdef STATS
-char* palloc(size, which) uns size; {
+char* palloc(uns size, int which) {
 #else
-char* palloc(size) uns size; {
+char* palloc(uns size) {
 #endif
 
 
@@ -132,7 +132,12 @@ again:		tmp = sbrk(i);
 	return oldtop;
 }
 #else
+#ifdef STATS
+char* palloc(uns size, int which) {
+	usestats[which] += size;
+#else
 char* palloc(uns size) {
+#endif // STATS
 	return ((char*)aligned_alloc(VMALIGN, size));
 }
 #endif // USEVM

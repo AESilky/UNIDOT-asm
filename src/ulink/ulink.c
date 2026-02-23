@@ -87,7 +87,7 @@ void linkspec(char* lnkfile);
 void map();
 void page();
 void pent(sytab_t* syp);
-void psect(section_t* sep);
+void psect(section_t* secp);
 void usage();
 
 
@@ -97,7 +97,7 @@ void intr(){  fprintf(stderr,"INTERRUPT!\n"); quit( FATEXIT ); }
 
 void main(int argc, char* argv[], char* env[]) {
 
-	section_t	*sep;
+	section_t	*secp;
 
 #ifdef vms
 	if( signal( SIGINT, SIG_IGN ) == SIG_DFL )
@@ -197,13 +197,13 @@ void main(int argc, char* argv[], char* env[]) {
 	}
 	if( verbose ) printf("pass1:\n");
 #ifdef STATS
-	sectab[URBABS] = sep = (section_t *)zpalloc( sizeof(section_t), SECUSE );
+	sectab[URBABS] = secp = (section_t *)zpalloc( sizeof(section_t), SECUSE );
 #else
-	sectab[URBABS] = sep = (section_t *)zpalloc( sizeof(section_t) );
+	sectab[URBABS] = secp = (section_t *)zpalloc( sizeof(section_t) );
 #endif
-	sep->se_sym = sylook( ".abs  " );		/* NOTE BLANKs	*/
-	sep->se_sym->sy_typ = STSEC;			/* no list	*/
-	sep->se_atr |= USEABS;				/* absolute	*/
+	secp->se_sym = sylook( ".abs  " );		/* NOTE BLANKs	*/
+	secp->se_sym->sy_typ = STSEC;			/* no list	*/
+	secp->se_atr |= USEABS;				/* absolute	*/
 #ifdef STATS
 #ifdef DEBUG
 prstats("before dopass");
@@ -218,7 +218,7 @@ prstats("before interlude");
 	interlude();
 	if( errct == 0 ){ /* no errors detected in pass 1 */
 		pass2 = 1;
-		if( verbose ) printf("pass2:\n");
+		if( verbose ) printf("PASS2:\n");
 		dopass( filex, files );
 		if( afmt ){
 			afinish();
@@ -235,12 +235,11 @@ prstats("before interlude");
 	if( undct ) printf( "%4d undefined symbols\n", undct );
 	if( mulct ) printf( "%4d multiply defined symbols\n", mulct );
 	if( errct ){
+		printf("%4d linker warnings\n", warnct);
 		printf( "%4d linker errors\n", errct );
 		quit( BADEXIT );
 	}
-	if( verbose ) printf( warnct ?
-			"%4d linker warnings\n" :
-			"no linker errors detected\n", warnct);
+	if( verbose | warnct) printf("%4d linker warnings\n  no linker errors\n", warnct);
 	quit( warnct ? wrnex : GOODEXIT );
 }
 /*
@@ -268,13 +267,22 @@ void init(int argc, char** argv) {
 		case 'A':
 		case 'a': afmt++;		/* a.out format		*/
 			  continue;
-
+		
 		case 'B':
-		case 'b': singlecol++;		/* single column map	*/
+		case 'b': binfmt++; afmt++;	/* binary (raw) format (use afmt processing for most) */
+			  sflag++;		/* no symbols either */
+			  if (*ap) {
+				fillb = scanbyte(ap);	/* fill byte specified */
+				ap = nil;
+			  }
+			  continue;
+
+		case '1': singlecol++;		/* single column map	*/
 			  continue;
 
 		case '0': if( *ap != 'd' ) usage();
 			  while( *ap++ == 'd' ) debug++;
+			  verbose++;		/* also, be verbose */
 			  ap--;
 			  continue;
 
@@ -358,7 +366,7 @@ void init(int argc, char** argv) {
 	}
 	if( i > argc ) usage();
 	if( sflag && rflag )
-		error("F94 The -s and -r options may not be used together");
+		error("F94 The -b or -s, and -r options may not be used together");
 }
 
 void linkspec( char *lnkfile ) {	/* do a link file */
@@ -408,9 +416,7 @@ void linkspec( char *lnkfile ) {	/* do a link file */
 
  * scanaddr - convert an address
  */
-
-long
-scanaddr(char* s) {
+long scanaddr(char* s) {
 
 	long	v;
 	int	c;
@@ -425,6 +431,27 @@ scanaddr(char* s) {
 	}
 	return v;
 }
+
+/*
+ * scanbyte - convert a byte
+ */
+unsigned char scanbyte(char* s) {
+
+	short	v;
+	int	c;
+
+	v = 0;
+	while ((c = *s++) != '\0') {
+		if ('0' <= c && c <= '9') c += 0 - '0'; else
+			if ('a' <= c && c <= 'f') c += 10 - 'a'; else
+				if ('A' <= c && c <= 'F') c += 10 - 'A'; else
+					error("F11 Bad byte value");
+		v = (v << 4) | c;
+	}
+	if (v > 0xff)
+		error("F11 Bad byte value");
+	return (unsigned char)v;
+}
 /*
  * locspec - Processes a location specification string.
  */
@@ -433,18 +460,18 @@ void locspec(char* s) {
 
 
 	char	*n;
-	section_t	*sep;
+	section_t	*secp;
 	char		name[128];
 
 	n = name;
 	while( *s != '\0' && *s != '=' ) *n++ = *s++;	/* copy the name */
 	*n = name[32] = NULLCA;
-	sep = selook( name );
+	secp = selook( name );
 	if( *s == '=' ){				/* read the address */
-		sep->se_val = scanaddr( s+1 );
-		sep->se_cum = 0L;
-		sep->se_mod = 0L;
-		sep->se_atr |= USEFIX;
+		secp->se_val = scanaddr( s+1 );
+		secp->se_cum = 0L;
+		secp->se_mod = 0L;
+		secp->se_atr |= USEFIX;
 	}
 }
 /*
@@ -495,30 +522,30 @@ void pent(sytab_t* syp) {	/* print a symbol entry	*/
 	fprintf( LIST, valfmt, syp->sy_val );
 }
 
-void psect(section_t* sep) {	/* print a section entry	*/
+void psect(section_t* secp) {	/* print a section entry	*/
 
 	sytab_t	*syp;
 	section_t	*sep2;
 	int		i = 0;
 
 #define SE_PRINTED 1
-	if( sep->se_atr2 & SE_PRINTED ) return;
-top:	sep->se_atr2 |= SE_PRINTED;
+	if( secp->se_atr2 & SE_PRINTED ) return;
+top:	secp->se_atr2 |= SE_PRINTED;
 	if( linect < 1 ) page();
-	syp = sep->se_sym;
+	syp = secp->se_sym;
 	if( i ) fprintf( LIST, "%-25.25s ext %2d",syp->sy_str,i);
 	   else fprintf( LIST, "%-32.32s", syp->sy_str);
 	fprintf( LIST," %8lx %8lx %8lx        %2d         %2d        %2d\n",
-		sep->se_val,
-		sep->se_val+sep->se_cum,
-		sep->se_cum,
-		sep->se_aln,
-		sep->se_ext,
-		sep->se_adu);
+		secp->se_val,
+		secp->se_val+secp->se_cum,
+		secp->se_cum,
+		secp->se_aln,
+		secp->se_ext,
+		secp->se_adu);
 	linect--;
-	if( sep->se_atr & USEXTD1 ){
+	if( secp->se_atr & USEXTD1 ){
 		i++;
-		sep = sectab[sep->se_xtd & 0xff];
+		secp = sectab[secp->se_xtd & 0xff];
 		goto top;
 	}
 }
@@ -543,7 +570,7 @@ void map(){
 	int		i;
 	sytab_t	*syp2;
 	sytab_t		*c1,*c2,*c3;	/* columns for printing */
-	section_t	*sep;
+	section_t	*secp;
 	long		curtime;
 	char		datstr[64];
 	char		timstr[16];
@@ -573,14 +600,14 @@ void map(){
 		codsep->se_val = codsep->se_cum;
 		datsep->se_val = datsep->se_cum;
 		for( i = URBSEC; i<stct; i++ ){
-			sep = sectab[i];
-			if( sep->se_atr & USEABS ) continue;
-			if( sep->se_atr & USENOX ){
-				if( sep->se_val < datsep->se_val )
-					datsep->se_val = sep->se_val;
+			secp = sectab[i];
+			if( secp->se_atr & USEABS ) continue;
+			if( secp->se_atr & USENOX ){
+				if( secp->se_val < datsep->se_val )
+					datsep->se_val = secp->se_val;
 			} else {
-				if( sep->se_val < codsep->se_val )
-					codsep->se_val = sep->se_val;
+				if( secp->se_val < codsep->se_val )
+					codsep->se_val = secp->se_val;
 			}
 		}
 		codsep->se_cum -= codsep->se_val;
@@ -589,9 +616,9 @@ void map(){
 		linect -= 2;
 		fprintf(LIST,"Sections comprising derived code section\n\n");
 		for( i = URBSEC; i<stct; i++ ){
-			sep = sectab[i];
-			if( sep->se_atr & (USEABS|USENOX) ) continue;
-			psect( sep );
+			secp = sectab[i];
+			if( secp->se_atr & (USEABS|USENOX) ) continue;
+			psect( secp );
 		}
 		bigspace(8);
 		fprintf(LIST,"Derived data section for split code/data\n\n");
@@ -599,10 +626,10 @@ void map(){
 		linect -= 2;
 		fprintf(LIST,"Sections comprising derived data section\n\n");
 		for( i = URBSEC; i<stct; i++ ){
-			sep = sectab[i];
-			if( sep->se_atr & USEABS ) continue;
-			if( !(sep->se_atr & USENOX) ) continue;
-			psect( sep );
+			secp = sectab[i];
+			if( secp->se_atr & USEABS ) continue;
+			if( !(secp->se_atr & USENOX) ) continue;
+			psect( secp );
 		}
 	}
 
@@ -690,7 +717,7 @@ void afinish(){		/* clean up the a.out format module */
 	int		i;
 
 DEBOUT(0,("afin fpos = %ld, relsize = %ld, symsize = %ld\n",fpos,relsize,symsize));
-	fseek( OBJOUT, fpos, 0 );	/* move to end of file */
+	fseek(OBJOUT, fpos, SEEK_SET);	/* move to end of file */
 	fclean( fpos, 0 );
 	if( rflag ){			/* copy the relocation items */
 		flushclos( RELFILE ); RELFILE=(FILE*)0;
@@ -706,8 +733,8 @@ DEBOUT(0,("afin fpos = %ld, relsize = %ld, symsize = %ld\n",fpos,relsize,symsize
 		while( (i = getc(SYMFILE)) != EOF ) putc( i, OBJOUT );
 		fclose( SYMFILE ); // SYMFILE=(FILE*)0;
 	}
-	if( relsize || symsize || tranad ){
-		fseek( OBJOUT, 4L, 0 );
+	if( !binfmt && (relsize || symsize || tranad) ){
+		fseek(OBJOUT, 4L, SEEK_SET);
 		along( tranad,  OBJOUT );
 		along( relsize, OBJOUT );
 		along( symsize, OBJOUT );
@@ -719,28 +746,30 @@ void fclean(long pos, int length) {
 	static long hiwater = 0;
 
 	if( hiwater < pos ){
-		fseek( OBJOUT, hiwater, 0 );
+		fseek(OBJOUT, hiwater, SEEK_SET);
+		DEBOUT(0, ("fclean fill (%02X): %ld\n", fillb, pos - hiwater));
 		while( hiwater < pos ){
-			putc( 0, OBJOUT );
+			putc( fillb, OBJOUT );
 			hiwater++;
 		}
 	}
 	if( pos + length > hiwater ){
 		hiwater = pos + length;
-		DEBOUT(0,("fclean: %ld + %d = %ld\n",pos,length,hiwater));
+		DEBOUT(0,("fclean: pos:%ld + len:%d = hiwater:%ld\n",pos,length,hiwater));
 	}
 }
-/*
- * usage - Issues a fatal error message for a command line error.
- */
 
+/*
+ * usage - Show the options. Issues a fatal error message for a command line error.
+ */
 void usage(){
 
 	copymsg(stdout);
 	printf("Usage: %s [options].. file [file]..\n",prname);
 	printf("	-a		produce image output in a.out style\n");
+	printf("        -b[n]           produce binary (raw image) output (use n for fill)\n");
 	if( !nsc ) {
-		printf("	-b		single column map file for symbols\n");
+		printf("	-1		(one) single column map file for symbols\n");
 	}
 	printf("	-f<file>	<file> is a linker control file\n");
 	printf("	-i		split I/D load\n");
@@ -754,6 +783,7 @@ void usage(){
 	printf("	-s		suppress symbol output in object\n");
 	printf("	-v		verbose option\n");
 	printf("	-y<file>	<file> is an overlay control file\n");
+	printf("        -0d[d...]       set debug level to 'd' count\n");
 	quit(GOODEXIT);
 }
 
@@ -793,13 +823,13 @@ void quit(int n){
 		objfile = (char*)0;
 	}
 #ifdef STATS
-	if( verbose || n == BADEXIT || n == FATEXIT ) prstats("at quit");
+	if( verbose || debug || n == BADEXIT || n == FATEXIT ) prstats("at quit");
 #endif
 	exit(n);
 }
 
 #ifdef STATS
-prstats(char* s) {
+void prstats(char* s) {
 
 	printf("memory stats %s  (sp = %x)\n",s,&s);
 	printf("%6ld bytes used for buffers\n",usestats[BUFUSE]);

@@ -186,7 +186,32 @@ top:	while( argn < argc ){	/* read command line arguments */
 				} else {
 					if( argn >= argc )
 						usage("no definition");
-					defines[defx++] = argv[argn++];
+					// In this case (sp between -d and sym=val)
+					// remove any '\' characters
+					defines[defx] = argv[argn++];
+					i = defx++;
+					char *s = defines[i];
+					int bs = 0;
+					int sl = 0;
+					while(*s) {
+						if (*s++ == '\\')
+							bs = 1;
+						else
+							sl++;
+					}
+					if (bs) {
+						// There are '\' characters than need to be removed
+						s = defines[i];
+						char *d = palloc(sl+1);
+						defines[i] = d;
+						while(*s) {
+							if (*s != '\\')
+								*d++ = *s++;
+							else
+								s++;
+						}
+						*d = NULLCA;
+					}
 				}
 				goto top;
 
@@ -341,6 +366,7 @@ top:	while( argn < argc ){	/* read command line arguments */
 #ifdef	STATS
 				if( *sp == 'z' ) stats = 1;
 #endif
+				verbose++;
 				continue;
 
 		case 'Z':
@@ -515,7 +541,8 @@ void defsym(char* s) {
 	if( *s == '=' ) s++; else s = "1";
 	if( defbuf[0] == 0 ) usage("no define symbol");
 	scanpt = s;
-	if( token() != TKCON ) usage("illegal define value");
+	i = token();
+	if( i != TKCON && i != TKSTR ) usage("illegal define value");
 	val = sylook(defbuf);
 	syp = (sytab_t *)wfetch(val);
 	if( syp->sy_typ != STUND ) usage("symbol %s previous defined",defbuf);
@@ -564,16 +591,17 @@ void usage(char* s, ...) {
 	copymsg(ERRFIL);
 	fprintf(ERRFIL, "Usage:  %s [options]... file\n", prname);
 	if( !strcmp(prname,"nrgpasm") || !strcmp(prname,"NRGPASM") )
-		fprintf(ERRFIL,"\t-a            absolute addressing\n");
-	fprintf(ERRFIL,"\t-d<sym>=<val> define a symbol value\n");
-	fprintf(ERRFIL,"\t-e<nnn>       set an error limit\n");
-	fprintf(ERRFIL,"\t-f<lstname>   change list file name from default to <lstname>\n");
-	fprintf(ERRFIL,"\t-h<nnn>       set page height in lines\n");
-	fprintf(ERRFIL,"\t-i<path>      set an include path\n");
-	fprintf(ERRFIL,"\t-l            produce a listing file\n");
-	fprintf(ERRFIL,"\t-m            toggle the uppercase only option\n");
-	fprintf(ERRFIL,"\t-n            do not produce an object file\n");
-	fprintf(ERRFIL,"\t-o<objname>   change object name from default to <objname>\n");
+		fprintf(ERRFIL,"\t-a              absolute addressing\n");
+	fprintf(ERRFIL,"\t-d<sym>=<val>   define a symbol value (raw)\n");
+	fprintf(ERRFIL, "\t-d <sym>=<val> define a symbol value (removes '\\')\n");
+	fprintf(ERRFIL,"\t-e<nnn>         set an error limit\n");
+	fprintf(ERRFIL,"\t-f<lstname>     change list file name from default to <lstname>\n");
+	fprintf(ERRFIL,"\t-h<nnn>         set page height in lines\n");
+	fprintf(ERRFIL,"\t-i<path>        set an include path\n");
+	fprintf(ERRFIL,"\t-l              produce a listing file\n");
+	fprintf(ERRFIL,"\t-m              toggle the uppercase only option\n");
+	fprintf(ERRFIL,"\t-n              do not produce an object file\n");
+	fprintf(ERRFIL,"\t-o<objname>     change object name from default to <objname>\n");
 #ifndef NOPD
 	fprintf(ERRFIL,"\t-p<pdfile>    set a predefinition file\n");
 #endif
@@ -588,5 +616,6 @@ void usage(char* s, ...) {
 	fprintf(ERRFIL,"\t-x            collect cross references\n");
 	fprintf(ERRFIL,"\t-xx           alternate cross reference list\n");
 	fprintf(ERRFIL,"\t-z<errfile>   errors to <errfile> and not stderr\n");
+	fprintf(ERRFIL,"\t-0d[d...]     output debug messages (more d's more output)\n");
 	quit( BADEXIT );
 }

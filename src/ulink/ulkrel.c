@@ -130,16 +130,16 @@ void getrelitem() {
 long rbase(uns reloc) {
 
 
-	section_t	*sep;
+	section_t	*secp;
 	long	base;
 
 	reloc &= URBMSK;
 	if( reloc == URBABS ) return 0L;			/* absolute */
 	if( URBSEC <= reloc && reloc < svct ){			/* section */
-		sep = sectab[secvec[reloc]&0xff];
-		if( sep->se_atr & USEABS ) return 0L;
-		base = pass2 || OVLYFILE ? sep->se_val: 0L;
-		if( !(sep->se_atr & USECOM) ) base = base + sep->se_cum;
+		secp = sectab[secvec[reloc]&0xff];
+		if( secp->se_atr & USEABS ) return 0L;
+		base = pass2 || OVLYFILE ? secp->se_val: 0L;
+		if( !(secp->se_atr & USECOM) ) base = base + secp->se_cum;
 		return base;
 	}
 	if( URBEXT <= reloc && reloc < URBEXT+evct )		/* external */
@@ -156,7 +156,7 @@ long rbase(uns reloc) {
 
 long sbase(uns reloc) {
 
-	section_t	*sep;
+	section_t	*secp;
 
 	reloc &= URBMSK;
 	if( reloc == URBABS || rflag ) return 0L;		/* absolute */
@@ -166,12 +166,12 @@ long sbase(uns reloc) {
 		reloc = extvec[ reloc-URBEXT ]->sy_rel;
 	else
 		error( "F23 Sbase relocation error, relocation key = %d",reloc);
-	sep = sectab[reloc & 0xff];
-	if( sep->se_grp ){
-		reloc = grptab[sep->se_grp-1]->gr_sym->sy_rel;
-		sep = sectab[reloc & 0xff];
+	secp = sectab[reloc & 0xff];
+	if( secp->se_grp ){
+		reloc = grptab[secp->se_grp-1]->gr_sym->sy_rel;
+		secp = sectab[reloc & 0xff];
 	}
-	return sep->se_val;
+	return secp->se_val;
 }
 
 /*
@@ -228,7 +228,7 @@ int newrel() {
 section_t* selook(char* s) {
 
 
-	section_t	*sep;
+	section_t	*secp;
 	sytab_t	*syp;
 
 	syp = sylook( s );
@@ -236,16 +236,16 @@ section_t* selook(char* s) {
 		if( stct >= SECSIZ ) error( "F21 Too many sections" );
 		syp->sy_typ = STSEC;
 		syp->sy_val = 0L;
-		if( strcmp(s, ".abs ") ){	/* not funny .abs section */
+		if( strcmp(s, ".abs ") != 0 ){	/* not the 'funny' .abs section */
 			syp->sy_rel = stct;
-			sep = sectab[stct++] =
+			secp = sectab[stct++] =
 #ifdef STATS
 				(section_t *)zpalloc(sizeof(section_t),SECUSE);
 #else
 				(section_t *)zpalloc(sizeof(section_t));
 #endif
-			sep->se_sym = syp;
-			sep->se_ext = 32;
+			secp->se_sym = syp;
+			secp->se_ext = 32;
 		}
 	}
 	if( syp->sy_typ != STSEC )
@@ -267,7 +267,7 @@ void treloc() {
 		txtstt++;			/* point to data start */
 	while( objblk.ob_ptr < objblk.ob_top ){
 		getrelitem();
-DEBOUT(1,(" relocation(off %d, reloc %x)\n",itmoff,reloc));
+DEBOUT(2,(" relocation(off %d, reloc %x)\n",itmoff,reloc));
 		ip = relact[(reloc >> UR_SHF) & 31];
 		if( rflag ){
 			nrel = newrel();
@@ -292,12 +292,12 @@ DEBOUT(1,(" relocation(off %d, reloc %x)\n",itmoff,reloc));
 }
 
 #ifdef DEBUG
-xx(int n, IACC* isp) {
+int xx(int n, IACC* isp) {
 	if( debug > 2 ){
-		fprintf(stderr," [%x]",n&0xff);
+		printf(" [%x]",n&0xff);
 		for(;isp<&istk[ISTKSIZ];isp++)
-			fprintf(stderr,"\t%lx",*isp);
-		fprintf(stderr,"\n");
+			printf("\t%lx",*isp);
+		printf("\n");
 	}
 	return n;
 }
@@ -312,6 +312,7 @@ void interp(char* ip) {
 	isp = &istk[ISTKSIZ];			/* empty stack		*/
 	itmp0 = itmp1 = 0;			/* init temporaries	*/
 #ifdef DEBUG
+	if ( debug > 2 ) printf("interp: 0x%04X\n", (int)*ip);
 	for(;;)switch( xx(i = *ip++,isp) ){
 #else
 	for(;;)switch( i = *ip++ ){
@@ -319,7 +320,7 @@ void interp(char* ip) {
 
 case A_HALT:		/* zero had always better be halt		*/
 #ifdef DEBUG
-		if( debug > 2 ) fprintf(stderr," ::\n");
+		if( debug > 2 ) printf(" A_HALT::\n");
 #endif
 		return;
 

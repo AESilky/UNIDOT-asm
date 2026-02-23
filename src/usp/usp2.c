@@ -64,8 +64,8 @@ DICTENT	*dictop;		/* top of dictionary			*/
 char	*string;		/* base of strings			*/
 char	*sttop;			/* top of strings			*/
 
-PRODENT	*prod;			/* base of productions			*/
-PRODENT	*prodtop;		/* top of productions			*/
+prodent_t	*prod;			/* base of productions			*/
+prodent_t	*prodtop;		/* top of productions			*/
 
 char	*memtop;		/* top of occupied memory		*/
 char	*memlim;		/* end of acquired memory		*/
@@ -174,7 +174,7 @@ void dumpprods(){
 
 	DICTENT	*dp,
 			*dp2;
-	PRODENT	*pp;
+	prodent_t	*pp;
 	short		px;
 	short		upel;
 	short		oldlp;
@@ -214,7 +214,7 @@ void dumpprods(){
 void dumpsem() {
 
 DICTENT	*dp;
-PRODENT	*pp;
+prodent_t	*pp;
 int		i;
 int		px;
 int		sem;
@@ -303,8 +303,8 @@ void readdict(){
 void readprods(){
 
 	lseek( pfile, 0L, 0 );
-	prod = (PRODENT *) readblock( pfile );		/* productions */
-	prodtop = (PRODENT *) memtop;			/* top of productions */
+	prod = (prodent_t *) readblock( pfile );		/* productions */
+	prodtop = (prodent_t *) memtop;			/* top of productions */
 }
 
 /*VARARGS1*/

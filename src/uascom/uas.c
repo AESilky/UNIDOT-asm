@@ -290,7 +290,7 @@ void dopass(){
 void assem1(){
 
 	laboc();
-	BDEB(1,("lc=%lx,ad=%d,pb=%d	%s\n",curloc,curadu,pendbits,sline));
+	DEBOUT(1,("lc=%lx,ad=%d,pb=%d	%s\n",curloc,curadu,pendbits,sline));
 	if( *opcstr ){ /* we have an opcode field */
 		opcode = oclook( opcstr );
 		switch( opcode->oc_typ ){
@@ -312,7 +312,7 @@ void assem1(){
 			break;
 
 		case OTMAC:	/* macro call */
-BDEB(0,("%d expanding: %s, (%d)  stack depth is %d\n",
+DEBOUT(0,("%d expanding: %s, (%d)  stack depth is %d\n",
 	llseqval,opcstr,opcode->oc_arg,(char *)infp-(char *)instk));
 			mexprint();	/* here before push	*/
 			macro( opcode->oc_val );
@@ -373,7 +373,7 @@ void assign(uns typ, long val, uns rel) {
 		tokpt = tokpt1;
 	}
 	syp = (sytab_t *) wfetch( label );
-	BDEB(1,("assign( %d, %lx, %d ): %s\n",typ,val,rel,syp->sy_str));
+	DEBOUT(1,("assign( %d, %lx, %d ): %s\n",typ,val,rel,syp->sy_str));
 	if( syp->sy_typ == STKEY || syp->sy_typ == STKEQ ){
 		if( typ != STKEY )
 			error("35 The label is in use as a keyword");
@@ -739,22 +739,22 @@ void setorg() {
 
 void setsec(uns sec) {
 
-	section_t	*sep;
+	section_t	*secp;
 
 	if( sec == cursec ) return;
 	lcalign(curadu);
-	sep = &sectab[cursec];
-	sep->se_aln = curaln;
-	sep->se_ext = curext;
-	sep->se_atr = curatr;
-	sep->se_loc = curloc;
-	sep->se_adu = curadu;
-	sep = &sectab[cursec = sec];
-	curaln = sep->se_aln;
-	curext = sep->se_ext;
-	curatr = sep->se_atr;
-	curloc = sep->se_loc;
-	curadu = sep->se_adu;
+	secp = &sectab[cursec];
+	secp->se_aln = curaln;
+	secp->se_ext = curext;
+	secp->se_atr = curatr;
+	secp->se_loc = curloc;
+	secp->se_adu = curadu;
+	secp = &sectab[cursec = sec];
+	curaln = secp->se_aln;
+	curext = secp->se_ext;
+	curatr = secp->se_atr;
+	curloc = secp->se_loc;
+	curadu = secp->se_adu;
 }
 
 /*

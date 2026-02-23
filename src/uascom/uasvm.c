@@ -56,7 +56,7 @@ static	short	vmtx = 0;		/* next vmt to allocate		*/
 #ifdef msdos
 #define DOSINT 0x21
 #define F_CF            0x01            /* carry flag                   */
-#define REG86	struct reg86
+#define REG86	struct reg_86
 REG86 {
 	unsigned r_ax;
 	unsigned r_bx;
@@ -88,11 +88,11 @@ static	char	vmfn[] = "/tmp/vmaXXXXX";
  * vmgbuf - Returns a pointer to a vmtab structure
  */
 
-VMTAB *
+vmtab_t *
 vmgbuf(VMADR adr) {
 
 	char	*bufptr;
-	VMTAB	*vmp;
+	vmtab_t	*vmp;
 	int		i;
 	int		blk;
 	ushort	j;
@@ -201,7 +201,7 @@ readin:
 char* vmrfetch(VMADR adr) {
 
 	char	*p;
-	VMTAB	*vmp;
+	vmtab_t	*vmp;
 	p = (vmp = vmgbuf(adr))->vm_buf + (adr & (BUFSIZ-1));
 	return p;
 }
@@ -213,7 +213,7 @@ char* vmrfetch(VMADR adr) {
 
 char* vmwfetch(VMADR adr) {
 
-	VMTAB	*vmp;
+	vmtab_t	*vmp;
 	char	*p;
 
 	vmp = vmgbuf( adr );

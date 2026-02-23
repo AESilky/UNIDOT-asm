@@ -73,8 +73,8 @@ ALTENT	*alttab;		/* base of alternate semantic use table */
 ALTENT	*alttop;		/* top of alternate semantic use table	*/
 
 #define LI(x)	((LIST *)(x))
-LIST	*ntact;			/* base of nt default action table	*/
-LIST	*ntatop;		/* top of nt default action table	*/
+list_t	*ntact;			/* base of nt default action table	*/
+list_t	*ntatop;		/* top of nt default action table	*/
 
 short	*ptab;			/* base of final parse table		*/
 short	*ptop;			/* top of final parse table		*/
@@ -186,8 +186,8 @@ main(int argc, char** argv) {
 showrsem(){
 
 	int		ax;
-	LIST	*xp;
-	LIST	*top;
+	list_t	*xp;
+	list_t	*top;
 
 
 	ax = Ax(fact);
@@ -214,17 +214,17 @@ showrsem(){
 
 aconvert(AENT* abase) {
 
-	LIST		*ap;
-	LIST		*aptop;
-	LIST		*defact;
-	LIST		*nt;
-	LIST		*ntp;
-	LIST		*nttop;
-	LIST		*t;
-	LIST		*tp;
-	LIST		*ttop;
-	LIST		*maxp;
-	LIST		*sp;
+	list_t		*ap;
+	list_t		*aptop;
+	list_t		*defact;
+	list_t		*nt;
+	list_t		*ntp;
+	list_t		*nttop;
+	list_t		*t;
+	list_t		*tp;
+	list_t		*ttop;
+	list_t		*maxp;
+	list_t		*sp;
 	char		*symbase;
 	char		*symtop;
 	char		*scp;
@@ -437,7 +437,7 @@ aconvert(AENT* abase) {
 short* fconvert(LIST* base, LIST* top) {
 
 
-	LIST	*ap;
+	list_t	*ap;
 	short		*fp;
 	short		*semp;
 	short		f;
@@ -471,10 +471,10 @@ short* fconvert(LIST* base, LIST* top) {
 
 finddflts(){
 
-	LIST	*sp;	/* scan pointer				*/
-	LIST	*ap;	/* action pointer			*/
-	LIST		*ntap;	/* table entry for current nonterminal	*/
-	LIST		*maxpt;	/* ptr to most frequent action for this nt */
+	list_t	*sp;	/* scan pointer				*/
+	list_t	*ap;	/* action pointer			*/
+	list_t		*ntap;	/* table entry for current nonterminal	*/
+	list_t		*maxpt;	/* ptr to most frequent action for this nt */
 	short		nt;	/* nonterminal number			*/
 	short		maxct;	/* max count seen so far for this nt	*/
 

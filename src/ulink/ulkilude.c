@@ -50,12 +50,12 @@ static char rcsid[] =
 /* Definitions (Local) */
 
 void afmtstt();
-void allocseg(section_t* sep, section_t* lsep);
+void allocseg(section_t* secp, section_t* lsecp);
 void asgncom();
 void asgnsec();
 void asgnsym();
-void grpcheck(GROUP* gp);
-void grpout(GROUP* gp);
+void grpcheck(group_t* gp);
+void grpout(group_t* gp);
 void ovrlapch();
 void splitinit();
 void symtoaout(section_t* csep);
@@ -80,7 +80,7 @@ long			secfsize();
 
 void interlude(){
 
-	section_t	*sep;
+	section_t	*secp;
 	sytab_t	*syp;
 	int		i;
 	uns		h;
@@ -110,12 +110,12 @@ DEBOUT(0,("INTERLUDE\n"));
 	asgnsec();	/* Assign hard addresses to sections.		*/
 	asgnsym();	/* Assign hard addresses to global symbols	*/
 	ovrlapch();	/* Check for section overlap			*/
-	sep = sectab[URBABS];		/* point to absolute section	*/
-	sep->se_adu = absadu;		/* set abs section adu		*/
-	sep->se_cum = sep->se_mod - sep->se_val;
-	if( sep->se_cum && codsep && codsep->se_cum == 0 ){
-		codsep->se_val = sep->se_val;
-		codsep->se_cum = sep->se_cum;
+	secp = sectab[URBABS];		/* point to absolute section	*/
+	secp->se_adu = absadu;		/* set abs section adu		*/
+	secp->se_cum = secp->se_mod - secp->se_val;
+	if( secp->se_cum && codsep && codsep->se_cum == 0 ){
+		codsep->se_val = secp->se_val;
+		codsep->se_cum = secp->se_cum;
 	}
 
 	/* Start off the object output file.  */
@@ -146,57 +146,68 @@ DEBOUT(0,("INTERLUDE\n"));
 	/* now reset sizes of sections for pass 2 */
 
 	for( i=0; i<stct; i++ ){
-		sep = sectab[i];
-		if( sep == csep ) continue;	/* no reset	*/
-		if( sep->se_atr & USEABS ) continue;
-		sep->se_cum = 0;	/* reset size of this section	*/
-		sep->se_mod = 0;	/* reset size of this section	*/
+		secp = sectab[i];
+		if( secp == csep ) continue;	/* no reset	*/
+		if( secp->se_atr & USEABS ) continue;
+		secp->se_cum = 0;	/* reset size of this section	*/
+		secp->se_mod = 0;	/* reset size of this section	*/
 	}
 DEBOUT(0,("INTERLUDE end\n"));
 }
 
+/* start off the aformat (or binary) output file */
 void afmtstt() {
 
-	section_t	*sep;
+	section_t	*secp;
 	int		i;
 	long		l;
 
-	/* start off the aformat output file		*/
 
-	sep = sectab[0];		/* point to absolute sect	*/
-	fclean( 0L, 16 + 8*stct );
-	aword( 0x0605, OBJOUT );	/* magic word			*/
-	aword( stct, OBJOUT );		/* count of sections		*/
-	along( 0L, OBJOUT );		/* transfer address		*/
-	along( 0L, OBJOUT );		/* size of relocation section	*/
-	along( 0L, OBJOUT );		/* size of symbol section	*/
-	sep->se_fpos = 16 + 8*stct;	/* file pos of abs section	*/
-	along( secfsize(sep), OBJOUT );		/* write size abs sect	*/
-	fpos = sep->se_fpos + secfsize(sep);	/* set file locctr	*/
+	secp = sectab[0];		/* point to absolute sect	*/
+	secp->se_fpos = 0;		/* 0 file pos			*/
+	if (!binfmt) {
+		fclean(0L, 16 + 8 * stct);
+		aword( 0x0605, OBJOUT );	/* magic word			*/
+		aword( stct, OBJOUT );		/* count of sections		*/
+		along( 0L, OBJOUT );		/* transfer address		*/
+		along( 0L, OBJOUT );		/* size of relocation section	*/
+		along( 0L, OBJOUT );		/* size of symbol section	*/
+		secp->se_fpos = 16 + 8 * stct;	/* file pos of abs section	*/
+		along(secfsize(secp), OBJOUT);		/* write size abs sect	*/
+	}
+	fpos = secp->se_fpos + secfsize(secp);	/* set file locctr	*/
 	fpos &= 0xffffffL;			/* trim adu info	*/
-	along( sep->se_val, OBJOUT );		/* address of abs section */
+	if (!binfmt) {
+		along(secp->se_val, OBJOUT);		/* address of abs section */
+	}
+	DEBOUT(0, ("Section Num     fpos      val    fsize name (rel)\n"));
 	for( i=URBSEC; i<stct; i++ ){
-		sep = sectab[i];
-		sep->se_fpos = 0;
-		l = secfsize(sep);
-		if( sep->se_atr & USEINIT ){
-			sep->se_fpos = fpos;	/* file pos for afmt	*/
+		secp = sectab[i];
+		secp->se_fpos = 0;
+		l = secfsize(secp);
+		if( secp->se_atr & USEINIT ){
+			if (!binfmt)
+				secp->se_fpos = fpos;	/* file pos for afmt	*/
+			else
+				secp->se_fpos = secp->se_val;	/* file pos for binfmt */
 			fpos += l;		/* adj file position	*/
 			fpos &= 0xffffffL;	/* trim adu info	*/
 		} else {
 			l |= 0x80000000L;
 		}
-		along( l, OBJOUT );		/* size of section	*/
-		along( sep->se_val, OBJOUT );	/* loc of sect		*/
+		if (!binfmt) {
+			along( l, OBJOUT );		/* size of section	*/
+			along( secp->se_val, OBJOUT );	/* loc of sect		*/
+		}
 	DEBOUT(0,("Section: %2d %8lx %8lx %8lx %s (%d)\n",
-		i,sep->se_fpos,sep->se_val,l,sep->se_sym->sy_str,
-		sep->se_sym->sy_rel & 0xff));
+		i,secp->se_fpos,secp->se_val,l,secp->se_sym->sy_str,
+		secp->se_sym->sy_rel & 0xff));
 	}
 }
 
 void ufmtstt() {
 
-	section_t	*sep;
+	section_t	*secp;
 	int		i;
 	uns		h;
 
@@ -215,21 +226,21 @@ void ufmtstt() {
 		*/
 
 		for( i=URBSEC; i<stct; i++ ){
-			sep = sectab[i];
+			secp = sectab[i];
 			objblk.ob_type = UOBSEC;
-			oputb(sep->se_aln);
-			oputb(sep->se_ext);
-			h = sep->se_atr | USEMOR;
-			if( sep->se_atr & USEABS ) h |= USEFIX;
+			oputb(secp->se_aln);
+			oputb(secp->se_ext);
+			h = secp->se_atr | USEMOR;
+			if( secp->se_atr & USEABS ) h |= USEFIX;
 			oputb(h);
 			h = USMLEN;
-			if( sep->se_adu != 8 ) h |= USMADU;
-			if( sep->se_wth ) h |= USMWTH;
+			if( secp->se_adu != 8 ) h |= USMADU;
+			if( secp->se_wth ) h |= USMWTH;
 			oputb(h);
-			if( h & USMADU ) oputb( sep->se_adu );
-			if( h & USMWTH ) oputb( sep->se_wth );
-			oputl(sep->se_cum);
-			oputs(sep->se_sym->sy_str);
+			if( h & USMADU ) oputb( secp->se_adu );
+			if( h & USMWTH ) oputb( secp->se_wth );
+			oputl(secp->se_cum);
+			oputs(secp->se_sym->sy_str);
 			oflush();
 		}
 		if( !split ){
@@ -293,7 +304,7 @@ void ufmtstt() {
 	oflush();
 }
 
-long secfsize(section_t* sep) {
+long secfsize(section_t* secp) {
 
 	int	i;
 	long	l;
@@ -301,8 +312,8 @@ long secfsize(section_t* sep) {
 	/* returns the section length in bytes (file length) and inserts
 	   the adu information in the high byte */
 
-	i = sep->se_adu;
-	l = sep->se_cum;
+	i = secp->se_adu;
+	l = secp->se_cum;
 	if( i < 8 ){
 		/* if adu is less than 8 addressing units are packed solid
 		   into bytes */
@@ -319,9 +330,9 @@ long secfsize(section_t* sep) {
 }
 
 
-void grpout(GROUP* gp) {
+void grpout(group_t* gp) {
 
-	GROUP 	*gl;
+	group_t 	*gl;
 	char	*p;
 	char	*p2;
 	int		n;
@@ -341,10 +352,10 @@ void grpout(GROUP* gp) {
 	oflush();
 }
 
-void grpcheck(GROUP* gp) {	/* check for group consistency		*/
+void grpcheck(group_t* gp) {	/* check for group consistency		*/
 
-	section_t 	*sep;
-	GROUP 	*gl;
+	section_t 	*secp;
+	group_t 	*gl;
 	int		n;
 	int		at;
 	int		adu;
@@ -352,28 +363,28 @@ void grpcheck(GROUP* gp) {	/* check for group consistency		*/
 	at = 0;
 	adu = 0;
 	for( n=0, gl=gp->gr_lnk; gl; gl=gl->gr_lnk, n++ ){
-		sep = sectab[ gl->gr_sym->sy_rel & 0xff ];
-		at |= sep->se_atr;
-		if( adu == 0 ) adu = sep->se_adu;
-		if( adu != sep->se_adu )
+		secp = sectab[ gl->gr_sym->sy_rel & 0xff ];
+		at |= secp->se_atr;
+		if( adu == 0 ) adu = secp->se_adu;
+		if( adu != secp->se_adu )
 			error("36 Group has different addressing units");
-		if( n && sep->se_atr & USEFIX ){
+		if( n && secp->se_atr & USEFIX ){
 			error("31 Only first section of group may be fixed");
-			sep->se_atr &= ~USEFIX;
+			secp->se_atr &= ~USEFIX;
 		}
 	}
 	at &= USENOX|USENOR|USENOW;
 	if( at == (USENOX|USENOR|USENOW) )
 		error("W37 Group is not executable, readable, or writeable");
 	for( gl=gp->gr_lnk; gl; gl=gl->gr_lnk ){
-		sep = sectab[ gl->gr_sym->sy_rel & 0xff ];
-		sep->se_atr |= at;
+		secp = sectab[ gl->gr_sym->sy_rel & 0xff ];
+		secp->se_atr |= at;
 	}
 }
 
 void asgncom() {		/* assign addresses to common variables	*/
 
-	section_t	*sep;
+	section_t	*secp;
 	sytab_t	*syp;
 	int		i;
 	uns		h;
@@ -397,19 +408,19 @@ void asgncom() {		/* assign addresses to common variables	*/
 						csect = csep->se_sym->sy_rel;
 						csep->se_atr |= USEREF|USENOX;
 					}
-					sep = csep;
+					secp = csep;
 					l = syp->sy_val;
 					i = (l >> 24) & 0xf;
 					l &= 0xffffffL;	/* val in adus */
 					if( i > commalign ) commalign = i;
 					if( i ){
 						i = (1 << i) - 1;
-						sep->se_cum += i;
-						sep->se_cum &= ~(long)i;
+						secp->se_cum += i;
+						secp->se_cum &= ~(long)i;
 					}
-					syp->sy_val = sep->se_cum;
-					sep->se_cum += l;
-					sep->se_aln = commalign;
+					syp->sy_val = secp->se_cum;
+					secp->se_cum += l;
+					secp->se_aln = commalign;
 					syp->sy_typ = STGLO;
 					syp->sy_rel = csect;
 				} else {
@@ -458,38 +469,38 @@ void splitinit(){		/* called immediately after init	*/
 
 void asgnsec() {		/* assign addresses to sections		*/
 
-	section_t	*sep;
-	GROUP	*gl;
+	section_t	*secp;
+	group_t	*gl;
 	int		i;
 	int		n;
-	GROUP	*grp;
-	section_t	*lsep;
+	group_t	*grp;
+	section_t	*lsecp;
 
-	lsep = 0;
+	lsecp = 0;
 	for( i = URBSEC; i<stct; i++ ){
-		sep = sectab[i];
+		secp = sectab[i];
 
-		if( sep->se_atr & USEALLO ) continue;	/* allocated	*/
-		if( sep->se_atr & USEABS ){
-			sep->se_cum = sep->se_mod - sep->se_val;
-			sep->se_atr |= USEALLO;
+		if( secp->se_atr & USEALLO ) continue;	/* allocated	*/
+		if( secp->se_atr & USEABS ){
+			secp->se_cum = secp->se_mod - secp->se_val;
+			secp->se_atr |= USEALLO;
 			continue;
 		}
-		if( !(sep->se_atr & USEREF) )
+		if( !(secp->se_atr & USEREF) )
 			error("W11 Section %s not encountered in any module",
-				sep->se_sym->sy_str );
-		if( rflag ) sep->se_grp = 0;	/* no groups assigned	*/
-		if( n = sep->se_grp ){
-			if( sep->se_sym != (grp=grptab[n-1])->gr_lnk->gr_sym)
+				secp->se_sym->sy_str );
+		if( rflag ) secp->se_grp = 0;	/* no groups assigned	*/
+		if( n = secp->se_grp ){
+			if( secp->se_sym != (grp=grptab[n-1])->gr_lnk->gr_sym)
 				continue;
 			for( gl = grp->gr_lnk; gl; gl = gl->gr_lnk ){
-				allocseg(sectab[gl->gr_sym->sy_rel&0xff],lsep);
-				lsep = sectab[gl->gr_sym->sy_rel&0xff];
+				allocseg(sectab[gl->gr_sym->sy_rel&0xff],lsecp);
+				lsecp = sectab[gl->gr_sym->sy_rel&0xff];
 			}
 			continue;
 		}
-		allocseg( sep, lsep );
-		lsep = sep;
+		allocseg( secp, lsecp );
+		lsecp = secp;
 	}
 	if( split ){
 		codsep->se_cum = ctop;
@@ -497,9 +508,9 @@ void asgnsec() {		/* assign addresses to sections		*/
 	}
 }
 
-void allocseg(section_t* sep, section_t* lsep) {
+void allocseg(section_t* secp, section_t* lsecp) {
 
-	int		i;
+	int	i;
 	long	base;		/* general location counter	*/
 	long	cbase;		/* code loc counter if split	*/
 	long	xbase;
@@ -508,78 +519,82 @@ void allocseg(section_t* sep, section_t* lsep) {
 
 tiptop:
 
-	sep->se_atr |= USEALLO;		/* mark as allocated		*/
-	if( sep->se_atr & USEFIX ){
-		if( split && !(sep->se_atr & USENOX) )
-			ctop = sep->se_val;
+	secp->se_atr |= USEALLO;		/* mark as allocated		*/
+	if( secp->se_atr & USEFIX ){
+		if( split && !(secp->se_atr & USENOX) )
+			ctop = secp->se_val;
 		else
-			dtop = sep->se_val;
+			dtop = secp->se_val;
 	}
 	if( !afmt && !split && !rflag && dtop < sectab[URBABS]->se_val )
 		sectab[URBABS]->se_val = dtop;
 
 	xbase = base = dtop;
 	cbase = ctop;
-	if( split && !(sep->se_atr & USENOX) ) xbase = base = cbase;
+	if( split && !(secp->se_atr & USENOX) ) xbase = base = cbase;
 
 	/* Take care of alignment and extent constraints.  */
 
 	DEBOUT(0,("%d Section('%s') base is %lx\n",
-		sep->se_sym->sy_rel & 0xff, sep->se_sym->sy_str, base));
+		secp->se_sym->sy_rel & 0xff, secp->se_sym->sy_str, base));
 
-	i = sep->se_ext;
-	if( i < 31 && (secfsize(sep) & 0xffffffL) > (1L << i))
+	i = secp->se_ext;
+	if( i < 31 && (secfsize(secp) & 0xffffffL) > (1L << i))
 		error( "43 Section %s too big for extent",
-			sep->se_sym->sy_str );
-	i = sep->se_aln;
+			secp->se_sym->sy_str );
+	i = secp->se_aln;
 #ifdef OLDCODE
 	if( i < 1 ) i = 1;		/* RMM - force minaln to 2**1 */
 #endif
 	l = 0;
 	if( i < 32 ) l = -1L << i;
 	base = (base - l - 1) & l;	/* alignment constraint */
-	top = base + sep->se_cum;
+	top = base + secp->se_cum;
 	if( !strcmp(proctype,"z8000") ){
 		if( (top ^ base) & 0xffff0000 ||
-		    lsep && nomix &&
-		    (lsep->se_atr ^ sep->se_atr) & (USENOX|USENOR|USENOW)){
+		    lsecp && nomix &&
+		    (lsecp->se_atr ^ secp->se_atr) & (USENOX|USENOR|USENOW)){
 			base = (base + 0xffffL) & 0xffff0000L;
-			top = base + sep->se_cum;
+			top = base + secp->se_cum;
 		}
 	}
-	i = sep->se_ext;
+	i = secp->se_ext;
 	l = 0;
 	if( i < 32 ) l = -1L << i;
 	if( (base & l) != ((top - 1L) & l) ){ /* adjust for extent */
-		if( sep->se_aln > i ) i = sep->se_aln;
+		if( secp->se_aln > i ) i = secp->se_aln;
 		l = 0;
 		if( i < 32 ) l = -1L << i;
 		base = base - l - 1 & l;
-		top = base + sep->se_cum;
+		top = base + secp->se_cum;
 	}
-	if( split && !(sep->se_atr & USENOX) ) ctop = top; else dtop = top;
+	if( split && !(secp->se_atr & USENOX) ) ctop = top; else dtop = top;
 	DEBOUT(0,("ctop is %lx, dtop is %lx\n",ctop,dtop));
-	if( sep->se_val == xbase && xbase != base )
+	if( secp->se_val == xbase && xbase != base )
 error("47 Location for sect %s does not meet alignment/extent constraints",
-			sep->se_sym->sy_str);
-	sep->se_val = base;
-	if( afmt && base > xbase && base < xbase+16 && lsep ){
+			secp->se_sym->sy_str);
+	secp->se_val = base;
+	if( afmt && base > xbase && lsecp ){
+		if ( binfmt || base < xbase + 16 ) {
 
-		/* here we have aligned the section and therefore
-		   may have left a gap between this section and
-		   the previous section.  In afmt it is convenient
-		   if these can be made file contiguous if possible.
-		   We do this if the gap is no bigger than 15 bytes.
-		*/
-		lsep->se_cum += base-xbase;
+			/* here we have aligned the section and therefore
+			may have left a gap between this section and
+			the previous section.  If this in binary format
+			make these file contiguous. 
+			If afmt it is convenient if these can be made file
+			contiguous if possible - We do this if the gap is
+			no bigger than 15 bytes.
+			*/
+			lsecp->se_cum += base-xbase;
+		}
 	}
-	if( rflag && !afmt )	sep->se_val = 0; /* start at zero */
-		else		sep->se_atr |= USEFIX;
+	if( rflag && !afmt )	secp->se_val = 0; /* start at zero */
+		else		secp->se_atr |= USEFIX;
 
-	DEBOUT(0,("\tInterlude SEC base %lx cum %lx\n",base,sep->se_cum));
-	if( sep->se_atr & USEXTD1 ){
-		lsep = sep;
-		sep = sectab[sep->se_xtd & 0xff];
+	DEBOUT(0,("\tInterlude SEC base %lx cum %lx\n",base,secp->se_cum));
+	if( secp->se_atr & USEXTD1 ){
+		lsecp = secp;
+		secp = sectab[secp->se_xtd & 0xff];
 		goto tiptop;
 	}
 	if( !afmt && !split && !rflag && dtop > sectab[URBABS]->se_mod )
@@ -589,7 +604,7 @@ error("47 Location for sect %s does not meet alignment/extent constraints",
 
 void ovrlapch() {
 
-	section_t	*sep;
+	section_t	*secp;
 	section_t	*xsep;
 	int		i;
 	int		j;
@@ -600,10 +615,10 @@ void ovrlapch() {
 
 	if( rflag || OVLYFILE ) return;
 	for( i = URBSEC; i < stct; i++ ){
-		sep = sectab[i];
-		top = sep->se_cum;
+		secp = sectab[i];
+		top = secp->se_cum;
 		if( top == 0 ) continue;		/* empty section */
-		base = sep->se_val;
+		base = secp->se_val;
 		top += base;
 		for( j = URBSEC; j < i; j++ ){
 			xsep = sectab[j];
@@ -612,7 +627,7 @@ void ovrlapch() {
 			   we don't need to check if the executability
 			   attributes are not the same */
 
-			if( split && ((xsep->se_atr^sep->se_atr)&USENOX) )
+			if( split && ((xsep->se_atr^secp->se_atr)&USENOX) )
 				continue;
 
 			/* if a section is empty it cannot overlap */
@@ -625,7 +640,7 @@ void ovrlapch() {
 			if( xbase <= base && base < xtop ||
 			    base <= xbase && xbase < top ){
 				error( "W42 Sections %s and %s overlap",
-					sep->se_sym->sy_str,
+					secp->se_sym->sy_str,
 					xsep->se_sym->sy_str );
 				ovct++;
 			}
@@ -635,7 +650,7 @@ void ovrlapch() {
 
 void asgnsym() {		/* assign addresses to symbols		*/
 
-	section_t	*sep;
+	section_t	*secp;
 	sytab_t	*syp;
 	uns		h;
 	int		i;
@@ -644,9 +659,9 @@ void asgnsym() {		/* assign addresses to symbols		*/
 		for( syp = syhtab[h]; syp; syp = syp->sy_lnk ){
 			i = syp->sy_rel & 0xff;
 			if( i == URBABS || i == URBUND ) continue;
-			sep = sectab[i];
-			if( OVLYFILE == NULL && sep != NULL)
-				syp->sy_val += sep->se_val;
+			secp = sectab[i];
+			if( OVLYFILE == NULL && secp != NULL)
+				syp->sy_val += secp->se_val;
 		}
 	}
 }
