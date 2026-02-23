@@ -180,7 +180,7 @@ void afmtstt() {
 	if (!binfmt) {
 		along(secp->se_val, OBJOUT);		/* address of abs section */
 	}
-	DEBOUT(0, ("Section Num     fpos      val    fsize name (rel)\n"));
+	if (verbose) printf("Section Num  FilePos    Start     Size Name (rel)\n");
 	for( i=URBSEC; i<stct; i++ ){
 		secp = sectab[i];
 		secp->se_fpos = 0;
@@ -199,9 +199,16 @@ void afmtstt() {
 			along( l, OBJOUT );		/* size of section	*/
 			along( secp->se_val, OBJOUT );	/* loc of sect		*/
 		}
-	DEBOUT(0,("Section: %2d %8lx %8lx %8lx %s (%d)\n",
-		i,secp->se_fpos,secp->se_val,l,secp->se_sym->sy_str,
-		secp->se_sym->sy_rel & 0xff));
+		if (verbose) {
+			if (l & 0x80000000)
+				printf("Section: %2d        X %8lX %8lX %s (%d)\n",
+					i, secp->se_val, (l & 0x7FFFFFFF), secp->se_sym->sy_str,
+					secp->se_sym->sy_rel & 0xff);
+			else
+				printf("Section: %2d %8lX %8lX %8lX %s (%d)\n",
+				i, secp->se_fpos, secp->se_val, l, secp->se_sym->sy_str,
+				secp->se_sym->sy_rel & 0xff);
+		}
 	}
 }
 
