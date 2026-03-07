@@ -2,6 +2,9 @@
 
 This is the UNIDOT macro assembler and linker used in the 1980's to assemble and link the ZED source.
 
+As is, this is a Z80 assembler ('uasz80'), but versions for other processors existed in the 1980's.
+Everything is here to create assemblers for others (maybe the Z180 and/or Z280).
+
 ## Directory Structure
 
 ``` raw
