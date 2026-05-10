@@ -48,6 +48,22 @@
 			"problemMatcher": [],
 			"label": "Clean MKTABLE",
 			"detail": "./src/mktable/makefile"
+		},
+		{
+			"type": "make",
+			"targetName": "all",
+			"makeFileRelativePath": "src/imager/makefile",
+			"problemMatcher": [],
+			"label": "Build IMAGER",
+			"detail": "./src/imager/makefile"
+		},
+		{
+			"type": "make",
+			"targetName": "clean",
+			"makeFileRelativePath": "src/imager/makefile",
+			"problemMatcher": [],
+			"label": "Clean IMAGER",
+			"detail": "./src/imager/makefile"
 		}
 	]
 }

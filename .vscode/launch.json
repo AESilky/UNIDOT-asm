@@ -81,6 +81,24 @@
 		"args": [],
 		"miDebuggerPath": "/usr/bin/gdb",
 		"preLaunchTask": "Build MKTABLE"
+	},
+	{
+		"name": "imager",
+		"type": "cppdbg",
+		"request": "launch",
+		"cwd": "${workspaceFolder}/src/imager",
+		"program": "${workspaceFolder}/src/imager/imager",
+		"args": [
+			"_test/_test.bin",
+			"-v","-0dd",
+			"_test/_src1:0:1FF",
+			"_test/_src2::FFF",
+			"_test/_src3:500",
+			"_test/_src4",
+			"_test/_src5::1FFF"
+		],
+		"miDebuggerPath": "/usr/bin/gdb",
+		"preLaunchTask": "Build IMAGER"
 	}
 ]
 }
