@@ -562,8 +562,8 @@ void error(char* s, ...) {
 	va_start(argptr, s);
 	ep = &llerf[llerx++];
 	ep->er_msg = s;
-	ep->er_par[0] = va_arg(argptr, int);
-	ep->er_par[1] = va_arg(argptr, int);
+	ep->er_par[0] = va_arg(argptr, void*);
+	ep->er_par[1] = va_arg(argptr, void*);
 	for( p = sline, col = 0; p < tokpt; p++, col++ )
 		if( *p == '\t' ) col |= 7;
 	ep->er_col = col;

@@ -431,7 +431,7 @@ struct using_ {
 
 struct errframe_ {				/* save for structures			*/
 	char	*er_msg;		/* message string		*/
-	int	er_par[2];		/* message parameters		*/
+	void*	er_par[2];		/* message parameters		*/
 	char	er_flg;			/* warning or hard error flag	*/
 	char	er_col;			/* column marker for error	*/
 };
