@@ -574,17 +574,15 @@ void ifinish() {		/* finish up the image output file */
 
 void fclean(long pos, int length) {
 
-	if( hiwater < pos ){
+	if(pos + length > hiwater){
 		fseek(IMGOUT, hiwater, SEEK_SET);
 		DEBOUT(0, ("fclean fill (%02X): %ld\n", fillb, pos - hiwater));
-		while( hiwater < pos ){
+		while( hiwater < pos + length ){
 			putc( fillb, IMGOUT );
 			hiwater++;
 		}
-	}
-	if( pos + length > hiwater ){
-		hiwater = pos + length;
-		DEBOUT(0,("fclean: pos:%ld + len:%d = hiwater:%ld\n",pos,length,hiwater));
+		fpos = hiwater;
+		DEBOUT(0, ("fclean: pos:%ld + len:%d = hiwater:%ld\n", pos, length, hiwater));
 	}
 }
 
@@ -711,7 +709,7 @@ void quit(int n){
 	fclose( stdout );
 	if( (n == BADEXIT || n == FATEXIT) && imgfile ){
 		if( verbose ) printf("removing %s\n",imgfile);
-		unlink(imgfile);
+		remove(imgfile);
 		imgfile = (char*)0;
 	}
 #ifdef STATS

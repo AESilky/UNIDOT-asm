@@ -37,7 +37,14 @@ OBJ= ulink.o ulkpass.o ulkilude.o ulkobj.o ulkrel.o \
 SRC= ulink.c ulkpass.c ulkilude.c ulkobj.c ulkrel.c \
 	ulkgetpt.c ulklook.c ulkmisc.c
 
-BIN = /home/esilky/.local/bin
+ifeq ($(OS),Windows_NT)
+    HOME_DIR := $(USERPROFILE)
+else
+    HOME_DIR := $(HOME)
+endif
+BIN := $(HOME_DIR)/.local/bin
+
+LIB := $(HOME_DIR)/.local/lib
 
 ulink:		$(OBJ)
 	$(CC) $(LDFLAGS) -o ulink $(OBJ)
@@ -46,8 +53,8 @@ Install:	Installbin
 
 Installbin:	ulink
 	cp ulink $(BIN)
-	cd $(BIN);strip ulink;chown bin ulink;chgrp bin ulink;chmod 771 ulink
-	@echo ulink is installed in /usr/bin
+	cd $(BIN);strip ulink;chmod 771 ulink
+	@echo ulink is installed in $(BIN)
 
 
 $(OBJ):		ulink.h ../incl/uobj.h

@@ -16,7 +16,12 @@ OBJ = imager.o
 
 SRC = imager.c
 
-BIN = /home/esilky/.local/bin
+ifeq ($(OS),Windows_NT)
+    HOME_DIR := $(USERPROFILE)
+else
+    HOME_DIR := $(HOME)
+endif
+BIN := $(HOME_DIR)/.local/bin
 
 all:	imager
 
@@ -28,7 +33,7 @@ Install:	Installbin
 
 Installbin:	imager
 	cp imager $(BIN)
-	cd $(BIN);strip imager;chown bin imager;chgrp bin imager;chmod 771 imager
+	cd $(BIN);strip imager;chmod 771 imager
 	@echo imager is installed in $(BIN)
 
 

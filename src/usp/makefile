@@ -22,7 +22,14 @@ OBJ= usp.o usp2.o usp3.o usp4.o usp5.o uspset.o
 
 SRC= usp.c usp2.c usp3.c usp4.c usp5.c uspset.c
 
-BIN = /usr/bin
+ifeq ($(OS),Windows_NT)
+    HOME_DIR := $(USERPROFILE)
+else
+    HOME_DIR := $(HOME)
+endif
+BIN := $(HOME_DIR)/.local/bin
+
+LIB := $(HOME_DIR)/.local/lib
 
 all:	$(APPS)
 

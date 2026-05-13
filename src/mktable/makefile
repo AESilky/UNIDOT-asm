@@ -40,7 +40,14 @@ OBJ= mkpdtab.o mktable.o
 
 SRC= mkpdtab.c mktable.c
 
-BIN = /usr/bin
+ifeq ($(OS),Windows_NT)
+    HOME_DIR := $(USERPROFILE)
+else
+    HOME_DIR := $(HOME)
+endif
+BIN := $(HOME_DIR)/.local/bin
+
+LIB := $(HOME_DIR)/.local/lib
 
 all:	mkpdtab mktable
 

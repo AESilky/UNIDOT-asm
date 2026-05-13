@@ -74,6 +74,9 @@ void quit(int status) {
 	fclose( ERRFIL );
 	if(LIST)fclose( LIST );
 	if(OBJECT)fclose( OBJECT );
+	if(status == BADEXIT || status == FATEXIT) {
+		remove(objname);
+	}
 
 #ifdef PROFILE
 	monitor( 0 );
