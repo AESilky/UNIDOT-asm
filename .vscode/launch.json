@@ -5,6 +5,23 @@
     "version": "0.2.0",
     "configurations": [
 	{
+		"name": "uasz80 ZID-DM",
+		"type": "cppdbg",
+		"request": "launch",
+		"cwd": "${env:PROJ_ROOT}/sd-zid/src-z/dbm",
+		"program": "${workspaceFolder}/src/uasz80/uasz80",
+		"args": [
+			"-li${env:PROJ_ROOT}/sd-zid/src-z",
+			"-l",
+			"-d",
+			"_BLD_DT=\\\"20260222-20:38\\\"",
+			"-0d",
+			"dbmon.asm"
+		],
+		"miDebuggerPath": "/usr/bin/gdb",
+		"preLaunchTask": "Build UASZ80 (and common)"
+	},
+	{
 		"name": "uasz80 ZID-SBC",
 		"type": "cppdbg",
 		"request": "launch",
