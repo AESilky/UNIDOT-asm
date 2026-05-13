@@ -65,9 +65,14 @@ LDFLAGS=
 CC = cc
 LD = cc
 
-BIN = /usr/bin
+ifeq ($(OS),Windows_NT)
+    HOME_DIR := $(USERPROFILE)
+else
+    HOME_DIR := $(HOME)
+endif
+BIN := $(HOME_DIR)/.local/bin
 
-LIB = /usr/lib
+LIB := $(HOME_DIR)/.local/lib
 
 UASCOM=  ../uascom/uas.o \
 	../uascom/uasdirec.o \
@@ -104,12 +109,12 @@ Install:	Installbin Installlib
 
 Installbin:	$(TGT)
 	cp $? $(BIN)
-	cd $(BIN); strip $?; chown bin $?; chgrp bin $?; chmod 771 $?
+	cd $(BIN); strip $?; chmod 771 $?
 	rm -f Installbin
 
 Installlib:	uz80s.pd
 	cp $? $(LIB)
-	cd $(LIB); chown bin $?; chgrp bin $?; chmod 664 $?
+	cd $(LIB); chmod 664 $?
 	rm -f Installlib
 
 clean:

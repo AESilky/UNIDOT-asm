@@ -566,6 +566,7 @@ GLOBL char	llobj[LLOBJ+3] IZ;	/* object field in listing line */
 GLOBL char	llseq[LLSEQ+2] IZ;	/* sequence field in listing line */
 GLOBL char	llsrc[SLINSIZ+2] IZ;	/* source field in listing line */
 GLOBL char	objbuf[OBJSIZ] IZ;	/* object block construction area */
+GLOBL char 	objname[STRSIZ + 1] IZ;	/* object file name		*/
 GLOBL octab_t	*ochtab[1<<OHSHLOG] IZ;	/* opcode hash table		*/
 GLOBL char	opcstr[SYMSIZ+1] IZ;	/* opcode string		*/
 GLOBL uns	pendrel IZ;		/* pending reloc		*/

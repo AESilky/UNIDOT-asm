@@ -128,7 +128,6 @@ void init(int argc, char* argv[]) {
 	int		defx;
 	short		nerrlim;
 	short		sufsiz;
-	char		*objname;
 	char		*errfile;
 	char		fnbuf[24];
 	char		*defines[32];
@@ -139,7 +138,6 @@ void init(int argc, char* argv[]) {
 	//extern char	*sbrk();
 	static char	nil[2];
 
-	objname = 0;
 	nerrlim = 0;
 	errfile = 0;
 	defx = 0;
@@ -276,21 +274,21 @@ top:	while( argn < argc ){	/* read command line arguments */
 #endif
 
 		case 'N':
-		case 'n':	if( objname ) usage("both -n and -o specified");
+		case 'n':	if( *objname ) usage("both -n and -o specified");
 				noobj = 1;
 				continue;
 
 		case 'O':
-		case 'o':	if( objname ) usage( "too many object files");
+		case 'o':	if( *objname ) usage( "too many object files");
 				if( noobj ) usage("both -n and -o specified");
 				if( *ap ){
 					if( *ap == '=' ) ap++;
-					objname = ap;
+					strcpy(objname, ap);
 					goto top;
 				}
 				if( argn >= argc )
 					usage("no object file name");
-				objname = argv[argn++];
+				strcpy(objname, argv[argn++]);
 				goto top;
 
 #ifndef NOPD
@@ -458,7 +456,7 @@ top:	while( argn < argc ){	/* read command line arguments */
 	ep = fnbuf + (ep-sp);
 	sp = fnbuf;
 	strcpy( ep+1, objsuf );
-	if( objname == 0 ) objname = sp;
+	if( *objname == 0 ) strcpy(objname, sp);
 	if( !noobj ){
 		OBJECT = fopen( objname, "w" );
 		if( OBJECT == NULL ) fatal( "52 Cannot create %s", objname );

@@ -5,14 +5,14 @@
     "version": "0.2.0",
     "configurations": [
 	{
-		"name": "uasz80 ZMB-Minimum",
+		"name": "uasz80 ZID-SBC",
 		"type": "cppdbg",
 		"request": "launch",
-		"cwd": "${env:PROJ_ROOT}/sd-zmb/fw/minimum",
+		"cwd": "${env:PROJ_ROOT}/sd-zid/src-z/sbc",
 		"program": "${workspaceFolder}/src/uasz80/uasz80",
 		"args": [
 			"-l","-d","_BLD_DT=\\\"20260222-20:38\\\"","-0d",
-			"boot.asm"
+			"sbc1.asm"
 		],
 		"miDebuggerPath": "/usr/bin/gdb",
 		"preLaunchTask": "Build UASZ80 (and common)"
