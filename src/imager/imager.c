@@ -450,6 +450,10 @@ void secproc(int sn) {
 		// Didn't reach the end of the source file before the specified end
 		error("W11 Truncated at length %d. Start:%06X Spec-End:%06X Current:%06X", secp->se_fpos, l, maxend, fpos);
 	}
+	else {
+		printf("Processed %s - Start:%06X Max:%06X End:%06X\n", cursrc, l, maxend, fpos);
+	}
+
 	// The image contents are written up to fpos, move the 'hiwater' for fills
 	hiwater = fpos;
 _finally:
