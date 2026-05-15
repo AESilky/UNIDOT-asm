@@ -1,4 +1,4 @@
-# UNIDOT Macro Assembler - as used in 1980's
+# UNIDOT Macro Assembler - from the 1980's - 1990's
 
 This is the UNIDOT macro assembler and linker used in the 1980's to assemble and link the ZED source.
 
